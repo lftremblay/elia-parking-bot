@@ -37,6 +37,9 @@ jobs:
       
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-opencv
+          pip install opencv-python-headless==4.8.0.74  # Headless version (no GUI)
           pip install playwright loguru python-dotenv pyotp cryptography
           playwright install chromium
           playwright install-deps chromium
