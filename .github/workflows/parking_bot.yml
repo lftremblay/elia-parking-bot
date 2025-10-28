@@ -39,11 +39,11 @@ jobs:
         run: |
           # Install system dependencies
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx
+          sudo apt-get install -y libglib2.0-0 libsm6 libxrender1 libxext6
           
           # Install Python packages with specific versions
           pip install --upgrade pip
-          pip install numpy==1.26.4  # Pin to NumPy 1.x
+          pip install numpy==1.26.4
           pip install opencv-python-headless==4.8.0.74
           pip install playwright loguru python-dotenv pyotp cryptography
           
