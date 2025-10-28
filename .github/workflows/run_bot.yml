@@ -120,7 +120,7 @@ jobs:
         python -m playwright install --with-deps chromium
         
         # Verify installation and print Playwright version
-        python -c "from playwright import __version__; print(f'Playwright version: {__version__}')"
+        python -c "import pkg_resources; print('Playwright version:', pkg_resources.get_distribution('playwright').version)"
 
     - name: Run the bot with Xvfb
       run: |
