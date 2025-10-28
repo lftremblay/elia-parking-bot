@@ -1,29 +1,44 @@
 name: Run Parking Bot
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  # Schedule the workflow to run daily at midnight UTC
   schedule:
-    - cron: '0 0 * * *'  # Runs at midnight UTC every day
+    - cron: '0 5 * * *'  # 12:00 AM EST / 1:00 AM EDT
+    - cron: '0 11 * * *'  # 6:00 AM EST / 7:00 AM EDT
+
+env:
+  PYTHONUNBUFFERED: 1
+  PLAYWRIGHT_BROWSERS_PATH: 0  # Use system browsers
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
 
 jobs:
   run-bot:
+    name: Run Parking Bot
     runs-on: ubuntu-22.04
-    
+    timeout-minutes: 30
+
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v3
-      
-    - name: Set up Python
+
+    - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-        
+        cache: 'pip'
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
+        sudo apt-get update -qy
+        sudo apt-get install -y --no-install-recommends \
           libasound2 \
           libatk1.0-0 \
           libatk-bridge2.0-0 \
@@ -44,28 +59,46 @@ jobs:
           libxshmfence1 \
           libxss1 \
           libxtst6 \
-          libnss3 \
           libatspi2.0-0 \
-          libcups2 \
-          libxcomposite1 \
           libxkbcommon0 \
-          libxrandr2 \
           xvfb \
-          libgbm1 \
           libpango-1.0-0 \
           libcairo2 \
-          libasound2 \
-          libatk-bridge2.0-0 \
-          libgtk-3-0
+          fonts-liberation \
+          libnss3 \
+          xdg-utils \
+          wget \
+          xvfb
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python -m playwright install
-        
-    - name: Run the bot
-      env:
-        PYTHONUNBUFFERED: 1
+        python -m pip install --upgrade pip setuptools wheel
+        pip install --no-cache-dir -r requirements.txt
+        python -m playwright install --with-deps
+
+    - name: Run the bot with Xvfb
       run: |
-        python main.py
+        # Start Xvfb in the background
+        export DISPLAY=:99
+        /usr/bin/Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
+        
+        # Give Xvfb some time to start
+        sleep 5
+        
+        # Run the bot with error handling
+        if ! python main.py; then
+          echo "Bot failed with exit code $?"
+          # Add any cleanup or notification here
+          exit 1
+        fi
+
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: error-logs
+        path: |
+          *.log
+          logs/
+          **/*.log
+        if-no-files-found: ignore
