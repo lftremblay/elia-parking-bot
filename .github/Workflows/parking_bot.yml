@@ -1,16 +1,10 @@
 name: Elia Parking Bot
 
 on:
-  schedule:
-    # Executive spots: Midnight EST (5 AM UTC)
-    - cron: '0 5 * * 1-5'
-    # Regular spots: 6 AM EST (11 AM UTC)  
-    - cron: '0 11 * * 1-5'
-  
   workflow_dispatch:
     inputs:
       spot_type:
-        description: 'Spot type'
+        description: 'Spot type to reserve'
         required: true
         default: 'all'
         type: choice
@@ -18,13 +12,26 @@ on:
           - all
           - regular
           - executive
+  
+  schedule:
+    # Executive spots: Midnight EST (5 AM UTC)
+    - cron: '0 5 * * 1-5'
+    # Regular spots: 6 AM EST (11 AM UTC)  
+    - cron: '0 11 * * 1-5'
+  
+  push:
+    branches: [ main ]
 
 jobs:
   reserve-parking:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       
@@ -41,10 +48,15 @@ jobs:
           ELIA_PASSWORD: ${{ secrets.ELIA_PASSWORD }}
           TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
         run: |
-          if [ "${{ github.event.inputs.spot_type }}" == "all" ]; then
-            python main.py --reserve-all
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.spot_type }}" == "all" ]; then
+              python main.py --reserve-all
+            else
+              python main.py --reserve ${{ github.event.inputs.spot_type }}
+            fi
           else
-            python main.py --reserve ${{ github.event.inputs.spot_type }}
+            echo "Scheduled run - determining spot type based on time"
+            python main.py --reserve-all
           fi
       
       - name: Upload artifacts
