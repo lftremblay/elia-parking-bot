@@ -21,7 +21,6 @@ env:
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
   PYTHONFAULTHANDLER: 1  # Better error messages
   PYTHONHASHSEED: 42     # Reproducible builds
-  PIP_NO_CACHE_DIR: true  # Don't use pip cache (we use actions/cache instead)
 
 jobs:
   run-bot:
@@ -52,8 +51,11 @@ jobs:
 
     - name: Cache pip packages
       uses: actions/cache@v3
+      id: pip-cache
       with:
-        path: ~/.cache/pip
+        path: |
+          ~/.cache/pip
+          ~/.local
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
@@ -108,16 +110,17 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        # Upgrade pip and setuptools with no cache
-        python -m pip install --no-cache-dir --upgrade pip setuptools wheel
+        # Upgrade pip and setuptools
+        python -m pip install --upgrade pip setuptools wheel
         
-        # Install requirements in a single pip command
-        pip install --no-cache-dir -r requirements.txt
+        # Install requirements
+        pip install -r requirements.txt
         
-        # Install Playwright browsers in parallel
-        python -m playwright install --with-deps chromium &\
-        python -m playwright install-deps &\
-        wait
+        # Install Playwright browsers
+        python -m playwright install --with-deps chromium
+        
+        # Verify installation
+        python -c "import playwright; print(f'Playwright version: {playwright.__version__}')
 
     - name: Run the bot with Xvfb
       run: |
