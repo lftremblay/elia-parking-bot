@@ -2,6 +2,15 @@ name: Run Parking Bot
 
 on:
   workflow_dispatch:
+    inputs:
+      spot_type:
+        description: 'Spot type to try first (executive/regular)'
+        required: false
+        default: 'executive'
+        type: choice
+        options:
+        - executive
+        - regular
   schedule:
     - cron: '0 5 * * *'  # 12:00 AM EST / 1:00 AM EDT
     - cron: '0 11 * * *'  # 6:00 AM EST / 7:00 AM EDT
@@ -10,22 +19,36 @@ env:
   PYTHONUNBUFFERED: 1
   PLAYWRIGHT_BROWSERS_PATH: 0  # Use system browsers
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
+  PYTHONFAULTHANDLER: 1  # Better error messages
+  PYTHONHASHSEED: 42     # Reproducible builds
+  PIP_NO_CACHE_DIR: true  # Don't use pip cache (we use actions/cache instead)
 
 jobs:
   run-bot:
-    name: Run Parking Bot
+    name: Run Elia Parking Bot
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
         cache: 'pip'
+        cache-dependency-path: '**/requirements.txt'
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v3
+      id: playwright-cache
+      with:
+        path: |
+          ~/.cache/ms-playwright
+          ~/.cache/pip
+        key: ${{ runner.os }}-playwright-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
 
     - name: Cache pip packages
       uses: actions/cache@v3
@@ -37,8 +60,8 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        sudo apt-get update -qy
-        sudo apt-get install -y --no-install-recommends \
+        # Create a list of packages to install
+        PKGS="\
           libasound2 \
           libatk1.0-0 \
           libatk-bridge2.0-0 \
@@ -65,30 +88,88 @@ jobs:
           libpango-1.0-0 \
           libcairo2 \
           fonts-liberation \
-          libnss3 \
           xdg-utils \
           wget \
-          xvfb
+          tzdata \
+          ttf-mscorefonts-installer \
+          fonts-noto-color-emoji \
+          fonts-freefont-ttf \
+          fonts-liberation2 \
+          fonts-dejavu-core \
+          fonts-noto-cjk \
+          fonts-noto-cjk-extra \
+          fonts-noto-ui-core"
+
+        # Update and install in a single layer to reduce image size
+        sudo apt-get update -qy && \
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PKGS && \
+        sudo apt-get clean && \
+        sudo rm -rf /var/lib/apt/lists/*
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
+        # Upgrade pip and setuptools with no cache
+        python -m pip install --no-cache-dir --upgrade pip setuptools wheel
+        
+        # Install requirements in a single pip command
         pip install --no-cache-dir -r requirements.txt
-        python -m playwright install --with-deps
+        
+        # Install Playwright browsers in parallel
+        python -m playwright install --with-deps chromium &\
+        python -m playwright install-deps &\
+        wait
 
     - name: Run the bot with Xvfb
       run: |
+        # Function to run the bot with error handling
+        run_bot() {
+          local spot_type=$1
+          echo "🔍 Attempting to reserve $spot_type spot..."
+          
+          # Set a timeout for the bot (8 minutes to be safe)
+          timeout 480s python main.py --reserve $spot_type --headless && {
+            echo "✅ Successfully reserved $spot_type spot"
+            return 0
+          } || {
+            local exit_status=$?
+            if [ $exit_status -eq 124 ]; then
+              echo "⏱️  Timeout while trying to reserve $spot_type spot"
+            else
+              echo "⚠️  Failed to reserve $spot_type spot (exit code: $exit_status)"
+            fi
+            return 1
+          }
+        }
+
         # Start Xvfb in the background
         export DISPLAY=:99
-        /usr/bin/Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
+        Xvfb $DISPLAY -screen 0 1920x1080x24 -ac +extension GLX +render -noreset >/dev/null 2>&1 &
+        XVFB_PID=$!
         
         # Give Xvfb some time to start
-        sleep 5
+        sleep 3
         
-        # Run the bot with error handling
-        if ! python main.py; then
-          echo "Bot failed with exit code $?"
-          # Add any cleanup or notification here
+        # Cleanup function
+        cleanup() {
+          echo "🧹 Cleaning up..."
+          kill $XVFB_PID 2>/dev/null || true
+        }
+        trap cleanup EXIT
+        
+        # Try executive spots first, then regular spots
+        # Use workflow_dispatch input if available, otherwise default to executive first
+        FIRST_TRY=${{
+          github.event.inputs.spot_type || 'executive'
+        }}
+        
+        if [ "$FIRST_TRY" = "executive" ]; then
+          run_bot executive || run_bot regular
+        else
+          run_bot regular || run_bot executive
+        fi
+        
+        if [ $? -ne 0 ]; then
+          echo "❌ Failed to reserve any spot"
           exit 1
         fi
 
