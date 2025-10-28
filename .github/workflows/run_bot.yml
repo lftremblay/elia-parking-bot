@@ -27,9 +27,48 @@ jobs:
     name: Run Elia Parking Bot
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    env:
+      CONFIG_JSON: ${{ secrets.BOT_CONFIG_JSON }}
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Ensure config secret is present
+      if: ${{ env.CONFIG_JSON == '' }}
+      run: |
+        echo "::error::Missing BOT_CONFIG_JSON secret. Please add it in repository settings."
+        exit 1
+
+    - name: Write config.json from secret
+      run: |
+        python - <<'PY'
+        import os
+        import base64
+        from pathlib import Path
+
+        raw = os.environ.get("CONFIG_JSON", "")
+        if not raw.strip():
+            raise SystemExit("BOT_CONFIG_JSON secret is empty")
+
+        path = Path("config.json")
+
+        try:
+            # Support either plain JSON or base64-encoded JSON
+            if raw.lstrip().startswith("{"):
+                data = raw.encode("utf-8")
+            else:
+                data = base64.b64decode(raw)
+        except Exception as exc:
+            raise SystemExit(f"Failed to decode BOT_CONFIG_JSON: {exc}")
+
+        path.write_bytes(data)
+        path.chmod(0o600)
+        print("config.json written")
+        PY
+
+    - name: Confirm config present
+      run: |
+        ls -l config.json
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -156,6 +195,7 @@ jobs:
         cleanup() {
           echo "🧹 Cleaning up..."
           kill $XVFB_PID 2>/dev/null || true
+          rm -f config.json
         }
         trap cleanup EXIT
         
