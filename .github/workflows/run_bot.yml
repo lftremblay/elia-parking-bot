@@ -119,8 +119,8 @@ jobs:
         # Install Playwright browsers
         python -m playwright install --with-deps chromium
         
-        # Verify installation
-        python -c "import playwright; print(f'Playwright version: {playwright.__version__}')"
+        # Verify installation and print Playwright version
+        python -c "from playwright import __version__; print(f'Playwright version: {__version__}')"
 
     - name: Run the bot with Xvfb
       run: |
