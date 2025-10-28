@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿name: Run Parking Bot
+=======
+name: Run Parking Bot
+>>>>>>> 5e38ada8dc3f196ea3d6e5444925189111c1ff1c
 
 on:
   workflow_dispatch:
