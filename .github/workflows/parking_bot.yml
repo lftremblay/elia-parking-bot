@@ -50,6 +50,24 @@ jobs:
           # Set up Playwright
           playwright install chromium
           playwright install-deps chromium
+          
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install numpy==1.26.4
+          pip install opencv-python-headless==4.8.0.74
+          pip install Pillow==10.0.0  # Add this line
+          pip install playwright loguru python-dotenv pyotp cryptography
+          playwright install chromium
+          playwright install-deps chromium
+        run: |
+          pip install --upgrade pip
+          pip install numpy==1.26.4
+          pip install opencv-python-headless==4.8.0.74
+          pip install Pillow==10.0.0  # Add this line
+          pip install playwright loguru python-dotenv pyotp cryptography
+          playwright install chromium
+          playwright install-deps chromium
       
       - name: Run bot
         env:
