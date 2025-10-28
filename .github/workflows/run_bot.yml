@@ -1,4 +1,4 @@
-name: Run Parking Bot
+﻿name: Run Parking Bot
 
 on:
   workflow_dispatch:
@@ -27,7 +27,6 @@ jobs:
         
     - name: Run the bot
       env:
-        # Add your environment variables here
         PYTHONUNBUFFERED: 1
       run: |
         python main.py
