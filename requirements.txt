@@ -19,8 +19,8 @@ schedule==1.2.1
 apscheduler==3.10.4
 
 # Image processing & AI
-opencv-python==4.9.0.80
-numpy==2.0.1
+opencv-python==4.8.1.78
+numpy==1.24.4
 pytesseract==0.3.13
 
 # Notifications
