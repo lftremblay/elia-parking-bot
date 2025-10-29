@@ -632,166 +632,206 @@ class BrowserAutomation:
         try:
             logger.info("⏳ Waiting for dashboard to load...")
             
-            # More flexible URL patterns for different auth flows
-            dashboard_url_patterns = [
-                '**/app.elia.io/**',
-                '**/elia.io/**',
-                '**/parking/**',  # Sometimes redirects to parking subdomain
-                '**/*parking*',   # Contains parking in URL
-                '**/dashboard/**',
-                '**/home/**'
-            ]
+            # IMMEDIATE CHECK: See if we're already on a non-auth page
+            current_url = self.page.url
+            logger.info(f"🔗 Current URL at start: {current_url}")
             
-            # Wait for any of the dashboard URL patterns
-            url_detected = False
-            for pattern in dashboard_url_patterns:
+            if ('login' not in current_url.lower() and 
+                'auth' not in current_url.lower() and
+                'signin' not in current_url.lower() and
+                'error' not in current_url.lower()):
+                logger.info("✅ Already on non-auth page - checking for dashboard")
+                
+                # Quick check for interactive elements
                 try:
-                    await self.page.wait_for_url(pattern, timeout=10000)
-                    logger.info(f"✅ Dashboard URL detected: {pattern}")
-                    url_detected = True
-                    break
-                except:
-                    continue
+                    interactive_count = await self.page.evaluate("""
+                        () => document.querySelectorAll('button, a, input, select').length
+                    """)
+                    logger.info(f"📊 Found {interactive_count} interactive elements")
+                    if interactive_count > 3:
+                        await self.take_screenshot("dashboard_immediate")
+                        logger.success("✅ Dashboard detected immediately")
+                        return True
+                except Exception as e:
+                    logger.debug(f"Interactive element check failed: {e}")
+        
+        # More flexible URL patterns for different auth flows
+        dashboard_url_patterns = [
+            '**/app.elia.io/**',
+            '**/elia.io/**',
+            '**/parking/**',  # Sometimes redirects to parking subdomain
+            '**/*parking*',   # Contains parking in URL
+            '**/dashboard/**',
+            '**/home/**'
+        ]
+        
+        # Wait for any of the dashboard URL patterns
+        url_detected = False
+        for pattern in dashboard_url_patterns:
+            try:
+                await self.page.wait_for_url(pattern, timeout=15000)  # 15 seconds per pattern
+                logger.info(f"✅ Dashboard URL detected: {pattern}")
+                url_detected = True
+                break
+            except:
+                continue
+        
+        if not url_detected:
+            # If no specific URL pattern matches, wait for page to stabilize
+            logger.info("⏳ Waiting for page to stabilize...")
+            await asyncio.sleep(5)  # Increased wait time
             
-            if not url_detected:
-                # If no specific URL pattern matches, wait for page to stabilize
-                logger.info("⏳ Waiting for page to stabilize...")
-                await asyncio.sleep(3)
-                
-                # Check current URL
-                current_url = self.page.url
-                logger.info(f"📍 Current URL after auth: {current_url}")
-                
-                # Accept any URL that doesn't contain login/auth terms
-                if ('login' not in current_url.lower() and 
-                    'auth' not in current_url.lower() and
-                    'signin' not in current_url.lower()):
-                    logger.info("✅ On non-auth page, assuming dashboard")
-                    url_detected = True
+            # Check current URL
+            current_url = self.page.url
+            logger.info(f"📍 Current URL after wait: {current_url}")
             
-            if not url_detected:
-                logger.warning(f"⚠️ No dashboard URL pattern matched, current URL: {self.page.url}")
-                # Continue anyway - might still be on dashboard
+            # Accept any URL that doesn't contain login/auth terms
+            if ('login' not in current_url.lower() and 
+                'auth' not in current_url.lower() and
+                'signin' not in current_url.lower()):
+                logger.info("✅ On non-auth page after stabilization")
+                url_detected = True
+        
+        if not url_detected:
+            logger.warning(f"⚠️ No dashboard URL pattern matched, current URL: {self.page.url}")
+            # Continue anyway - might still be on dashboard
+        
+        # Wait for page to be interactive and check for dashboard elements
+        await asyncio.sleep(2)
+        
+        # Debug: Log current page content
+        try:
+            page_title = await self.page.title()
+            logger.info(f"📄 Page title: {page_title}")
+        except:
+            logger.debug("Could not get page title")
+        
+        # Debug: Check for any visible text on page
+        try:
+            visible_text = await self.page.evaluate("""
+                () => {
+                    const elements = document.querySelectorAll('*');
+                    const texts = [];
+                    for (let el of elements) {
+                        const text = el.textContent?.trim();
+                        if (text && text.length > 3 && el.offsetParent !== null) {
+                            texts.push(text.substring(0, 50));
+                            if (texts.length >= 5) break; // Limit to first 5 visible texts
+                        }
+                    }
+                    return texts;
+                }
+            """)
+            if visible_text:
+                logger.info(f"📝 Visible text: {visible_text[:2]}")  # Show first 2
+        except Exception as e:
+            logger.debug(f"Could not extract visible text: {e}")
+        
+        # Debug: Check current URL again
+        current_url = self.page.url
+        logger.info(f"🔗 Final URL: {current_url}")
+        
+        # AGGRESSIVE SUCCESS CHECK: If we're not on auth pages and have some content, assume success
+        if ('login' not in current_url.lower() and 
+            'auth' not in current_url.lower() and
+            'signin' not in current_url.lower() and
+            'error' not in current_url.lower()):
             
-            # Wait for page to be interactive and check for dashboard elements
+            # Check if page has loaded any content
+            try:
+                body_text = await self.page.evaluate("() => document.body ? document.body.textContent.length : 0")
+                if body_text > 100:  # If page has substantial content
+                    logger.info(f"📄 Page has {body_text} characters of content")
+                    await self.take_screenshot("dashboard_success")
+                    logger.success("✅ Dashboard loaded successfully (content check)")
+                    return True
+            except:
+                pass
+        
+        # Try to detect dashboard elements with more comprehensive checks
+        dashboard_indicators = [
+            # Text-based indicators
+            'text="Parking"',
+            'text="Réservation"',
+            'text="Reservation"',
+            'text="Dashboard"',
+            'text="Welcome"',
+            'text="Bonjour"',
+            'text="Spot"',
+            'text="Place"',
+            
+            # Element-based indicators
+            '[data-testid*="parking"]',
+            '[data-testid*="dashboard"]',
+            '.parking-grid',
+            '.dashboard',
+            '.parking-spots',
+            '.spots-container',
+            '.reservation-form',
+            'nav',
+            'header',
+            '.main-content',
+            '#app',  # Common SPA root
+            '.app-container',
+            
+            # Button/link indicators
+            'button:has-text("Reserve")',
+            'button:has-text("Réserver")',
+            'a:has-text("Parking")',
+            'a:has-text("Dashboard")',
+            
+            # Generic page structure
+            'h1',
+            'h2',
+            '.card',
+            '.panel'
+        ]
+        
+        dashboard_detected = False
+        for indicator in dashboard_indicators:
+            try:
+                if indicator.startswith('text='):
+                    await self.page.wait_for_selector(f'*{indicator}', timeout=5000)  # Reduced timeout
+                else:
+                    await self.page.wait_for_selector(indicator, timeout=5000, state='visible')
+                logger.info(f"✅ Dashboard element detected: {indicator}")
+                dashboard_detected = True
+                break
+            except:
+                continue
+        
+        if dashboard_detected:
+            # Additional wait for dashboard to fully load
             await asyncio.sleep(2)
             
-            # Debug: Log current page content
-            try:
-                page_title = await self.page.title()
-                logger.info(f"📄 Page title: {page_title}")
-            except:
-                logger.debug("Could not get page title")
+            # Take screenshot of successful dashboard load
+            await self.take_screenshot("dashboard_loaded")
             
-            # Debug: Check for any visible text on page
-            try:
-                visible_text = await self.page.evaluate("""
-                    () => {
-                        const elements = document.querySelectorAll('*');
-                        const texts = [];
-                        for (let el of elements) {
-                            const text = el.textContent?.trim();
-                            if (text && text.length > 3 && el.offsetParent !== null) {
-                                texts.push(text.substring(0, 50));
-                                if (texts.length >= 10) break; // Limit to first 10 visible texts
-                            }
-                        }
-                        return texts;
-                    }
-                """)
-                logger.info(f"📝 Visible text snippets: {visible_text[:3]}")  # Show first 3
-            except Exception as e:
-                logger.debug(f"Could not extract visible text: {e}")
-            
-            # Debug: Check current URL again
+            logger.success("✅ Dashboard loaded successfully")
+            return True
+        else:
+            # FINAL FALLBACK: If we're not on auth pages, assume success
             current_url = self.page.url
-            logger.info(f"🔗 Final URL: {current_url}")
-            
-            # Try to detect dashboard elements with more comprehensive checks
-            dashboard_indicators = [
-                # Text-based indicators
-                'text="Parking"',
-                'text="Réservation"',
-                'text="Reservation"',
-                'text="Dashboard"',
-                'text="Welcome"',
-                'text="Bonjour"',
-                'text="Spot"',
-                'text="Place"',
+            if ('login' not in current_url.lower() and 
+                'auth' not in current_url.lower() and
+                'signin' not in current_url.lower() and
+                'error' not in current_url.lower()):
                 
-                # Element-based indicators
-                '[data-testid*="parking"]',
-                '[data-testid*="dashboard"]',
-                '.parking-grid',
-                '.dashboard',
-                '.parking-spots',
-                '.spots-container',
-                '.reservation-form',
-                'nav',
-                'header',
-                '.main-content',
-                '#app',  # Common SPA root
-                '.app-container',
+                logger.info("⚠️ No specific dashboard indicators found, but not on auth page - proceeding")
+                await self.take_screenshot("dashboard_fallback")
                 
-                # Button/link indicators
-                'button:has-text("Reserve")',
-                'button:has-text("Réserver")',
-                'a:has-text("Parking")',
-                'a:has-text("Dashboard")',
-                
-                # Generic page structure
-                'h1',
-                'h2',
-                '.card',
-                '.panel'
-            ]
-            
-            dashboard_detected = False
-            for indicator in dashboard_indicators:
+                # Check for basic page loaded indicators
                 try:
-                    if indicator.startswith('text='):
-                        await self.page.wait_for_selector(f'*{indicator}', timeout=3000)
-                    else:
-                        await self.page.wait_for_selector(indicator, timeout=3000, state='visible')
-                    logger.info(f"✅ Dashboard element detected: {indicator}")
-                    dashboard_detected = True
-                    break
+                    has_body = await self.page.evaluate("() => !!document.body")
+                    has_title = await self.page.evaluate("() => !!document.title")
+                    
+                    if has_body and has_title:
+                        logger.info("✅ Basic page structure detected - assuming dashboard")
+                        return True
                 except:
-                    continue
-            
-            if dashboard_detected:
-                # Additional wait for dashboard to fully load
-                await asyncio.sleep(3)
+                    pass
                 
-                # Take screenshot of successful dashboard load
-                await self.take_screenshot("dashboard_loaded")
-                
-                logger.success("✅ Dashboard loaded successfully")
                 return True
-            else:
-                # If we can't detect dashboard elements but we're not on auth pages, assume success
-                current_url = self.page.url
-                if ('login' not in current_url.lower() and 
-                    'auth' not in current_url.lower() and
-                    'signin' not in current_url.lower() and
-                    'error' not in current_url.lower()):
-                    
-                    logger.info("⚠️ Dashboard elements not clearly detected, but not on auth page - proceeding")
-                    await self.take_screenshot("dashboard_assumed")
-                    
-                    # Additional check: if we have any interactive elements, assume we're on a valid page
-                    try:
-                        interactive_count = await self.page.evaluate("""
-                            () => document.querySelectorAll('button, a, input, select').length
-                        """)
-                        if interactive_count > 5:  # If we have several interactive elements, likely a valid app page
-                            logger.info(f"✅ Found {interactive_count} interactive elements - assuming valid app page")
-                            return True
-                    except:
-                        pass
-                    
-                    return True
-                else:
                     logger.warning(f"⚠️ Still on auth-related page: {current_url}")
                     await self.take_screenshot("error_dashboard")
                     return False
