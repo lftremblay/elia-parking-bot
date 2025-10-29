@@ -19,13 +19,16 @@ from notifier import Notifier
 class EliaParkingBot:
     """Main orchestrator for Elia parking reservation bot"""
     
-    def __init__(self, config_path: str = "config.json"):
+    def __init__(self, config_path: str = "config.json", config: dict = None):
         # Load configuration
-        with open(config_path, 'r') as f:
-            self.config = json.load(f)
+        if config is not None:
+            self.config = config
+        else:
+            with open(config_path, 'r') as f:
+                self.config = json.load(f)
         
         # Initialize components
-        self.auth_manager = AuthenticationManager(config_path)
+        self.auth_manager = AuthenticationManager(config=self.config)
         self.browser = BrowserAutomation(self.config, self.auth_manager)
         self.spot_detector = SpotDetector(self.config)
         self.notifier = Notifier(self.config)

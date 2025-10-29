@@ -18,8 +18,11 @@ import pickle
 class AuthenticationManager:
     """Manages authentication with multiple fallback strategies"""
     
-    def __init__(self, config_path: str = "config.json"):
-        self.config = self._load_config(config_path)
+    def __init__(self, config_path: str = "config.json", config: dict = None):
+        if config is not None:
+            self.config = config
+        else:
+            self.config = self._load_config(config_path)
         self.session_file = Path("./session_data/auth_session.pkl")
         self.token_file = Path("./session_data/tokens.enc")
         self.session_file.parent.mkdir(exist_ok=True)

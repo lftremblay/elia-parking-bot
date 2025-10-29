@@ -32,12 +32,13 @@ class BrowserAutomation:
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
         
-        # Paths
-        self.profile_path = Path(config.get('advanced', {}).get('browser_profile_path', './browser_data'))
-        self.screenshot_dir = Path('./screenshots')
+        # Paths - ensure absolute paths
+        profile_path = config.get('advanced', {}).get('browser_profile_path', './browser_data')
+        self.profile_path = Path(profile_path).resolve()
+        self.screenshot_dir = Path('./screenshots').resolve()
         self.screenshot_dir.mkdir(exist_ok=True)
         
-        logger.info("🌐 BrowserAutomation initialized")
+        logger.info(f"🌐 BrowserAutomation initialized with profile: {self.profile_path}")
     
     async def initialize(self, headless: bool = True):
         """Initialize browser with persistent profile and anti-detection measures"""
