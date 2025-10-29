@@ -170,6 +170,27 @@ class BrowserAutomation:
         logger.success("✅ Browser initialized with persistent profile and anti-detection measures")
         return self.page
     
+    async def _wait_for_first_selector(self, selectors, timeout: int = 3000, state: str = 'visible') -> Optional[str]:
+        """Return the first selector that becomes available within the timeout"""
+        for selector in selectors:
+            try:
+                await self.page.wait_for_selector(selector, timeout=timeout, state=state)
+                return selector
+            except Exception:
+                continue
+        return None
+
+    async def _is_selector_present(self, selectors) -> Optional[str]:
+        """Check if any selector is currently present on the page"""
+        for selector in selectors:
+            try:
+                element = await self.page.query_selector(selector)
+                if element:
+                    return selector
+            except Exception:
+                continue
+        return None
+
     async def navigate_to_elia(self, organization: str) -> bool:
         """Navigate to Elia and handle organization input only if needed"""
         try:
@@ -264,76 +285,52 @@ class BrowserAutomation:
         for attempt in range(1, max_retries + 1):
             try:
                 logger.info(f"🔐 Handling Microsoft SSO (attempt {attempt}/{max_retries})...")
-                
-                # Wait for Microsoft login page with multiple possible URLs
-                microsoft_urls = [
+
+                login_hosts = [
                     '**/login.microsoftonline.com/**',
                     '**/login.microsoft.com/**',
                     '**/login.live.com/**',
-                    '**/account.microsoft.com/**'
+                    '**/account.microsoft.com/**',
+                    '**/.auth0.com/**',
+                    '**/login.microsoftonline.com/**'  # SAML endpoint
                 ]
-                
+
                 login_page_found = False
-                for url_pattern in microsoft_urls:
+                for url_pattern in login_hosts:
                     try:
                         await self.page.wait_for_url(url_pattern, timeout=5000)
-                        logger.info(f"📧 Microsoft login page detected: {url_pattern}")
+                        logger.info(f"📧 Login page detected: {url_pattern}")
                         login_page_found = True
                         break
-                    except:
+                    except Exception:
                         continue
-                
+
                 if not login_page_found:
-                    logger.warning(f"⚠️ Microsoft login page not detected, checking current URL...")
+                    logger.warning("⚠️ Login page pattern not matched, inspecting current URL...")
                     current_url = self.page.url
-                    if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
-                        logger.info(f"📧 On login page: {current_url}")
+                    if any(token in current_url.lower() for token in ['microsoft', 'login', 'auth0', 'saml']):
+                        logger.info(f"📧 On login flow page: {current_url}")
+                        # Wait for page to stabilize after potential SAML redirect
+                        await asyncio.sleep(2)
+                        await self.page.wait_for_load_state('networkidle', timeout=10000)
+                        await asyncio.sleep(1)
                     else:
                         raise Exception(f"Not on expected login page: {current_url}")
-                
-                # Add random delay to avoid detection
-                await asyncio.sleep(1 + (attempt * 0.5))
-                
-                # Try multiple email input selectors
+
+                await asyncio.sleep(0.75 + (attempt * 0.25))
+
                 email_selectors = [
                     'input[type="email"]',
                     'input[name="loginfmt"]',
                     'input[name="username"]',
                     'input[id*="email"]',
                     'input[id*="user"]',
-                    '#i0116',  # Common Microsoft ID
+                    '#i0116',
                     '#email',
                     'input[placeholder*="email"]',
                     'input[placeholder*="user"]'
                 ]
-                
-                email_entered = False
-                for selector in email_selectors:
-                    try:
-                        await self.page.wait_for_selector(selector, timeout=3000, state='visible')
-                        await self.page.fill(selector, email)
-                        logger.info(f"✅ Email entered using selector: {selector}")
-                        email_entered = True
-                        break
-                    except:
-                        continue
-                
-                if not email_entered:
-                    # Try JavaScript injection as fallback
-                    try:
-                        await self.page.evaluate(f"""
-                            const inputs = document.querySelectorAll('input[type="email"], input[name="loginfmt"], input[name="username"]');
-                            inputs.forEach(input => input.value = '{email}');
-                        """)
-                        logger.info("✅ Email entered via JavaScript")
-                        email_entered = True
-                    except:
-                        pass
-                
-                if not email_entered:
-                    raise Exception("Could not enter email")
-                
-                # Click next/submit button
+
                 submit_selectors = [
                     'input[type="submit"]',
                     'button[type="submit"]',
@@ -344,34 +341,92 @@ class BrowserAutomation:
                     'button:has-text("Sign in")',
                     'button:has-text("Continue")'
                 ]
-                
-                submit_clicked = False
-                for selector in submit_selectors:
-                    try:
-                        await self.page.wait_for_selector(selector, timeout=2000, state='visible')
-                        await self.page.click(selector)
-                        logger.info(f"✅ Submit clicked using selector: {selector}")
-                        submit_clicked = True
-                        break
-                    except:
-                        continue
-                
-                if not submit_clicked:
-                    # Try pressing Enter
-                    await self.page.keyboard.press('Enter')
-                    logger.info("✅ Submit via Enter key")
-                
-                await asyncio.sleep(2 + (attempt * 0.5))
-                
-                # Handle password page
+
+                error_selectors = [
+                    '#usernameError',
+                    'div[role="alert"] span',
+                    '.error',
+                    '[data-test="error"]',
+                    '.message_error',
+                    '.field-validation-error'
+                ]
+
                 password_selectors = [
                     'input[type="password"]',
                     'input[name="passwd"]',
-                    '#i0118',  # Common Microsoft ID
+                    '#i0118',
                     '#password',
                     'input[placeholder*="password"]'
                 ]
-                
+
+                email_attempts = 0
+                max_email_attempts = 5
+
+                while email_attempts < max_email_attempts:
+                    logger.info(f"🔍 Looking for email input (attempt {email_attempts + 1}/{max_email_attempts})...")
+                    
+                    email_selector = await self._wait_for_first_selector(email_selectors, timeout=5000)  # Increased timeout
+                    if email_selector:
+                        logger.info(f"✅ Found email input: {email_selector}")
+                        await self.page.click(email_selector)
+                        await self.page.fill(email_selector, "")
+                        await self.page.type(email_selector, email, delay=75)  # Slightly slower typing
+                        logger.info(f"✅ Email entered using selector: {email_selector}")
+
+                        submit_selector = await self._wait_for_first_selector(submit_selectors, timeout=3000, state='visible')
+                        if submit_selector:
+                            await self.page.click(submit_selector)
+                            logger.info(f"✅ Submit clicked using selector: {submit_selector}")
+                        else:
+                            await self.page.keyboard.press('Enter')
+                            logger.info("✅ Submit via Enter key")
+
+                        # Wait longer for redirect after email submission
+                        logger.info("⏳ Waiting for redirect after email submission...")
+                        await asyncio.sleep(3)
+
+                        # Check for password field appearing
+                        if await self._is_selector_present(password_selectors):
+                            logger.info("📫 Password prompt detected after email submission")
+                            break
+
+                        # Check for email validation errors
+                        error_selector = await self._is_selector_present(error_selectors)
+                        if error_selector:
+                            try:
+                                error_text = await self.page.text_content(error_selector)
+                                error_text = error_text.strip() if error_text else error_selector
+                            except Exception:
+                                error_text = error_selector
+                            logger.warning(f"⚠️ Email validation message: {error_text}")
+                            email_attempts += 1
+                            continue
+
+                        # Some flows redisplay another email prompt (e.g., Microsoft after SAML)
+                        if await self._is_selector_present(email_selectors):
+                            logger.info("🔁 Additional email prompt detected, re-entering email")
+                            email_attempts += 1
+                            await asyncio.sleep(2)
+                            continue
+
+                        # If neither password nor email prompt nor error, break to continue
+                        logger.debug("ℹ️ No password prompt yet, waiting briefly")
+                        await asyncio.sleep(2)
+                        if await self._is_selector_present(password_selectors):
+                            break
+                    else:
+                        # Check if password is already available (skip email step)
+                        if await self._is_selector_present(password_selectors):
+                            logger.info("ℹ️ Password prompt already available, skipping email step")
+                            break
+                        
+                        email_attempts += 1
+                        logger.debug(f"No email input found on attempt {email_attempts}, waiting...")
+                        await asyncio.sleep(2)
+
+                if email_attempts >= max_email_attempts and not await self._is_selector_present(password_selectors):
+                    raise Exception("Email prompt persisted after multiple attempts")
+
                 password_entered = False
                 for selector in password_selectors:
                     try:
@@ -380,11 +435,10 @@ class BrowserAutomation:
                         logger.info(f"✅ Password entered using selector: {selector}")
                         password_entered = True
                         break
-                    except:
+                    except Exception:
                         continue
-                
+
                 if not password_entered:
-                    # JavaScript fallback
                     try:
                         await self.page.evaluate(f"""
                             const inputs = document.querySelectorAll('input[type="password"], input[name="passwd"]');
@@ -392,48 +446,38 @@ class BrowserAutomation:
                         """)
                         logger.info("✅ Password entered via JavaScript")
                         password_entered = True
-                    except:
+                    except Exception:
                         pass
-                
+
                 if not password_entered:
                     raise Exception("Could not enter password")
-                
-                # Submit password
-                submit_clicked = False
-                for selector in submit_selectors:
-                    try:
-                        await self.page.wait_for_selector(selector, timeout=2000, state='visible')
-                        await self.page.click(selector)
-                        logger.info(f"✅ Password submit clicked using selector: {selector}")
-                        submit_clicked = True
-                        break
-                    except:
-                        continue
-                
-                if not submit_clicked:
+
+                submit_selector = await self._wait_for_first_selector(submit_selectors, timeout=2000, state='visible')
+                if submit_selector:
+                    await self.page.click(submit_selector)
+                    logger.info(f"✅ Password submit clicked using selector: {submit_selector}")
+                else:
                     await self.page.keyboard.press('Enter')
                     logger.info("✅ Password submit via Enter key")
-                
+
                 logger.info("✅ Microsoft SSO basic auth completed")
                 return True
-                
+
             except Exception as e:
                 logger.warning(f"⚠️ SSO attempt {attempt} failed: {e}")
                 await self.take_screenshot(f"error_sso_attempt_{attempt}")
-                
+
                 if attempt < max_retries:
-                    backoff = 2 ** attempt  # Exponential backoff
+                    backoff = 2 ** attempt
                     logger.info(f"⏳ Retrying SSO in {backoff} seconds...")
                     await asyncio.sleep(backoff)
-                    
-                    # Try to go back to start if needed
                     try:
                         await self.page.goto('https://app.elia.io/', wait_until='networkidle', timeout=10000)
-                    except:
+                    except Exception:
                         pass
                 else:
                     logger.error(f"❌ All {max_retries} SSO attempts failed")
-        
+
         return False
     
     async def handle_mfa(self, method: str = "authenticator", max_retries: int = 3) -> bool:
@@ -453,6 +497,24 @@ class BrowserAutomation:
                     'text="Verification code"',
                     'text="Authenticator"'
                 ]
+
+                fallback_links = [
+                    'text="Use a different verification option"',
+                    'text="I can\'t use my Microsoft Authenticator app right now"',
+                    'text="Use verification code"',
+                    'text="Approve a request"',
+                    'text="Sign in another way"'
+                ]
+
+                for link in fallback_links:
+                    try:
+                        await self.page.wait_for_selector(f'*{link}', timeout=1500)
+                        await self.page.click(f'*{link}')
+                        logger.info(f"🔁 Selected alternative MFA option via {link}")
+                        await asyncio.sleep(1.5)
+                        break
+                    except Exception:
+                        continue
                 
                 mfa_prompt_found = False
                 for indicator in mfa_indicators:
