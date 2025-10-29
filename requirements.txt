@@ -7,7 +7,7 @@ msal==1.31.0
 cryptography==41.0.7
 pyotp==2.9.0
 keyring==25.6.0
-Pillow==10.3.0
+Pillow==10.4.0
 
 # HTTP & API
 requests==2.31.0

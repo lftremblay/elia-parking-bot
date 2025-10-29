@@ -43,14 +43,14 @@ def setup_logging(log_level: str = "INFO"):
     logger.info("📝 Logging configured")
 
 
-async def run_reservation(spot_type: str, config_path: str = "config.json"):
+async def run_reservation(spot_type: str, config_path: str = "config.json", headless: bool = True):
     """Run a single reservation attempt"""
     logger.info(f"🚀 Starting {spot_type} spot reservation...")
     
     bot = EliaParkingBot(config_path)
     
     try:
-        await bot.initialize(headless=True)
+        await bot.initialize(headless=headless)
         success = await bot.reserve_spot(spot_type)
         
         if success:

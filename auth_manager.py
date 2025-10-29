@@ -118,10 +118,18 @@ class AuthenticationManager:
     
     def get_totp_code(self) -> Optional[str]:
         """Generate TOTP code for MFA"""
+        # First try config file
         totp_secret = self.config.get('mfa', {}).get('totp_secret')
         
+        # If not in config, try environment variable
         if not totp_secret:
-            logger.warning("⚠️  No TOTP secret configured")
+            import os
+            from dotenv import load_dotenv
+            load_dotenv()
+            totp_secret = os.getenv('TOTP_SECRET')
+        
+        if not totp_secret:
+            logger.warning("⚠️  No TOTP secret configured (check config.json or .env)")
             return None
         
         try:

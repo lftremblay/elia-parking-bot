@@ -40,52 +40,183 @@ class BrowserAutomation:
         logger.info("🌐 BrowserAutomation initialized")
     
     async def initialize(self, headless: bool = True):
-        """Initialize browser with persistent profile"""
+        """Initialize browser with persistent profile and anti-detection measures"""
         logger.info(f"🚀 Launching browser (headless={headless})...")
     
         self.playwright = await async_playwright().start()
-            
+        
+        # Enhanced browser arguments for anti-detection
+        browser_args = [
+            '--disable-blink-features=AutomationControlled',
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process',
+            '--disable-extensions',
+            '--disable-plugins',
+            '--disable-default-apps',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--disable-field-trial-config',
+            '--disable-back-forward-cache',
+            '--disable-hang-monitor',
+            '--disable-ipc-flooding-protection',
+            '--disable-popup-blocking',
+            '--disable-prompt-on-repost',
+            '--force-color-profile=srgb',
+            '--metrics-recording-only',
+            '--no-first-run',
+            '--enable-automation=false',
+            '--password-store=basic',
+            '--use-mock-keychain',
+            '--no-service-autorun',
+            '--export-tagged-pdf',
+            '--disable-component-update',
+            '--disable-domain-reliability',
+            '--disable-client-side-phishing-detection',
+            '--disable-background-networking',
+            '--disable-breakpad',
+            '--disable-component-extensions-with-background-pages',
+            '--disable-ipc-flooding-protection',
+            '--disable-print-preview',
+            '--disable-component-cloud-policy',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+        ]
+        
+        # Add headless-specific args only when headless
+        if headless:
+            browser_args.extend([
+                '--headless=new',  # Use new headless mode
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--disable-background-media-download',
+                '--disable-features=VizDisplayCompositor',
+            ])
+        
         # Launch browser with persistent context for session persistence
         self.context = await self.playwright.chromium.launch_persistent_context(
                 user_data_dir=str(self.profile_path),
                 headless=headless,
                 channel='chrome',  # Use installed Chrome
-                args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-dev-shm-usage',
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process',
-                ],
+                args=browser_args,
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 locale='en-US',
                 timezone_id='America/New_York',
                 permissions=['geolocation', 'notifications'],
                 ignore_https_errors=True,
+                # Additional anti-detection measures
+                bypass_csp=True,
+                ignore_default_args=['--enable-automation'],
             )
             
         self.page = await self.context.new_page()
         
-        # Set extra headers
+        # Set extra headers to mimic real browser
         await self.page.set_extra_http_headers({
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0',
         })
         
-        logger.success("✅ Browser initialized with persistent profile")
+        # Inject anti-detection scripts
+        await self.page.add_init_script("""
+            // Remove webdriver property
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined,
+            });
+            
+            // Mock languages and plugins
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['en-US', 'en'],
+            });
+            
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5],
+            });
+            
+            // Mock permissions
+            const originalQuery = window.navigator.permissions.query;
+            window.navigator.permissions.query = (parameters) => (
+                parameters.name === 'notifications' ?
+                    Promise.resolve({ state: Notification.permission }) :
+                    originalQuery(parameters)
+            );
+            
+            // Mock screen properties for headless detection
+            Object.defineProperty(screen, 'availHeight', {
+                get: () => screen.height - 40,
+            });
+            
+            // Override chrome runtime detection
+            window.chrome = {
+                runtime: {},
+                csi: () => ({}),
+                loadTimes: () => ({}),
+            };
+        """)
+        
+        logger.success("✅ Browser initialized with persistent profile and anti-detection measures")
         return self.page
     
     async def navigate_to_elia(self, organization: str) -> bool:
-        """Navigate to Elia and handle organization input"""
+        """Navigate to Elia and handle organization input only if needed"""
         try:
             logger.info("📍 Navigating to Elia...")
             await self.page.goto('https://app.elia.io/', wait_until='networkidle', timeout=30000)
             
-            # Wait for organization input
+            # Wait a bit for the page to stabilize
+            await asyncio.sleep(2)
+            
+            # Check if we're already on the dashboard (session persisted)
+            current_url = self.page.url
+            if 'app.elia.io' in current_url and 'login' not in current_url.lower():
+                # Try to detect dashboard elements
+                dashboard_indicators = [
+                    'text="Parking"',  # Common dashboard text
+                    'text="Réservation"',
+                    'text="Reservation"',
+                    '[data-testid*="parking"]',
+                    '.parking-grid',
+                    '.dashboard',
+                    'h1',  # Usually has a header on dashboard
+                    'nav',  # Navigation elements
+                ]
+                
+                dashboard_detected = False
+                for indicator in dashboard_indicators:
+                    try:
+                        if indicator.startswith('text='):
+                            await self.page.wait_for_selector(f'*{indicator}', timeout=3000)
+                        else:
+                            await self.page.wait_for_selector(indicator, timeout=3000, state='visible')
+                        logger.info(f"✅ Dashboard detected: {indicator}")
+                        dashboard_detected = True
+                        break
+                    except:
+                        continue
+                
+                if dashboard_detected:
+                    logger.success("✅ Already on Elia dashboard - session persisted!")
+                    return True
+            
+            # If not on dashboard, we need to enter organization
+            logger.info("🏢 Need to enter organization - not logged in")
+            
+            # Wait for organization input (should be visible now)
             await self.page.wait_for_selector('input[type="text"]', timeout=10000)
             
-               # Enter organization name
+            # Enter organization name
             logger.info(f"🏢 Entering organization: {organization}")
             await self.page.fill('input[type="text"]', organization)
             
@@ -93,8 +224,14 @@ class BrowserAutomation:
             await self.page.click('button')
             logger.info("✅ Organization submitted")
             
-            # Wait for email input page
+            # Wait for email input page or redirect
             await asyncio.sleep(2)
+            
+            # Check if we got redirected to Microsoft SSO
+            current_url = self.page.url
+            if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
+                logger.info("🔐 Redirected to Microsoft SSO")
+                return True  # Let the auth flow handle SSO
             
             # Check if email input is required (before Microsoft SSO)
             try:
@@ -111,7 +248,7 @@ class BrowserAutomation:
                         logger.info("✅ Email submitted")
                         await asyncio.sleep(2)
             except Exception as e:
-                logger.debug(f"No email input required or already at Microsoft login: {e}")
+                logger.debug(f"No email input required: {e}")
             
             logger.success("✅ Navigation to Elia complete")
             return True
@@ -121,80 +258,374 @@ class BrowserAutomation:
             await self.take_screenshot("error_navigate")
             return False
     
-    async def handle_microsoft_sso(self, email: str, password: str) -> bool:
-        """Handle Microsoft SSO authentication"""
-        try:
-            logger.info("🔐 Handling Microsoft SSO...")
-            
-            # Wait for Microsoft login page
-            await self.page.wait_for_url('**/login.microsoftonline.com/**', timeout=15000)
-            logger.info("📧 Microsoft login page detected")
-            
-            # Enter email
-            email_selector = 'input[type="email"], input[name="loginfmt"]'
-            await self.page.wait_for_selector(email_selector, timeout=10000)
-            await self.page.fill(email_selector, email)
-            await self.page.click('input[type="submit"], button[type="submit"]')
-            
-            logger.info("✅ Email submitted")
-            await asyncio.sleep(2)
-            
-            # Enter password
-            password_selector = 'input[type="password"], input[name="passwd"]'
-            await self.page.wait_for_selector(password_selector, timeout=10000)
-            await self.page.fill(password_selector, password)
-            await self.page.click('input[type="submit"], button[type="submit"]')
-            
-            logger.info("✅ Password submitted")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ Microsoft SSO failed: {e}")
-            await self.take_screenshot("error_sso")
-            return False
-    
-    async def handle_mfa(self, method: str = "authenticator") -> bool:
-        """Handle MFA challenge"""
-        try:
-            logger.info(f"🔢 Handling MFA ({method})...")
-            
-            # Wait for MFA prompt
-            await asyncio.sleep(3)
-            
-            if method == "authenticator" or method == "totp":
-                # Check if we need to enter TOTP code
-                if await self.page.is_visible('input[name="otc"]', timeout=5000):
-                    # Get TOTP code from auth manager
-                    if self.auth_manager:
-                        code = self.auth_manager.get_totp_code()
-                        if code:
-                            await self.page.fill('input[name="otc"]', code)
-                            await self.page.click('input[type="submit"]')
-                            logger.success("✅ TOTP code submitted")
-                        else:
-                            logger.error("❌ Failed to generate TOTP code")
-                            return False
+    async def handle_microsoft_sso(self, email: str, password: str, max_retries: int = 3) -> bool:
+        """Handle Microsoft SSO authentication with robust retry logic"""
+        for attempt in range(1, max_retries + 1):
+            try:
+                logger.info(f"🔐 Handling Microsoft SSO (attempt {attempt}/{max_retries})...")
+                
+                # Wait for Microsoft login page with multiple possible URLs
+                microsoft_urls = [
+                    '**/login.microsoftonline.com/**',
+                    '**/login.microsoft.com/**',
+                    '**/login.live.com/**',
+                    '**/account.microsoft.com/**'
+                ]
+                
+                login_page_found = False
+                for url_pattern in microsoft_urls:
+                    try:
+                        await self.page.wait_for_url(url_pattern, timeout=5000)
+                        logger.info(f"📧 Microsoft login page detected: {url_pattern}")
+                        login_page_found = True
+                        break
+                    except:
+                        continue
+                
+                if not login_page_found:
+                    logger.warning(f"⚠️ Microsoft login page not detected, checking current URL...")
+                    current_url = self.page.url
+                    if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
+                        logger.info(f"📧 On login page: {current_url}")
+                    else:
+                        raise Exception(f"Not on expected login page: {current_url}")
+                
+                # Add random delay to avoid detection
+                await asyncio.sleep(1 + (attempt * 0.5))
+                
+                # Try multiple email input selectors
+                email_selectors = [
+                    'input[type="email"]',
+                    'input[name="loginfmt"]',
+                    'input[name="username"]',
+                    'input[id*="email"]',
+                    'input[id*="user"]',
+                    '#i0116',  # Common Microsoft ID
+                    '#email',
+                    'input[placeholder*="email"]',
+                    'input[placeholder*="user"]'
+                ]
+                
+                email_entered = False
+                for selector in email_selectors:
+                    try:
+                        await self.page.wait_for_selector(selector, timeout=3000, state='visible')
+                        await self.page.fill(selector, email)
+                        logger.info(f"✅ Email entered using selector: {selector}")
+                        email_entered = True
+                        break
+                    except:
+                        continue
+                
+                if not email_entered:
+                    # Try JavaScript injection as fallback
+                    try:
+                        await self.page.evaluate(f"""
+                            const inputs = document.querySelectorAll('input[type="email"], input[name="loginfmt"], input[name="username"]');
+                            inputs.forEach(input => input.value = '{email}');
+                        """)
+                        logger.info("✅ Email entered via JavaScript")
+                        email_entered = True
+                    except:
+                        pass
+                
+                if not email_entered:
+                    raise Exception("Could not enter email")
+                
+                # Click next/submit button
+                submit_selectors = [
+                    'input[type="submit"]',
+                    'button[type="submit"]',
+                    '#idSIButton9',
+                    'input[value="Next"]',
+                    'input[value="Sign in"]',
+                    'button:has-text("Next")',
+                    'button:has-text("Sign in")',
+                    'button:has-text("Continue")'
+                ]
+                
+                submit_clicked = False
+                for selector in submit_selectors:
+                    try:
+                        await self.page.wait_for_selector(selector, timeout=2000, state='visible')
+                        await self.page.click(selector)
+                        logger.info(f"✅ Submit clicked using selector: {selector}")
+                        submit_clicked = True
+                        break
+                    except:
+                        continue
+                
+                if not submit_clicked:
+                    # Try pressing Enter
+                    await self.page.keyboard.press('Enter')
+                    logger.info("✅ Submit via Enter key")
+                
+                await asyncio.sleep(2 + (attempt * 0.5))
+                
+                # Handle password page
+                password_selectors = [
+                    'input[type="password"]',
+                    'input[name="passwd"]',
+                    '#i0118',  # Common Microsoft ID
+                    '#password',
+                    'input[placeholder*="password"]'
+                ]
+                
+                password_entered = False
+                for selector in password_selectors:
+                    try:
+                        await self.page.wait_for_selector(selector, timeout=5000, state='visible')
+                        await self.page.fill(selector, password)
+                        logger.info(f"✅ Password entered using selector: {selector}")
+                        password_entered = True
+                        break
+                    except:
+                        continue
+                
+                if not password_entered:
+                    # JavaScript fallback
+                    try:
+                        await self.page.evaluate(f"""
+                            const inputs = document.querySelectorAll('input[type="password"], input[name="passwd"]');
+                            inputs.forEach(input => input.value = '{password}');
+                        """)
+                        logger.info("✅ Password entered via JavaScript")
+                        password_entered = True
+                    except:
+                        pass
+                
+                if not password_entered:
+                    raise Exception("Could not enter password")
+                
+                # Submit password
+                submit_clicked = False
+                for selector in submit_selectors:
+                    try:
+                        await self.page.wait_for_selector(selector, timeout=2000, state='visible')
+                        await self.page.click(selector)
+                        logger.info(f"✅ Password submit clicked using selector: {selector}")
+                        submit_clicked = True
+                        break
+                    except:
+                        continue
+                
+                if not submit_clicked:
+                    await self.page.keyboard.press('Enter')
+                    logger.info("✅ Password submit via Enter key")
+                
+                logger.info("✅ Microsoft SSO basic auth completed")
+                return True
+                
+            except Exception as e:
+                logger.warning(f"⚠️ SSO attempt {attempt} failed: {e}")
+                await self.take_screenshot(f"error_sso_attempt_{attempt}")
+                
+                if attempt < max_retries:
+                    backoff = 2 ** attempt  # Exponential backoff
+                    logger.info(f"⏳ Retrying SSO in {backoff} seconds...")
+                    await asyncio.sleep(backoff)
+                    
+                    # Try to go back to start if needed
+                    try:
+                        await self.page.goto('https://app.elia.io/', wait_until='networkidle', timeout=10000)
+                    except:
+                        pass
                 else:
-                    # Might be push notification - wait for approval
-                    logger.info("📱 Waiting for MFA approval (push notification)...")
-                    await asyncio.sleep(30)
-            
-            elif method == "email":
-                logger.info("📧 Email MFA detected - check your email for code")
-                # TODO: Implement email code retrieval from IMAP
-                await asyncio.sleep(60)  # Wait for manual entry
-            
-            # Check if "Stay signed in?" prompt appears
-            if await self.page.is_visible('text="Stay signed in?"', timeout=5000):
-                logger.info("💾 Handling 'Stay signed in' prompt...")
-                await self.page.click('input[type="submit"][value="Yes"]')
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ MFA handling failed: {e}")
-            await self.take_screenshot("error_mfa")
-            return False
+                    logger.error(f"❌ All {max_retries} SSO attempts failed")
+        
+        return False
+    
+    async def handle_mfa(self, method: str = "authenticator", max_retries: int = 3) -> bool:
+        """Handle MFA challenge with robust retry logic"""
+        for attempt in range(1, max_retries + 1):
+            try:
+                logger.info(f"🔢 Handling MFA ({method}) - attempt {attempt}/{max_retries}...")
+                
+                # Wait for MFA prompt with multiple possible indicators
+                mfa_indicators = [
+                    'input[name="otc"]',  # TOTP input
+                    'input[name="code"]',  # Generic code input
+                    'input[placeholder*="code"]',
+                    'input[placeholder*="verification"]',
+                    '#idTxtBx_SAOTCC_OTC',  # Microsoft specific
+                    'text="Enter code"',
+                    'text="Verification code"',
+                    'text="Authenticator"'
+                ]
+                
+                mfa_prompt_found = False
+                for indicator in mfa_indicators:
+                    try:
+                        if indicator.startswith('text='):
+                            await self.page.wait_for_selector(f'*{indicator}', timeout=5000)
+                        else:
+                            await self.page.wait_for_selector(indicator, timeout=5000, state='visible')
+                        logger.info(f"🔢 MFA prompt detected: {indicator}")
+                        mfa_prompt_found = True
+                        break
+                    except:
+                        continue
+                
+                if not mfa_prompt_found:
+                    # Check if we're already past MFA (on dashboard)
+                    current_url = self.page.url
+                    if 'app.elia.io' in current_url and 'login' not in current_url:
+                        logger.success("✅ Already past MFA, on dashboard")
+                        return True
+                    
+                    # Wait a bit more for MFA to load
+                    logger.info("⏳ Waiting for MFA prompt to load...")
+                    await asyncio.sleep(5)
+                    
+                    # Try again
+                    for indicator in mfa_indicators:
+                        try:
+                            if indicator.startswith('text='):
+                                await self.page.wait_for_selector(f'*{indicator}', timeout=3000)
+                            else:
+                                await self.page.wait_for_selector(indicator, timeout=3000, state='visible')
+                            logger.info(f"🔢 MFA prompt detected on retry: {indicator}")
+                            mfa_prompt_found = True
+                            break
+                        except:
+                            continue
+                
+                if not mfa_prompt_found:
+                    logger.warning("⚠️ MFA prompt not clearly detected, proceeding with caution...")
+                
+                await asyncio.sleep(1 + (attempt * 0.5))
+                
+                if method == "authenticator" or method == "totp":
+                    # Try multiple TOTP input selectors
+                    totp_selectors = [
+                        'input[name="otc"]',
+                        'input[name="code"]',
+                        'input[id*="otc"]',
+                        'input[id*="code"]',
+                        '#idTxtBx_SAOTCC_OTC',
+                        '#otc',
+                        'input[type="text"]',  # Fallback
+                        'input[type="tel"]'    # Sometimes used for codes
+                    ]
+                    
+                    code_entered = False
+                    for selector in totp_selectors:
+                        try:
+                            await self.page.wait_for_selector(selector, timeout=3000, state='visible')
+                            if self.auth_manager:
+                                code = self.auth_manager.get_totp_code()
+                                if code:
+                                    await self.page.fill(selector, code)
+                                    logger.info(f"✅ TOTP code entered using selector: {selector}")
+                                    code_entered = True
+                                    break
+                                else:
+                                    logger.error("❌ Failed to generate TOTP code")
+                                    return False
+                        except:
+                            continue
+                    
+                    if not code_entered:
+                        # JavaScript fallback
+                        try:
+                            if self.auth_manager:
+                                code = self.auth_manager.get_totp_code()
+                                if code:
+                                    await self.page.evaluate(f"""
+                                        const inputs = document.querySelectorAll('input[name="otc"], input[name="code"], input[id*="otc"]');
+                                        inputs.forEach(input => input.value = '{code}');
+                                    """)
+                                    logger.info("✅ TOTP code entered via JavaScript")
+                                    code_entered = True
+                        except:
+                            pass
+                    
+                    if not code_entered:
+                        raise Exception("Could not enter TOTP code")
+                    
+                    # Submit the code
+                    submit_selectors = [
+                        'input[type="submit"]',
+                        'button[type="submit"]',
+                        '#idSubmit_SAOTCC_Continue',
+                        'input[value="Verify"]',
+                        'input[value="Submit"]',
+                        'button:has-text("Verify")',
+                        'button:has-text("Submit")',
+                        'button:has-text("Continue")'
+                    ]
+                    
+                    submit_clicked = False
+                    for selector in submit_selectors:
+                        try:
+                            await self.page.wait_for_selector(selector, timeout=2000, state='visible')
+                            await self.page.click(selector)
+                            logger.info(f"✅ MFA submit clicked using selector: {selector}")
+                            submit_clicked = True
+                            break
+                        except:
+                            continue
+                    
+                    if not submit_clicked:
+                        await self.page.keyboard.press('Enter')
+                        logger.info("✅ MFA submit via Enter key")
+                    
+                    # Wait for approval or next step
+                    logger.info("⏳ Waiting for MFA verification...")
+                    await asyncio.sleep(3)
+                    
+                    # Check if we're on the "Stay signed in?" page
+                    try:
+                        await self.page.wait_for_selector('text="Stay signed in?"', timeout=5000)
+                        logger.info("💾 Handling 'Stay signed in' prompt...")
+                        # Click "Yes" to stay signed in
+                        yes_selectors = [
+                            'input[type="submit"][value="Yes"]',
+                            'input[value="Yes"]',
+                            'button:has-text("Yes")',
+                            '#idSIButton9'  # Microsoft specific
+                        ]
+                        
+                        for selector in yes_selectors:
+                            try:
+                                await self.page.wait_for_selector(selector, timeout=2000, state='visible')
+                                await self.page.click(selector)
+                                logger.info(f"✅ Stay signed in: {selector}")
+                                break
+                            except:
+                                continue
+                    except:
+                        logger.debug("No 'Stay signed in' prompt found")
+                    
+                    return True
+                    
+                elif method == "email":
+                    logger.info("📧 Email MFA detected - waiting for manual code entry...")
+                    await asyncio.sleep(60)  # Give time for manual entry
+                    return True
+                
+                elif method == "push":
+                    logger.info("📱 Push notification MFA - waiting for approval...")
+                    # Wait up to 2 minutes for push approval
+                    await asyncio.sleep(120)
+                    return True
+                
+                else:
+                    logger.warning(f"⚠️ Unsupported MFA method: {method}")
+                    return False
+                
+            except Exception as e:
+                logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
+                await self.take_screenshot(f"error_mfa_attempt_{attempt}")
+                
+                if attempt < max_retries:
+                    backoff = 2 ** attempt
+                    logger.info(f"⏳ Retrying MFA in {backoff} seconds...")
+                    await asyncio.sleep(backoff)
+                else:
+                    logger.error(f"❌ All {max_retries} MFA attempts failed")
+        
+        return False
     
     async def wait_for_dashboard(self) -> bool:
         """Wait for successful login and dashboard load"""

@@ -77,33 +77,59 @@ class EliaParkingBot:
             try:
                 logger.info(f"🎯 Authentication attempt {attempt}/{max_attempts}")
                 
-                                # Navigate to Elia
+                # Navigate to Elia (this will detect if already logged in)
                 success = await self.browser.navigate_to_elia(organization)
                 if not success:
                     raise Exception("Failed to navigate to Elia")
                 
-                # Check if we're already logged in (session persisted)
-                await asyncio.sleep(3)
+                # Check current URL after navigation
+                await asyncio.sleep(2)
                 current_url = self.browser.page.url
                 
-                if 'app.elia.io' in current_url and 'login' not in current_url:
+                # If we're on the dashboard, we're already authenticated
+                if 'app.elia.io' in current_url and 'login' not in current_url.lower():
                     logger.success("✅ Already logged in! Session persisted.")
                     self.authenticated = True
                     self.auth_manager.save_session()
                     return True
                 
-                # If not logged in, handle Microsoft SSO
-                if 'login.microsoftonline.com' in current_url or 'login' in current_url:
+                # If we're on Microsoft login page, handle SSO
+                if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
                     logger.info("🔐 Authentication required...")
                     
                     # Handle Microsoft SSO
                     password = self._get_password()
-                    success = await self.browser.handle_microsoft_sso(email, password)
-                    if not success:
+                    sso_success = await self.browser.handle_microsoft_sso(email, password, max_retries=3)
+                    if not sso_success:
                         raise Exception("Microsoft SSO failed")
+                    
+                    # Handle MFA if needed
+                    mfa_method = self.config.get('elia', {}).get('credentials', {}).get('mfa_method', 'authenticator')
+                    if mfa_method != 'none':
+                        logger.info(f"🔢 Handling MFA ({mfa_method})...")
+                        mfa_success = await self.browser.handle_mfa(mfa_method, max_retries=3)
+                        if not mfa_success:
+                            raise Exception("MFA failed")
+                    
+                    # Wait for dashboard
+                    dashboard_success = await self.browser.wait_for_dashboard()
+                    if not dashboard_success:
+                        raise Exception("Failed to reach dashboard after authentication")
+                    
+                    logger.success("✅ Authentication successful!")
+                    self.authenticated = True
+                    
+                    # Extract and save tokens
+                    tokens = await self.browser.extract_tokens_from_browser()
+                    if tokens:
+                        # Save any extracted tokens
+                        pass
+                    
+                    return True
                 
-                logger.success("✅ Authentication successful!")
-                return True
+                else:
+                    logger.warning(f"⚠️ Unexpected URL after navigation: {current_url}")
+                    raise Exception(f"Unexpected navigation result: {current_url}")
                 
             except Exception as e:
                 logger.error(f"❌ Authentication attempt {attempt} failed: {e}")
