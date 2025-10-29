@@ -286,6 +286,28 @@ class BrowserAutomation:
             try:
                 logger.info(f"🔐 Handling Microsoft SSO (attempt {attempt}/{max_retries})...")
 
+                # Check for initial SSO choice page (Auth0)
+                org_continue_selectors = [
+                    'button:has-text("Continue with Quebecor")',
+                    'button:has-text("Continue")',
+                    'a:has-text("Continue with Quebecor")',
+                    '[data-action="continue-with-org"]',
+                    'button[id*="continue"]',
+                    'a[id*="continue"]'
+                ]
+
+                # Look for "Continue with Quebecor" button first
+                org_button_found = await self._is_selector_present(org_continue_selectors)
+                if org_button_found:
+                    logger.info(f"🏢 Found organization continue button: {org_button_found}")
+                    await self.page.click(org_button_found)
+                    logger.info("✅ Clicked 'Continue with Quebecor'")
+                    await asyncio.sleep(2)
+
+                    # Wait for redirect to Microsoft
+                    await self.page.wait_for_load_state('networkidle', timeout=10000)
+                    logger.info("🔄 Redirected after organization selection")
+
                 login_hosts = [
                     '**/login.microsoftonline.com/**',
                     '**/login.microsoft.com/**',
@@ -535,6 +557,34 @@ class BrowserAutomation:
                     if 'app.elia.io' in current_url and 'login' not in current_url:
                         logger.success("✅ Already past MFA, on dashboard")
                         return True
+                    
+                    # Check if there's an unexpected email prompt during MFA
+                    email_during_mfa = await self._is_selector_present([
+                        'input[type="email"]',
+                        'input[name="loginfmt"]',
+                        'input[name="username"]'
+                    ])
+                    
+                    if email_during_mfa:
+                        logger.warning("📧 Unexpected email prompt during MFA - re-entering email")
+                        await self.page.click(email_during_mfa)
+                        await self.page.fill(email_during_mfa, "")
+                        await self.page.type(email_during_mfa, email, delay=75)
+                        
+                        # Submit
+                        submit_mfa = await self._wait_for_first_selector([
+                            'input[type="submit"]',
+                            'button[type="submit"]',
+                            '#idSIButton9'
+                        ], timeout=2000)
+                        
+                        if submit_mfa:
+                            await self.page.click(submit_mfa)
+                            logger.info("✅ Submitted email during MFA flow")
+                            await asyncio.sleep(3)
+                            # Continue with MFA detection
+                        else:
+                            await self.page.keyboard.press('Enter')
                     
                     # Wait a bit more for MFA to load
                     logger.info("⏳ Waiting for MFA prompt to load...")
