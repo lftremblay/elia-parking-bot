@@ -37,7 +37,12 @@ async def test_sso_flow_headless():
         shutil.rmtree(browser_dir)
         print("🧹 Cleared existing browser data")
 
-    # Initialize bot with proper config
+    # Option 1: Use real config from config.json
+    # Uncomment these lines to use your real email instead of test email:
+    # bot = EliaParkingBot()  # Uses real config.json
+    # auth_manager = bot.auth_manager
+
+    # Option 2: Use test config (currently active)
     config = {
         'advanced': {
             'browser_profile_path': './test_browser_data'
@@ -45,7 +50,7 @@ async def test_sso_flow_headless():
         'elia': {
             'organization': 'quebecor',
             'credentials': {
-                'email': 'test@example.com',
+                'email': 'test@example.com',  # Change this to your real email if desired
                 'mfa_method': 'authenticator'
             }
         },
@@ -53,9 +58,9 @@ async def test_sso_flow_headless():
             'max_attempts': 1  # Reduce for testing
         }
     }
-    
+
     bot = EliaParkingBot(config=config)
-    auth_manager = AuthenticationManager()
+    auth_manager = AuthenticationManager(config=config)
 
     try:
         # Initialize in headless mode
