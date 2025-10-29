@@ -627,22 +627,131 @@ class BrowserAutomation:
         
         return False
     
-    async def wait_for_dashboard(self) -> bool:
-        """Wait for successful login and dashboard load"""
+    async def wait_for_dashboard(self, timeout: int = 60000) -> bool:
+        """Wait for successful login and dashboard load with flexible detection"""
         try:
             logger.info("⏳ Waiting for dashboard to load...")
             
-            # Wait for Elia app to load (check for app-specific elements)
-            await self.page.wait_for_url('**/app.elia.io/**', timeout=60000)
+            # More flexible URL patterns for different auth flows
+            dashboard_url_patterns = [
+                '**/app.elia.io/**',
+                '**/elia.io/**',
+                '**/parking/**',  # Sometimes redirects to parking subdomain
+                '**/*parking*',   # Contains parking in URL
+                '**/dashboard/**',
+                '**/home/**'
+            ]
             
-            # Additional wait for app to fully initialize
-            await asyncio.sleep(5)
+            # Wait for any of the dashboard URL patterns
+            url_detected = False
+            for pattern in dashboard_url_patterns:
+                try:
+                    await self.page.wait_for_url(pattern, timeout=10000)
+                    logger.info(f"✅ Dashboard URL detected: {pattern}")
+                    url_detected = True
+                    break
+                except:
+                    continue
             
-            # Take screenshot of dashboard
-            await self.take_screenshot("dashboard_loaded")
+            if not url_detected:
+                # If no specific URL pattern matches, wait for page to stabilize
+                logger.info("⏳ Waiting for page to stabilize...")
+                await asyncio.sleep(3)
+                
+                # Check current URL
+                current_url = self.page.url
+                logger.info(f"📍 Current URL after auth: {current_url}")
+                
+                # Accept any URL that doesn't contain login/auth terms
+                if ('login' not in current_url.lower() and 
+                    'auth' not in current_url.lower() and
+                    'signin' not in current_url.lower()):
+                    logger.info("✅ On non-auth page, assuming dashboard")
+                    url_detected = True
             
-            logger.success("✅ Dashboard loaded successfully")
-            return True
+            if not url_detected:
+                logger.warning(f"⚠️ No dashboard URL pattern matched, current URL: {self.page.url}")
+                # Continue anyway - might still be on dashboard
+            
+            # Wait for page to be interactive and check for dashboard elements
+            await asyncio.sleep(2)
+            
+            # Try to detect dashboard elements with more comprehensive checks
+            dashboard_indicators = [
+                # Text-based indicators
+                'text="Parking"',
+                'text="Réservation"',
+                'text="Reservation"',
+                'text="Dashboard"',
+                'text="Welcome"',
+                'text="Bonjour"',
+                'text="Spot"',
+                'text="Place"',
+                
+                # Element-based indicators
+                '[data-testid*="parking"]',
+                '[data-testid*="dashboard"]',
+                '.parking-grid',
+                '.dashboard',
+                '.parking-spots',
+                '.spots-container',
+                '.reservation-form',
+                'nav',
+                'header',
+                '.main-content',
+                '#app',  # Common SPA root
+                '.app-container',
+                
+                # Button/link indicators
+                'button:has-text("Reserve")',
+                'button:has-text("Réserver")',
+                'a:has-text("Parking")',
+                'a:has-text("Dashboard")',
+                
+                # Generic page structure
+                'h1',
+                'h2',
+                '.card',
+                '.panel'
+            ]
+            
+            dashboard_detected = False
+            for indicator in dashboard_indicators:
+                try:
+                    if indicator.startswith('text='):
+                        await self.page.wait_for_selector(f'*{indicator}', timeout=3000)
+                    else:
+                        await self.page.wait_for_selector(indicator, timeout=3000, state='visible')
+                    logger.info(f"✅ Dashboard element detected: {indicator}")
+                    dashboard_detected = True
+                    break
+                except:
+                    continue
+            
+            if dashboard_detected:
+                # Additional wait for dashboard to fully load
+                await asyncio.sleep(3)
+                
+                # Take screenshot of successful dashboard load
+                await self.take_screenshot("dashboard_loaded")
+                
+                logger.success("✅ Dashboard loaded successfully")
+                return True
+            else:
+                # If we can't detect dashboard elements but we're not on auth pages, assume success
+                current_url = self.page.url
+                if ('login' not in current_url.lower() and 
+                    'auth' not in current_url.lower() and
+                    'signin' not in current_url.lower() and
+                    'error' not in current_url.lower()):
+                    
+                    logger.info("⚠️ Dashboard elements not clearly detected, but not on auth page - proceeding")
+                    await self.take_screenshot("dashboard_assumed")
+                    return True
+                else:
+                    logger.warning(f"⚠️ Still on auth-related page: {current_url}")
+                    await self.take_screenshot("error_dashboard")
+                    return False
             
         except Exception as e:
             logger.error(f"❌ Failed to reach dashboard: {e}")
