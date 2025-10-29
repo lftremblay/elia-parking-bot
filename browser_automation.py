@@ -407,6 +407,14 @@ class BrowserAutomation:
                         logger.info("⏳ Waiting for redirect after email submission...")
                         await asyncio.sleep(3)
 
+                        # CHECK IF WE'RE ALREADY ON DASHBOARD after email submission
+                        current_url = self.page.url
+                        if ('app.elia.io' in current_url and 
+                            'login' not in current_url.lower() and
+                            'auth' not in current_url.lower()):
+                            logger.success("✅ Reached dashboard directly after email submission!")
+                            return True
+
                         # Check for password field appearing
                         if await self._is_selector_present(password_selectors):
                             logger.info("📫 Password prompt detected after email submission")

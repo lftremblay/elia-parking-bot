@@ -106,6 +106,16 @@ class EliaParkingBot:
                     if not sso_success:
                         raise Exception("Microsoft SSO failed")
                     
+                    # CHECK IF SSO TOOK US DIRECTLY TO DASHBOARD (skip MFA)
+                    current_url = self.browser.page.url
+                    if ('app.elia.io' in current_url and 
+                        'login' not in current_url.lower() and
+                        'auth' not in current_url.lower()):
+                        logger.success("✅ SSO completed and reached dashboard directly!")
+                        self.authenticated = True
+                        self.auth_manager.save_session()
+                        return True
+                    
                     # Handle MFA if needed
                     mfa_method = self.config.get('elia', {}).get('credentials', {}).get('mfa_method', 'authenticator')
                     if mfa_method != 'none':
