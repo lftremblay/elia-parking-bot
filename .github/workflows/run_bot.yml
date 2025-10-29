@@ -18,7 +18,7 @@ on:
 env:
   PYTHONUNBUFFERED: 1
   PLAYWRIGHT_BROWSERS_PATH: 0  # Use system browsers
-  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: false
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: true  # Skip Playwright browser download
   PYTHONFAULTHANDLER: 1  # Better error messages
   PYTHONHASHSEED: 42     # Reproducible builds
 
@@ -176,7 +176,8 @@ jobs:
           fonts-dejavu-core \
           fonts-noto-cjk \
           fonts-noto-cjk-extra \
-          fonts-noto-ui-core"
+          fonts-noto-ui-core \
+          chromium-browser"
 
         # Update and install in a single layer to reduce image size
         sudo apt-get update -qy && \
@@ -192,11 +193,35 @@ jobs:
         # Install requirements
         pip install -r requirements.txt
         
-        # Install Playwright browsers
-        python -m playwright install --with-deps chromium
+        # Install Playwright browsers with error handling
+        echo "🔍 Installing Playwright browsers..."
+        if python -m playwright install --with-deps chromium; then
+          echo "✅ Playwright browsers installed successfully"
+        else
+          echo "⚠️  Playwright browser download failed, using system browsers"
+          # Try installing without downloading
+          python -m playwright install-deps chromium || echo "⚠️  Could not install dependencies, will use system browser"
+        fi
         
         # Verify installation and print Playwright version
         python -c "import pkg_resources; print('Playwright version:', pkg_resources.get_distribution('playwright').version)"
+
+    - name: Verify Chromium availability
+      run: |
+        echo "🔍 Checking for available browsers..."
+        
+        # Check for system chromium
+        if command -v chromium-browser >/dev/null 2>&1; then
+          echo "✅ System chromium-browser found: $(chromium-browser --version)"
+        elif command -v chromium >/dev/null 2>&1; then
+          echo "✅ System chromium found: $(chromium --version)"
+        elif command -v google-chrome >/dev/null 2>&1; then
+          echo "✅ Google Chrome found: $(google-chrome --version)"
+        else
+          echo "⚠️  No system chromium/chrome found, Playwright will use bundled browser"
+          # As a last resort, try to install without --with-deps
+          python -m playwright install chromium || echo "❌ Could not install any browser"
+        fi
 
     - name: Run the bot with Xvfb
       run: |
