@@ -12,8 +12,8 @@ on:
         - executive
         - regular
   schedule:
-    - cron: '0 5 * * *'  # 12:00 AM EST / 1:00 AM EDT
-    - cron: '0 11 * * *'  # 6:00 AM EST / 7:00 AM EDT
+    - cron: '0 5 * * *'  # 00:00 PM EST / 00:02 AM EDT
+    - cron: '0 11 * * *'  # 6:00 AM EST / 6:02 AM EDT
 
 env:
   PYTHONUNBUFFERED: 1
