@@ -110,9 +110,14 @@ class EliaParkingBot:
                         mfa_success = await self.browser.handle_mfa(mfa_method, max_retries=3)
                         if not mfa_success:
                             raise Exception("MFA failed")
+                        
+                        # Additional wait after MFA for any redirects
+                        logger.info("⏳ Allowing time for post-MFA redirects...")
+                        await asyncio.sleep(5)
                     
-                    # Wait for dashboard
-                    dashboard_success = await self.browser.wait_for_dashboard()
+                    # Wait for dashboard with increased timeout
+                    logger.info("🏠 Waiting for dashboard after authentication...")
+                    dashboard_success = await self.browser.wait_for_dashboard(timeout=90000)  # 90 seconds
                     if not dashboard_success:
                         raise Exception("Failed to reach dashboard after authentication")
                     

@@ -676,6 +676,37 @@ class BrowserAutomation:
             # Wait for page to be interactive and check for dashboard elements
             await asyncio.sleep(2)
             
+            # Debug: Log current page content
+            try:
+                page_title = await self.page.title()
+                logger.info(f"📄 Page title: {page_title}")
+            except:
+                logger.debug("Could not get page title")
+            
+            # Debug: Check for any visible text on page
+            try:
+                visible_text = await self.page.evaluate("""
+                    () => {
+                        const elements = document.querySelectorAll('*');
+                        const texts = [];
+                        for (let el of elements) {
+                            const text = el.textContent?.trim();
+                            if (text && text.length > 3 && el.offsetParent !== null) {
+                                texts.push(text.substring(0, 50));
+                                if (texts.length >= 10) break; // Limit to first 10 visible texts
+                            }
+                        }
+                        return texts;
+                    }
+                """)
+                logger.info(f"📝 Visible text snippets: {visible_text[:3]}")  # Show first 3
+            except Exception as e:
+                logger.debug(f"Could not extract visible text: {e}")
+            
+            # Debug: Check current URL again
+            current_url = self.page.url
+            logger.info(f"🔗 Final URL: {current_url}")
+            
             # Try to detect dashboard elements with more comprehensive checks
             dashboard_indicators = [
                 # Text-based indicators
@@ -747,6 +778,18 @@ class BrowserAutomation:
                     
                     logger.info("⚠️ Dashboard elements not clearly detected, but not on auth page - proceeding")
                     await self.take_screenshot("dashboard_assumed")
+                    
+                    # Additional check: if we have any interactive elements, assume we're on a valid page
+                    try:
+                        interactive_count = await self.page.evaluate("""
+                            () => document.querySelectorAll('button, a, input, select').length
+                        """)
+                        if interactive_count > 5:  # If we have several interactive elements, likely a valid app page
+                            logger.info(f"✅ Found {interactive_count} interactive elements - assuming valid app page")
+                            return True
+                    except:
+                        pass
+                    
                     return True
                 else:
                     logger.warning(f"⚠️ Still on auth-related page: {current_url}")
