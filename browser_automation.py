@@ -17,6 +17,13 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
     logger.warning("⚠️ Playwright not installed. Install with: pip install playwright && playwright install chromium")
 
+try:
+    import pyotp
+    PYOTP_AVAILABLE = True
+except ImportError:
+    PYOTP_AVAILABLE = False
+    logger.warning("⚠️ pyotp not installed. Install with: pip install pyotp")
+
 
 class BrowserAutomation:
     """Handles browser automation for Elia parking reservation"""
@@ -557,6 +564,10 @@ class BrowserAutomation:
 
     async def handle_mfa(self, method: str = "authenticator", max_retries: int = 3) -> bool:
         """Handle MFA challenge with robust retry logic and improved Microsoft SSO integration"""
+        if not PYOTP_AVAILABLE:
+            logger.error("❌ pyotp is required for MFA handling. Install with: pip install pyotp")
+            return False
+            
         for attempt in range(1, max_retries + 1):
             try:
                 logger.info(f"🔢 Handling MFA ({method}) - attempt {attempt}/{max_retries}...")
@@ -665,7 +676,7 @@ class BrowserAutomation:
             logger.warning("⚠️ Detected potential redirect loop back to login page")
             
             # Try to detect if we're in a login form
-            has_login_form = await self.page.evaluate("""
+            login_form_elements = await self.page.evaluate("""
                 () => {
                     const formElements = [
                                         document.querySelector('input[type="password"]'),
