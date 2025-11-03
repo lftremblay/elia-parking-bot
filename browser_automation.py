@@ -550,7 +550,6 @@ class BrowserAutomation:
                     'a:has-text("Use a different verification option")',
                     'a:has-text("Sign in another way")'
                 ]
-                ]
 
                 # Check for and handle any MFA approval buttons first
                 try:
@@ -667,6 +666,7 @@ class BrowserAutomation:
                 
                 if any(domain in current_url for domain in login_domains):
                     # Enhanced error detection
+                    try:
                     error_messages = [
                 'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
                 'unable to sign in', 'sign-in was blocked', 'account is locked',
