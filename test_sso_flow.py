@@ -217,7 +217,7 @@ async def test_auth_manager():
         return False
 
     # Test session loading
-    new_auth = AuthenticationManager()
+    new_auth = AuthenticationManager(config=config)
     loaded = new_auth.load_session()
     if loaded and new_auth.access_token == "test_access_token":
         print("✅ Session load successful")
