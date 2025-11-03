@@ -143,7 +143,6 @@ def setup_initial_config():
     load_dotenv()
     
     import json
-    import os
     
     config_path = Path("config.json")
     

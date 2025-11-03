@@ -5,7 +5,7 @@ Test MFA logic improvements - syntax check only
 import ast
 import sys
 
-def test_syntax(filename, description):
+def check_syntax(filename, description):
     """Test that a Python file has valid syntax"""
     print(f"🔧 Testing {description} syntax...")
     
@@ -36,7 +36,7 @@ def main():
     
     all_passed = True
     for filename, description in tests:
-        if not test_syntax(filename, description):
+        if not check_syntax(filename, description):
             all_passed = False
         print()
     

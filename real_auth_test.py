@@ -4,6 +4,7 @@ Test authentication with REAL credentials from config.json
 """
 import asyncio
 import sys
+import pytest
 from pathlib import Path
 
 # Add current directory to path
@@ -11,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from bot_orchestrator import EliaParkingBot
 
+@pytest.mark.asyncio
 async def test_real_auth():
     """Test authentication with real credentials from config.json"""
     print("🔐 Testing authentication with REAL credentials from config.json")

@@ -7,6 +7,7 @@ Tests the improved Microsoft SSO handling for GitHub Actions compatibility
 import asyncio
 import sys
 import os
+import pytest
 from pathlib import Path
 from loguru import logger
 
@@ -17,6 +18,7 @@ from bot_orchestrator import EliaParkingBot
 from auth_manager import AuthenticationManager
 
 
+@pytest.mark.asyncio
 async def test_sso_flow_headless():
     """Test SSO flow in headless mode (like GitHub Actions)"""
     print("=" * 80)
@@ -101,6 +103,7 @@ async def test_sso_flow_headless():
         await bot.cleanup()
 
 
+@pytest.mark.asyncio
 async def test_sso_flow_visible():
     """Test SSO flow in visible mode for debugging"""
     print("=" * 80)
@@ -166,6 +169,7 @@ async def test_sso_flow_visible():
         await bot.cleanup()
 
 
+@pytest.mark.asyncio
 async def test_auth_manager():
     """Test authentication manager components"""
     print("=" * 80)

@@ -8,8 +8,9 @@ import os
 
 def test_basic_import():
     """Test that the module can be imported"""
+    # Module is already imported at the top
+    assert True
     print("✅ Module imported successfully")
-    return True
 
 def test_class_instantiation():
     """Test that BrowserAutomation class can be instantiated"""
@@ -21,21 +22,21 @@ def test_class_instantiation():
 
     try:
         browser = browser_automation.BrowserAutomation(config)
+        assert browser is not None
         print("✅ BrowserAutomation class instantiated successfully")
         print(f"📁 Profile path: {browser.profile_path}")
         print(f"📁 Screenshot dir: {browser.screenshot_dir}")
-        return True
     except Exception as e:
-        print(f"❌ Class instantiation failed: {e}")
-        return False
+        assert False, f"Class instantiation failed: {e}"
 
 def test_playwright_availability():
     """Test Playwright availability"""
     if browser_automation.PLAYWRIGHT_AVAILABLE:
         print("✅ Playwright is available")
+        assert True
     else:
         print("⚠️  Playwright not available (expected if not installed)")
-    return True
+        assert True  # This is expected behavior
 
 def main():
     """Run all tests"""
