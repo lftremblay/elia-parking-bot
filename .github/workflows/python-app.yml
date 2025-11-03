@@ -22,15 +22,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if exist requirements.txt pip install -r requirements.txt
+        if (Test-Path requirements.txt) { pip install -r requirements.txt }
     
     - name: Lint with flake8
       run: |
         pip install flake8
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv* || echo "Flake8 found issues"
-        flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv* || echo "Flake8 complexity check completed"
+        if (Test-Path .) { flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv* }
+        if (Test-Path .) { flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv* }
     
     - name: Run tests
       run: |
         pip install pytest
-        if exist test_*.py pytest || echo "No test files found"
+        if (Test-Path test_*.py) { pytest } else { Write-Output "No test files found" }
