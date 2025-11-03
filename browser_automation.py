@@ -126,7 +126,10 @@ class BrowserAutomation:
         
         # Set extra headers to mimic real browser
         await self.page.set_extra_http_headers({
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept': (
+                'text/html,application/xhtml+xml,application/xml;q=0.9,'
+                'image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+            ),
             'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br',
             'DNT': '1',
@@ -233,7 +236,8 @@ class BrowserAutomation:
                         logger.info(f"✅ Dashboard detected: {indicator}")
                         dashboard_detected = True
                         break
-                    except:
+                    except Exception as e:
+                        logger.debug(f"Dashboard indicator check failed for {indicator}: {e}")
                         continue
                 
                 if dashboard_detected:
@@ -617,7 +621,11 @@ class BrowserAutomation:
                 except Exception as e:
                     logger.warning(f"⚠️  Could not submit with Enter: {str(e)}")
                     # Try to find and click a submit button
-                    submit_buttons = await self.page.query_selector_all('button[type="submit"], input[type="submit"], button:has-text("Verify"), button:has-text("Submit"), button:has-text("Continue")')
+                    submit_buttons = await self.page.query_selector_all(
+                        'button[type="submit"], input[type="submit"], '
+                        'button:has-text("Verify"), button:has-text("Submit"), '
+                        'button:has-text("Continue")'
+                    )
                     if submit_buttons:
                         try:
                             await submit_buttons[0].click()
@@ -800,7 +808,8 @@ class BrowserAutomation:
                     logger.info(f"✅ Dashboard URL detected: {pattern}")
                     url_detected = True
                     break
-                except:
+                except Exception as e:
+                    logger.debug(f"URL pattern {pattern} not found: {e}")
                     continue
             
             if not url_detected:
@@ -830,8 +839,8 @@ class BrowserAutomation:
             try:
                 page_title = await self.page.title()
                 logger.info(f"📄 Page title: {page_title}")
-            except:
-                logger.debug("Could not get page title")
+            except Exception as e:
+                logger.debug(f"Could not get page title: {e}")
             
             # Debug: Check for any visible text on page
             try:
@@ -872,7 +881,8 @@ class BrowserAutomation:
                         await self.take_screenshot("dashboard_success")
                         logger.success("✅ Dashboard loaded successfully (content check)")
                         return True
-                except:
+                except Exception as e:
+                    logger.debug(f"Could not evaluate body text: {e}")
                     pass
             
             # Try to detect dashboard elements with more comprehensive checks
@@ -955,7 +965,8 @@ class BrowserAutomation:
                         if has_body and has_title:
                             logger.info("✅ Basic page structure detected - assuming dashboard")
                             return True
-                    except:
+                    except Exception as e:
+                        logger.debug(f"Could not check page structure: {e}")
                         pass
                     
                     return True

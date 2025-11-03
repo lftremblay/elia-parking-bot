@@ -4,9 +4,7 @@ Handles Microsoft SSO, MFA, and aggressive token refresh strategies
 """
 
 import json
-import time
 import pyotp
-import base64
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from loguru import logger
@@ -147,7 +145,10 @@ class AuthenticationManager:
     def prepare_auth_headers(self) -> Dict[str, str]:
         """Prepare authentication headers"""
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ),
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
             'Origin': 'https://app.elia.io',
