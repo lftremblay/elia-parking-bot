@@ -124,9 +124,9 @@ class EliaParkingBot:
                         if not mfa_success:
                             raise Exception("MFA failed")
                         
-                        # Additional wait after MFA for any redirects
-                        logger.info("⏳ Allowing time for post-MFA redirects...")
-                        await asyncio.sleep(5)
+                        # Brief wait for any final redirects
+                        logger.info("⏳ Allowing time for final redirects...")
+                        await asyncio.sleep(2)
                     
                     # Wait for dashboard with increased timeout
                     logger.info("🏠 Waiting for dashboard after authentication...")

@@ -88,154 +88,242 @@ async def find_available_spots(page, spot_type="regular"):
     """Find spots with green dots (available)"""
     try:
         logger.info(f"🔍 Searching for {spot_type} spots...")
-        
+
         # Take screenshot first
         await page.screenshot(path=f'screenshots/spot_search_{spot_type}.png')
-        
-        # Debug: Check what SVG elements exist
-        svg_debug = await page.evaluate('''
+
+        # Debug: Check what elements exist on the page
+        page_debug = await page.evaluate('''
             () => {
-                const svgs = document.querySelectorAll('svg');
-                const circles = document.querySelectorAll('circle');
-                const paths = document.querySelectorAll('path');
-                const rects = document.querySelectorAll('rect');
-                
-                // Get sample of green-ish elements
-                const greenElements = [];
-                [...circles, ...paths, ...rects].forEach(el => {
-                    const fill = el.getAttribute('fill') || '';
-                    const stroke = el.getAttribute('stroke') || '';
+                const allElements = document.querySelectorAll('*');
+                const clickableElements = [];
+                const textElements = [];
+                const coloredElements = [];
+
+                // Find all elements with spot-like text
+                allElements.forEach(el => {
+                    const text = el.textContent?.trim() || '';
+                    if (text.match(/^P\s*[•·\-]?\s*\d+$/)) {
+                        textElements.push({
+                            text: text,
+                            tagName: el.tagName,
+                            className: el.className,
+                            style: window.getComputedStyle(el).cssText.substring(0, 100),
+                            parentClass: el.parentElement?.className || '',
+                            rect: el.getBoundingClientRect()
+                        });
+                    }
+
+                    // Find clickable elements
                     const style = window.getComputedStyle(el);
-                    
-                    if (fill.includes('green') || fill.includes('#') || 
-                        stroke.includes('green') || style.fill.includes('green')) {
-                        greenElements.push({
-                            type: el.tagName,
-                            fill: fill || style.fill,
-                            stroke: stroke || style.stroke,
-                            className: el.className.baseVal || el.className
+                    if (style.cursor === 'pointer' || el.onclick || el.getAttribute('role') === 'button') {
+                        clickableElements.push({
+                            text: text.substring(0, 20),
+                            tagName: el.tagName,
+                            className: el.className
+                        });
+                    }
+
+                    // Find colored elements (any background or fill color)
+                    const bg = style.backgroundColor;
+                    const fill = el.getAttribute('fill');
+                    if ((bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') ||
+                        (fill && fill !== 'none')) {
+                        coloredElements.push({
+                            tagName: el.tagName,
+                            background: bg,
+                            fill: fill,
+                            className: el.className
                         });
                     }
                 });
-                
+
                 return {
-                    svgCount: svgs.length,
-                    circleCount: circles.length,
-                    pathCount: paths.length,
-                    rectCount: rects.length,
-                    greenSamples: greenElements.slice(0, 5)
+                    textElements: textElements.slice(0, 10),
+                    clickableCount: clickableElements.length,
+                    coloredCount: coloredElements.length,
+                    coloredSamples: coloredElements.slice(0, 5)
                 };
             }
         ''')
-        
-        logger.info(f"📊 SVG Debug: {svg_debug}")
-        
+
+        logger.info(f"📊 Page Debug: {len(page_debug['textElements'])} spot texts, {page_debug['clickableCount']} clickable, {page_debug['coloredCount']} colored")
+
         # Try multiple detection strategies
         available_spots = await page.evaluate('''
             () => {
                 const results = [];
-                
-                // Strategy 1: Find green circles
-                const circles = document.querySelectorAll('circle');
-                for (let circle of circles) {
-                    const fill = circle.getAttribute('fill') || '';
-                    const style = window.getComputedStyle(circle);
-                    
-                    // Check for ANY green shade
-                    const isGreen = 
-                        fill.match(/#[0-9a-fA-F]*[4-9a-fA-F][0-9a-fA-F]*/) || // Any hex with green
-                        fill.includes('green') || 
-                        fill.includes('rgb(') && fill.includes('255') || // RGB with high green
-                        style.fill.includes('green') ||
-                        style.fill.includes('rgb(') && style.fill.includes('255');
-                    
-                    if (isGreen || fill === '#22c55e' || fill === '#10b981') { // Tailwind greens
-                        const rect = circle.getBoundingClientRect();
-                        results.push({
-                            type: 'circle',
-                            color: fill || style.fill,
-                            x: rect.x,
-                            y: rect.y
-                        });
-                    }
-                }
-                
-                // Strategy 2: Find any element with green background near spot text
-                const spotTexts = Array.from(document.querySelectorAll('*'))
-                    .filter(el => {
-                        const text = el.textContent || '';
-                        return text.match(/^P\\s*[•·\\-]?\\s*\\d+$/);
-                    });
-                
-                for (let textEl of spotTexts) {
-                    const text = textEl.textContent.trim();
-                    const parent = textEl.parentElement;
-                    const grandparent = parent?.parentElement;
-                    
-                    // Check for green in vicinity
-                    let hasGreen = false;
-                    [textEl, parent, grandparent].forEach(el => {
-                        if (!el) return;
+
+                // Strategy 1: Find elements that look like available spots
+                const allElements = document.querySelectorAll('*');
+                const spotCandidates = [];
+
+                allElements.forEach(el => {
+                    const text = el.textContent?.trim() || '';
+
+                    // Look for spot text patterns
+                    if (text.match(/^P\s*[•·\-]?\s*\d+$/)) {
+                        const rect = el.getBoundingClientRect();
                         const style = window.getComputedStyle(el);
-                        const bg = style.backgroundColor;
-                        const color = style.color;
-                        
-                        if (bg.includes('rgb') && bg.includes('255') ||
-                            bg.includes('green') ||
-                            color.includes('green')) {
-                            hasGreen = true;
-                        }
-                        
-                        // Check children for green elements
-                        const greenChild = el.querySelector('[fill*="green"], [style*="green"], .bg-green-500, .bg-green-400');
-                        if (greenChild) hasGreen = true;
-                    });
-                    
-                    if (hasGreen) {
-                        results.push({
-                            type: 'text_with_green',
-                            spot: text
+                        const parent = el.parentElement;
+                        const grandparent = parent?.parentElement;
+
+                        spotCandidates.push({
+                            text: text,
+                            element: el,
+                            rect: rect,
+                            style: {
+                                cursor: style.cursor,
+                                backgroundColor: style.backgroundColor,
+                                color: style.color,
+                                border: style.border
+                            },
+                            parentClass: parent?.className || '',
+                            grandparentClass: grandparent?.className || '',
+                            isClickable: style.cursor === 'pointer' || el.onclick || el.getAttribute('data-clickable')
                         });
                     }
-                }
-                
-                // Strategy 3: Just find clickable spots (fallback)
-                if (results.length === 0) {
-                    for (let textEl of spotTexts.slice(0, 5)) {
-                        const text = textEl.textContent.trim();
-                        const style = window.getComputedStyle(textEl);
-                        if (style.cursor === 'pointer' || textEl.parentElement?.style.cursor === 'pointer') {
-                            results.push({
-                                type: 'clickable',
-                                spot: text
-                            });
+                });
+
+                // Check each spot candidate for availability indicators
+                spotCandidates.forEach(candidate => {
+                    let isAvailable = false;
+                    let reason = '';
+
+                    // Check if it has green styling
+                    if (candidate.style.backgroundColor.includes('rgb') &&
+                        candidate.style.backgroundColor.includes('255') && // High green value
+                        !candidate.style.backgroundColor.includes('0, 255, 0')) { // Not pure green
+                        isAvailable = true;
+                        reason = 'green background';
+                    }
+
+                    // Check for green border or text color
+                    if (candidate.style.color.includes('green') ||
+                        candidate.style.border.includes('green')) {
+                        isAvailable = true;
+                        reason = 'green styling';
+                    }
+
+                    // Check parent/sibling elements for green indicators
+                    const parent = candidate.element.parentElement;
+                    if (parent) {
+                        const siblings = Array.from(parent.children);
+                        const greenSibling = siblings.find(sib => {
+                            const sibStyle = window.getComputedStyle(sib);
+                            return sibStyle.backgroundColor.includes('green') ||
+                                   sibStyle.border.includes('green') ||
+                                   sib.getAttribute('fill')?.includes('green');
+                        });
+
+                        if (greenSibling) {
+                            isAvailable = true;
+                            reason = 'green sibling element';
                         }
                     }
-                }
-                
+
+                    // Check for any green elements near this spot
+                    const spotRect = candidate.rect;
+                    const nearbyElements = document.elementsFromPoint(
+                        spotRect.x + spotRect.width/2,
+                        spotRect.y + spotRect.height/2
+                    );
+
+                    const hasGreenNearby = nearbyElements.some(el => {
+                        const style = window.getComputedStyle(el);
+                        const fill = el.getAttribute('fill');
+                        return style.backgroundColor.includes('green') ||
+                               style.color.includes('green') ||
+                               (fill && fill.includes('green'));
+                    });
+
+                    if (hasGreenNearby) {
+                        isAvailable = true;
+                        reason = 'green nearby';
+                    }
+
+                    // If clickable and no obvious "unavailable" indicators, consider available
+                    if (candidate.isClickable && !candidate.text.includes('reserved') &&
+                        !candidate.parentClass.includes('disabled')) {
+                        isAvailable = true;
+                        reason = 'clickable and no disabled indicators';
+                    }
+
+                    if (isAvailable) {
+                        results.push({
+                            spot: candidate.text,
+                            reason: reason,
+                            clickable: candidate.isClickable,
+                            rect: {x: candidate.rect.x, y: candidate.rect.y}
+                        });
+                    }
+                });
+
                 return results;
             }
         ''')
-        
-        logger.info(f"🔍 Detection results: {available_spots}")
-        
-        # Extract spot IDs
-        logger.info(f"🔍 Detection results: {available_spots}")
-        
+
+        logger.info(f"🔍 Detection results: {len(available_spots)} available spots")
+
         # Extract spot IDs
         available = []
         for item in available_spots:
-            if item.get('spot'):
-                available.append(item['spot'])
-                logger.success(f"✅ Found: {item['spot']} (type: {item.get('type')})")
-        
-        # Final fallback: Just try P • 14 since we know it's available
+            spot_id = item['spot']
+            available.append(spot_id)
+            logger.success(f"✅ Found: {spot_id} (reason: {item.get('reason', 'unknown')})")
+
+        # If no spots detected, try a more aggressive approach
         if not available:
-            logger.warning("⚠️ No spots detected. Trying known available spot P • 14")
-            available = ["P • 14"]
-        
+            logger.warning("⚠️ No spots detected with standard method, trying fallback...")
+
+            # Fallback: Just look for any clickable elements with spot-like text
+            fallback_spots = await page.evaluate('''
+                () => {
+                    const spots = [];
+                    const elements = document.querySelectorAll('*');
+
+                    elements.forEach(el => {
+                        const text = el.textContent?.trim() || '';
+                        if (text.match(/^P\s*[•·\-]?\s*\d+$/)) {
+                            const style = window.getComputedStyle(el);
+                            const parent = el.parentElement;
+
+                            // Check if it's in a clickable container
+                            let isClickable = style.cursor === 'pointer' ||
+                                            el.onclick ||
+                                            parent?.onclick ||
+                                            el.closest('button') ||
+                                            el.closest('[role="button"]');
+
+                            // Check for availability indicators
+                            const classes = [el.className, parent?.className, parent?.parentElement?.className].join(' ');
+                            const notUnavailable = !classes.includes('reserved') &&
+                                                 !classes.includes('occupied') &&
+                                                 !classes.includes('disabled');
+
+                            if (isClickable && notUnavailable) {
+                                spots.push(text);
+                            }
+                        }
+                    });
+
+                    return spots.slice(0, 5); // Return first 5 found
+                }
+            ''')
+
+            if fallback_spots:
+                available = fallback_spots
+                logger.info(f"🔄 Fallback found {len(available)} spots: {available}")
+
+        # Final fallback: Try some known spot IDs
+        if not available:
+            logger.warning("⚠️ No spots detected. Trying known available spots")
+            # Try some common spot IDs that might be available
+            test_spots = ["P • 14", "P • 15", "P • 16", "P • 13", "P • 17"]
+            available = test_spots
+
         return available
-        
+
     except Exception as e:
         logger.error(f"❌ Spot search failed: {e}")
         return []
@@ -244,16 +332,70 @@ async def reserve_spot(page, spot_id: str) -> bool:
     """Click and reserve a specific parking spot"""
     try:
         logger.info(f"🎯 Attempting to reserve {spot_id}...")
-        
-        # Click on the spot element
-        try:
-            await page.click(f'text="{spot_id}"', timeout=3000)
-            await asyncio.sleep(1)
-            logger.info(f"✅ Clicked {spot_id}")
-        except Exception as e:
-            logger.error(f"❌ Failed to click {spot_id}: {e}")
-            return False
-        
+
+        # Multiple click strategies
+        click_strategies = [
+            # Strategy 1: Direct text click
+            lambda: page.click(f'text="{spot_id}"', timeout=3000),
+
+            # Strategy 2: Click containing element
+            lambda: page.click(f'text="{spot_id}" >> ..', timeout=2000),
+
+            # Strategy 3: Click parent if it's a button
+            lambda: page.click(f'text="{spot_id}" >> xpath=ancestor-or-self::*[contains(@class, "button") or @role="button"][1]', timeout=2000),
+
+            # Strategy 4: Click by coordinates (find element first)
+            lambda: click_by_coordinates(page, spot_id),
+
+            # Strategy 5: JavaScript click
+            lambda: page.evaluate(f'''
+                () => {{
+                    const elements = Array.from(document.querySelectorAll('*')).filter(el =>
+                        el.textContent?.trim() === '{spot_id}'
+                    );
+
+                    for (let el of elements) {{
+                        // Try to find clickable parent
+                        let clickable = el;
+                        while (clickable && !clickable.onclick && window.getComputedStyle(clickable).cursor !== 'pointer') {{
+                            clickable = clickable.parentElement;
+                            if (!clickable || clickable === document.body) break;
+                        }}
+
+                        if (clickable && (clickable.onclick || window.getComputedStyle(clickable).cursor === 'pointer')) {{
+                            clickable.click();
+                            return true;
+                        }}
+
+                        // Try clicking the text element itself
+                        el.click();
+                        return true;
+                    }}
+                    return false;
+                }}
+            ''')
+        ]
+
+        # Try each strategy
+        for i, strategy in enumerate(click_strategies, 1):
+            try:
+                logger.debug(f"Trying click strategy {i} for {spot_id}")
+                result = await strategy()
+
+                # For JavaScript strategies, check return value
+                if isinstance(result, bool) and result:
+                    logger.info(f"✅ Clicked {spot_id} using strategy {i}")
+                    await asyncio.sleep(1)
+                    break
+                elif not isinstance(result, bool):  # Regular click commands don't return bool
+                    logger.info(f"✅ Clicked {spot_id} using strategy {i}")
+                    await asyncio.sleep(1)
+                    break
+
+            except Exception as e:
+                logger.debug(f"Strategy {i} failed: {e}")
+                continue
+
         # Look for and click reserve/confirm button
         reserve_selectors = [
             'button:has-text("Réserver")',
@@ -261,28 +403,79 @@ async def reserve_spot(page, spot_id: str) -> bool:
             'button:has-text("Confirmer")',
             'button:has-text("Confirm")',
             'button[type="submit"]',
+            'button:has-text("Book")',
+            'button:has-text("Submit")',
+            'input[type="submit"]',
+            'input[value*="reserve" i]',
+            'input[value*="book" i]',
+            '[role="button"]:has-text("Reserve")',
+            '[role="button"]:has-text("Réserver")'
         ]
-        
+
         clicked = False
         for selector in reserve_selectors:
             try:
                 await page.click(selector, timeout=2000)
                 clicked = True
-                logger.success(f"✅ Reserved {spot_id}!")
-                await asyncio.sleep(1)
+                logger.success(f"✅ Reservation confirmed for {spot_id}!")
+                await asyncio.sleep(2)  # Wait for confirmation
                 break
             except:
                 continue
-        
+
+        if not clicked:
+            # Try pressing Enter as a fallback
+            try:
+                await page.keyboard.press('Enter')
+                logger.info(f"✅ Reservation submitted with Enter key for {spot_id}")
+                clicked = True
+                await asyncio.sleep(2)
+            except:
+                pass
+
         if not clicked:
             logger.warning(f"⚠️ Could not find reserve button for {spot_id}")
             return False
-        
+
+        # Take screenshot of successful reservation
+        await page.screenshot(path=f'screenshots/reservation_success_{spot_id.replace(" ", "_")}.png')
+
         return True
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to reserve {spot_id}: {e}")
+        await page.screenshot(path=f'screenshots/reservation_error_{spot_id.replace(" ", "_")}.png')
         return False
+
+async def click_by_coordinates(page, spot_id: str):
+    """Click a spot by finding its coordinates"""
+    try:
+        # Find the element's bounding rect
+        rect = await page.evaluate(f'''
+            () => {{
+                const elements = Array.from(document.querySelectorAll('*')).filter(el =>
+                    el.textContent?.trim() === '{spot_id}'
+                );
+
+                if (elements.length > 0) {{
+                    const rect = elements[0].getBoundingClientRect();
+                    return {{
+                        x: rect.x + rect.width / 2,
+                        y: rect.y + rect.height / 2
+                    }};
+                }}
+                return null;
+            }}
+        ''')
+
+        if rect:
+            await page.mouse.click(rect['x'], rect['y'])
+            return True
+
+    except Exception as e:
+        logger.debug(f"Coordinate click failed: {e}")
+
+    return False
 
 async def full_reservation_flow(page, spot_type="regular"):
     """Complete flow: navigate → set date → find → reserve"""

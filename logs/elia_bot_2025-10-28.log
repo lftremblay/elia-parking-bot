@@ -1,0 +1,1506 @@
+2025-10-28 10:14:51 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 10:14:51 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 10:14:51 | INFO     | auth_manager:_init_encryption:56 | 🔑 Generated new encryption key
+2025-10-28 10:14:51 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 10:14:51 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 10:14:51 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 10:14:51 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 10:14:51 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 10:14:51 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 10:14:51 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 10:14:51 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 10:14:51 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 10:14:51 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 10:14:56 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 10:14:56 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 10:14:56 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 10:14:56 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 10:14:56 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:15:09 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*=\"organisation\"]") to be visible
+
+2025-10-28 10:15:10 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_101509.png
+2025-10-28 10:15:10 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Failed to navigate to Elia
+2025-10-28 10:15:10 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 10:15:15 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 10:15:15 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:15:27 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*=\"organisation\"]") to be visible
+
+2025-10-28 10:15:47 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_101547.png
+2025-10-28 10:15:47 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Failed to navigate to Elia
+2025-10-28 10:15:47 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 10:15:57 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 3/5
+2025-10-28 10:15:57 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:16:08 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*=\"organisation\"]") to be visible
+
+2025-10-28 10:16:09 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_101608.png
+2025-10-28 10:16:09 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 3 failed: Failed to navigate to Elia
+2025-10-28 10:16:09 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 10:16:39 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 4/5
+2025-10-28 10:16:39 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:16:50 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*=\"organisation\"]") to be visible
+
+2025-10-28 10:16:51 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_101650.png
+2025-10-28 10:16:51 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 4 failed: Failed to navigate to Elia
+2025-10-28 10:16:51 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 10:21:52 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 10:21:52 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 10:21:52 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 10:21:52 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 10:21:52 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 10:21:52 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 10:21:52 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 10:21:52 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 10:21:52 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 10:21:52 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 10:21:52 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 10:21:52 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 10:21:57 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 10:21:57 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 10:21:57 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 10:21:57 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 10:21:57 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:21:59 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: YOUR_ORG_NAME_HERE
+2025-10-28 10:22:25 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.fill: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("input[placeholder*=\"organisation\"]")
+
+2025-10-28 10:22:27 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:22:27 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Failed to navigate to Elia
+2025-10-28 10:22:27 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 10:27:26 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 10:27:26 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 10:27:26 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 10:27:26 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 10:27:26 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 10:27:26 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 10:27:26 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 10:27:26 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 10:27:26 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 10:27:26 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 10:27:26 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 10:27:26 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 10:27:32 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 10:27:32 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 10:27:32 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 10:27:32 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 10:27:32 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:27:34 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: YOUR_ORG_NAME_HERE
+2025-10-28 10:28:04 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("button[type=\"submit\"]")
+
+2025-10-28 10:28:04 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_102804.png
+2025-10-28 10:28:04 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Failed to navigate to Elia
+2025-10-28 10:28:04 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 10:28:09 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 10:28:09 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:28:11 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: YOUR_ORG_NAME_HERE
+2025-10-28 10:28:13 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("button[type=\"submit\"]")
+
+2025-10-28 10:28:13 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:28:13 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Failed to navigate to Elia
+2025-10-28 10:28:13 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 10:55:51 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 10:55:51 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 10:55:51 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 10:55:51 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 10:55:51 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 10:55:51 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 10:55:51 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 10:55:51 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 10:55:51 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 10:55:51 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 10:55:51 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 10:55:51 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 10:55:52 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 10:55:52 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 10:55:52 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 10:55:52 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 10:55:52 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:55:54 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: YOUR_ORG_NAME_HERE
+2025-10-28 10:55:58 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("button[type=\"submit\"]")
+
+2025-10-28 10:55:58 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:55:58 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Failed to navigate to Elia
+2025-10-28 10:55:58 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 10:56:03 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 10:56:03 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:56:03 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.goto: Target page, context or browser has been closed
+2025-10-28 10:56:03 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:56:03 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Failed to navigate to Elia
+2025-10-28 10:56:03 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 10:56:13 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 3/5
+2025-10-28 10:56:13 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:56:13 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.goto: Target page, context or browser has been closed
+2025-10-28 10:56:13 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:56:13 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 3 failed: Failed to navigate to Elia
+2025-10-28 10:56:13 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 10:56:43 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 4/5
+2025-10-28 10:56:43 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:56:43 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.goto: Target page, context or browser has been closed
+2025-10-28 10:56:43 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:56:43 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 4 failed: Failed to navigate to Elia
+2025-10-28 10:56:43 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 10:57:13 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 5/5
+2025-10-28 10:57:13 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:57:13 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.goto: Target page, context or browser has been closed
+2025-10-28 10:57:13 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 10:57:13 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 5 failed: Failed to navigate to Elia
+2025-10-28 10:57:13 | ERROR    | bot_orchestrator:authenticate:127 | ❌ All authentication attempts failed
+2025-10-28 10:57:13 | ERROR    | bot_orchestrator:test_authentication:242 | ❌ Authentication test failed!
+2025-10-28 10:57:13 | INFO     | bot_orchestrator:cleanup:263 | 🧹 Cleaning up...
+2025-10-28 10:57:13 | INFO     | browser_automation:close:342 | 🔚 Browser closed
+2025-10-28 10:57:13 | INFO     | bot_orchestrator:cleanup:265 | ✅ Cleanup complete
+2025-10-28 10:58:09 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 10:58:09 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 10:58:09 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 10:58:09 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 10:58:09 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 10:58:09 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 10:58:09 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 10:58:09 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 10:58:09 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 10:58:09 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 10:58:09 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 10:58:09 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 10:58:11 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 10:58:11 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 10:58:11 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 10:58:11 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 10:58:11 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:58:12 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 10:58:43 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("button[type=\"submit\"]")
+
+2025-10-28 10:58:43 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_105843.png
+2025-10-28 10:58:43 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Failed to navigate to Elia
+2025-10-28 10:58:43 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 10:58:48 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 10:58:48 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 10:58:50 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 10:59:20 | ERROR    | browser_automation:navigate_to_elia:99 | ❌ Failed to navigate to Elia: Page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("button[type=\"submit\"]")
+
+2025-10-28 11:03:45 | DEBUG    | browser_automation:take_screenshot:309 | 📸 Screenshot saved: screenshots\error_navigate_20251028_110343.png
+2025-10-28 11:03:45 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Failed to navigate to Elia
+2025-10-28 11:03:45 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 11:04:57 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:04:57 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:04:57 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:04:57 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:04:57 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:04:57 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:04:57 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:04:57 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 11:04:57 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:04:57 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:04:57 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:04:57 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:04:59 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:04:59 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:04:59 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:04:59 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:04:59 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:05:01 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:05:01 | SUCCESS  | browser_automation:navigate_to_elia:95 | ✅ Organization submitted
+2025-10-28 11:05:04 | INFO     | browser_automation:handle_microsoft_sso:106 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:05:17 | ERROR    | browser_automation:handle_microsoft_sso:131 | ❌ Microsoft SSO failed: Target page, context or browser has been closed
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:05:17 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 11:05:17 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 11:05:17 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 11:15:02 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:15:02 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:15:02 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:15:02 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:15:02 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:15:02 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:15:02 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:15:02 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 11:15:02 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:15:02 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:15:02 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:15:02 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:15:04 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:15:04 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:15:04 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:15:04 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:15:04 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:15:05 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:15:06 | SUCCESS  | browser_automation:navigate_to_elia:95 | ✅ Organization submitted
+2025-10-28 11:15:09 | INFO     | browser_automation:handle_microsoft_sso:106 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:15:24 | ERROR    | browser_automation:handle_microsoft_sso:131 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:15:54 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Timeout 30000ms exceeded.
+Call log:
+  - taking page screenshot
+  - waiting for fonts to load...
+  - fonts loaded
+
+2025-10-28 11:15:54 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 11:15:54 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 11:15:59 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 11:15:59 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:16:00 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:16:02 | SUCCESS  | browser_automation:navigate_to_elia:95 | ✅ Organization submitted
+2025-10-28 11:16:05 | INFO     | browser_automation:handle_microsoft_sso:106 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:16:20 | ERROR    | browser_automation:handle_microsoft_sso:131 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:16:50 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Timeout 30000ms exceeded.
+2025-10-28 11:16:50 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Microsoft SSO failed
+2025-10-28 11:16:50 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 11:17:00 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 3/5
+2025-10-28 11:17:00 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:17:01 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:17:03 | SUCCESS  | browser_automation:navigate_to_elia:95 | ✅ Organization submitted
+2025-10-28 11:17:06 | INFO     | browser_automation:handle_microsoft_sso:106 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:17:21 | ERROR    | browser_automation:handle_microsoft_sso:131 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:17:51 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Timeout 30000ms exceeded.
+2025-10-28 11:17:51 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 3 failed: Microsoft SSO failed
+2025-10-28 11:17:51 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 11:18:21 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 4/5
+2025-10-28 11:18:21 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:18:24 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:18:26 | SUCCESS  | browser_automation:navigate_to_elia:95 | ✅ Organization submitted
+2025-10-28 11:18:29 | INFO     | browser_automation:handle_microsoft_sso:106 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:18:44 | ERROR    | browser_automation:handle_microsoft_sso:131 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:19:14 | ERROR    | browser_automation:take_screenshot:312 | ❌ Screenshot failed: Page.screenshot: Timeout 30000ms exceeded.
+2025-10-28 11:19:14 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 4 failed: Microsoft SSO failed
+2025-10-28 11:19:14 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 11:19:40 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:19:40 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:19:40 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:19:40 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:19:40 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:19:40 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:19:40 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:19:40 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 11:19:40 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:19:40 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:19:40 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:19:40 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:19:43 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:19:43 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:19:43 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:19:43 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:19:43 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:19:45 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:19:45 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:19:47 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:19:48 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:19:50 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:19:53 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:19:53 | INFO     | browser_automation:handle_microsoft_sso:131 | 📧 Microsoft login page detected
+2025-10-28 11:19:53 | INFO     | browser_automation:handle_microsoft_sso:139 | ✅ Email submitted
+2025-10-28 11:20:05 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Page.wait_for_selector: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("input[type=\"password\"], input[name=\"passwd\"]") to be visible
+    - waiting for navigation to finish...
+    - navigated to "https://adfsint.videotron.com/adfs/ls/wia?client-request-id=e3a69def-98b0-4b79-a369-6d9329e40161&wa=wsignin1.0&wtrealm=urn%3afederation%3aMicrosoftOnline&wctx=LoginOptions%3D3%26estsredirect%3d2%26es…"
+    - waiting for" https://dev-p0tbk3x9.us.auth0.com/authorize/resume?state=ykejef_H-JJRS1Wu698yFkkEww8XoN9Q" navigation to finish...
+    - navigated to "https://app.elia.io/?code=ufaDVem064yTlAS1umvEAW5wp74Ho44XimyVV4U1I_xla&state=fmdiYVlNSHdYNE9jS2hUcHRPQ3NwSmFQa35zYS5mR05lUWw1bVhYM09jQQ%3D%3D"
+
+2025-10-28 11:20:07 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_112005.png
+2025-10-28 11:20:07 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 11:20:07 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 11:20:12 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 11:20:12 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:32:41 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:32:41 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:32:41 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:32:41 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:32:41 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:32:41 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:32:41 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:32:41 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 11:32:41 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:32:41 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:32:41 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:32:41 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:32:44 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:32:44 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:32:44 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:32:44 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:32:44 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:32:48 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:32:48 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:32:51 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:32:52 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:32:54 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:32:57 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:33:12 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:33:12 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_113312.png
+2025-10-28 11:33:12 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 11:33:12 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 11:33:17 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 11:33:18 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:33:23 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:33:24 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:33:26 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:33:27 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:33:29 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:33:32 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:33:47 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:33:47 | ERROR    | browser_automation:take_screenshot:333 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 11:33:47 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Microsoft SSO failed
+2025-10-28 11:33:47 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 11:35:58 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:35:58 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:35:58 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:35:58 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:35:58 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:35:58 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:35:58 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:35:58 | INFO     | bot_orchestrator:test_authentication:233 | 🧪 Testing authentication...
+2025-10-28 11:35:58 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:35:58 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:35:58 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:35:58 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:36:01 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:36:01 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:36:01 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:36:01 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:36:01 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:36:04 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:36:04 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:36:07 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:36:08 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:36:10 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:36:13 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:36:28 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:36:53 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_113653.png
+2025-10-28 11:36:53 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 11:36:53 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 5 seconds...
+2025-10-28 11:36:58 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 11:36:58 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:37:01 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:37:01 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:37:03 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:37:04 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:37:06 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:37:09 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:37:24 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:37:24 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_113724.png
+2025-10-28 11:37:24 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 2 failed: Microsoft SSO failed
+2025-10-28 11:37:24 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 10 seconds...
+2025-10-28 11:37:34 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 3/5
+2025-10-28 11:37:34 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:37:41 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:37:42 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:37:44 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:37:45 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:37:47 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:37:50 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:38:05 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:38:06 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_113805.png
+2025-10-28 11:38:06 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 3 failed: Microsoft SSO failed
+2025-10-28 11:38:06 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 11:38:36 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 4/5
+2025-10-28 11:38:36 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:38:42 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:38:42 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:38:44 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:38:45 | DEBUG    | browser_automation:navigate_to_elia:114 | No email input required or already at Microsoft login: Page.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("button")
+
+2025-10-28 11:38:45 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:38:48 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 11:39:03 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 15000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/login.microsoftonline.com/**" until 'load'
+============================================================
+2025-10-28 11:39:03 | ERROR    | browser_automation:take_screenshot:333 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 11:39:03 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 4 failed: Microsoft SSO failed
+2025-10-28 11:39:03 | INFO     | bot_orchestrator:authenticate:124 | ⏳ Retrying in 30 seconds...
+2025-10-28 11:39:33 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 5/5
+2025-10-28 11:39:33 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:39:33 | ERROR    | browser_automation:navigate_to_elia:120 | ❌ Failed to navigate to Elia: Page.goto: Target page, context or browser has been closed
+2025-10-28 11:39:33 | ERROR    | browser_automation:take_screenshot:333 | ❌ Screenshot failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 11:39:33 | ERROR    | bot_orchestrator:authenticate:120 | ❌ Authentication attempt 5 failed: Failed to navigate to Elia
+2025-10-28 11:39:33 | ERROR    | bot_orchestrator:authenticate:127 | ❌ All authentication attempts failed
+2025-10-28 11:39:33 | ERROR    | bot_orchestrator:test_authentication:242 | ❌ Authentication test failed!
+2025-10-28 11:39:33 | INFO     | bot_orchestrator:cleanup:263 | 🧹 Cleaning up...
+2025-10-28 11:39:33 | INFO     | browser_automation:close:363 | 🔚 Browser closed
+2025-10-28 11:39:33 | INFO     | bot_orchestrator:cleanup:265 | ✅ Cleanup complete
+2025-10-28 11:43:36 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:43:36 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:43:36 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:43:36 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:43:36 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:43:36 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:43:36 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:43:36 | INFO     | bot_orchestrator:test_authentication:222 | 🧪 Testing authentication...
+2025-10-28 11:43:36 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:43:36 | WARNING  | auth_manager:load_session:81 | ⚠️  No saved session found
+2025-10-28 11:43:36 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:43:36 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:43:41 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:43:41 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:43:41 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:43:41 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:43:41 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:43:44 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:43:45 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:43:48 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:43:49 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:43:51 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:43:54 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 11:43:54 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 11:43:54 | SUCCESS  | bot_orchestrator:test_authentication:228 | ✅ Authentication test passed!
+2025-10-28 11:43:59 | INFO     | bot_orchestrator:cleanup:252 | 🧹 Cleaning up...
+2025-10-28 11:44:03 | INFO     | browser_automation:close:363 | 🔚 Browser closed
+2025-10-28 11:44:03 | INFO     | bot_orchestrator:cleanup:254 | ✅ Cleanup complete
+2025-10-28 11:57:38 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:57:38 | INFO     | __main__:test_authentication:105 | 🧪 Testing authentication...
+2025-10-28 11:57:38 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:57:38 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:57:38 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:57:38 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:57:38 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:57:38 | INFO     | bot_orchestrator:test_authentication:222 | 🧪 Testing authentication...
+2025-10-28 11:57:38 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:57:38 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 11:57:38 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:57:38 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:57:40 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:57:40 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:57:40 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:57:40 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:57:40 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:57:43 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:57:43 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:57:47 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:57:48 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:57:50 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 11:57:53 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 11:57:53 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 11:57:53 | SUCCESS  | bot_orchestrator:test_authentication:228 | ✅ Authentication test passed!
+2025-10-28 11:57:58 | INFO     | bot_orchestrator:cleanup:252 | 🧹 Cleaning up...
+2025-10-28 11:58:02 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 11:58:02 | INFO     | bot_orchestrator:cleanup:254 | ✅ Cleanup complete
+2025-10-28 11:59:43 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 11:59:43 | INFO     | __main__:test_spot_detection:113 | 🧪 Testing regular spot detection...
+2025-10-28 11:59:43 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 11:59:43 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 11:59:43 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 11:59:43 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 11:59:43 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 11:59:43 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 11:59:43 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 11:59:43 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 11:59:43 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 11:59:44 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 11:59:44 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 11:59:44 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 11:59:44 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 11:59:44 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 11:59:52 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 11:59:54 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 11:59:56 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 11:59:56 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 11:59:58 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:00:01 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:00:01 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:00:01 | INFO     | __main__:test_spot_detection:124 | 🔍 Searching for spots...
+2025-10-28 12:00:01 | INFO     | browser_automation:find_available_spots:223 | 🔍 Searching for available regular spots...
+2025-10-28 12:00:01 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\spot_search_regular_20251028_120001.png
+2025-10-28 12:00:02 | INFO     | browser_automation:_parse_spots_from_dom:271 | 📋 Found 0 spots from DOM
+2025-10-28 12:00:02 | INFO     | browser_automation:find_available_spots:237 | 🖼️  Attempting AI image recognition...
+2025-10-28 12:00:02 | INFO     | browser_automation:_detect_spots_from_image:282 | 🤖 Image-based detection not yet implemented
+2025-10-28 12:00:02 | INFO     | browser_automation:find_available_spots:241 | ✅ Found 0 available spots
+2025-10-28 12:00:02 | INFO     | __main__:test_spot_detection:127 | ✅ Found 0 spots:
+2025-10-28 12:00:12 | INFO     | bot_orchestrator:cleanup:252 | 🧹 Cleaning up...
+2025-10-28 12:00:12 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:00:12 | INFO     | bot_orchestrator:cleanup:254 | ✅ Cleanup complete
+2025-10-28 12:13:15 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:13:15 | INFO     | __main__:test_spot_detection:113 | 🧪 Testing regular spot detection...
+2025-10-28 12:13:15 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:13:15 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:13:15 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:13:15 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:13:15 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:13:15 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:13:15 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:13:15 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:13:15 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:13:18 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:13:18 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:13:18 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:13:18 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:13:18 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:13:21 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:13:22 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:13:25 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:13:26 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:13:28 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:13:31 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:13:31 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:13:31 | INFO     | __main__:test_spot_detection:124 | 🔍 Searching for spots...
+2025-10-28 12:13:31 | INFO     | browser_automation:find_available_spots:223 | 🔍 Searching for available regular spots...
+2025-10-28 12:13:32 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\spot_search_regular_20251028_121331.png
+2025-10-28 12:13:32 | INFO     | browser_automation:_parse_spots_from_dom:271 | 📋 Found 0 spots from DOM
+2025-10-28 12:13:32 | INFO     | browser_automation:find_available_spots:237 | 🖼️  Attempting AI image recognition...
+2025-10-28 12:13:32 | INFO     | browser_automation:_detect_spots_from_image:282 | 🤖 Image-based detection not yet implemented
+2025-10-28 12:13:32 | INFO     | browser_automation:find_available_spots:241 | ✅ Found 0 available spots
+2025-10-28 12:13:32 | INFO     | __main__:test_spot_detection:127 | ✅ Found 0 spots:
+2025-10-28 12:16:08 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:16:08 | INFO     | __main__:test_spot_detection:113 | 🧪 Testing regular spot detection...
+2025-10-28 12:16:08 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:16:08 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:16:08 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:16:08 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:16:08 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:16:08 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:16:08 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:16:08 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:16:08 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:16:11 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:16:11 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:16:11 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:16:11 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:16:11 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:16:20 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:16:21 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:16:23 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:16:24 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:16:26 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:16:29 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:16:29 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:16:29 | INFO     | __main__:test_spot_detection:124 | 🔍 Searching for spots...
+2025-10-28 12:16:29 | INFO     | browser_automation:find_available_spots:223 | 🔍 Searching for available regular spots...
+2025-10-28 12:16:29 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\spot_search_regular_20251028_121629.png
+2025-10-28 12:16:29 | INFO     | browser_automation:_parse_spots_from_dom:271 | 📋 Found 0 spots from DOM
+2025-10-28 12:16:29 | INFO     | browser_automation:find_available_spots:237 | 🖼️  Attempting AI image recognition...
+2025-10-28 12:16:29 | INFO     | browser_automation:_detect_spots_from_image:282 | 🤖 Image-based detection not yet implemented
+2025-10-28 12:16:29 | INFO     | browser_automation:find_available_spots:241 | ✅ Found 0 available spots
+2025-10-28 12:16:29 | INFO     | __main__:test_spot_detection:127 | ✅ Found 0 spots:
+2025-10-28 12:16:39 | INFO     | bot_orchestrator:cleanup:209 | 🧹 Cleaning up...
+2025-10-28 12:16:40 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:16:40 | INFO     | bot_orchestrator:cleanup:211 | ✅ Cleanup complete
+2025-10-28 12:18:46 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:18:46 | INFO     | __main__:test_spot_detection:113 | 🧪 Testing regular spot detection...
+2025-10-28 12:18:46 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:18:46 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:18:46 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:18:46 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:18:46 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:18:46 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:18:46 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:18:46 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:18:46 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:18:50 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:18:50 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:18:50 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:18:50 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:18:50 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:18:52 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:18:52 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:18:55 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:18:56 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:18:58 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:19:01 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:19:01 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:19:01 | INFO     | __main__:test_spot_detection:124 | 🔍 Searching for spots...
+2025-10-28 12:19:01 | INFO     | browser_automation:find_available_spots:223 | 🔍 Searching for available regular spots...
+2025-10-28 12:19:01 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\spot_search_regular_20251028_121901.png
+2025-10-28 12:19:01 | INFO     | browser_automation:_parse_spots_from_dom:271 | 📋 Found 0 spots from DOM
+2025-10-28 12:19:01 | INFO     | browser_automation:find_available_spots:237 | 🖼️  Attempting AI image recognition...
+2025-10-28 12:19:01 | INFO     | browser_automation:_detect_spots_from_image:282 | 🤖 Image-based detection not yet implemented
+2025-10-28 12:19:01 | INFO     | browser_automation:find_available_spots:241 | ✅ Found 0 available spots
+2025-10-28 12:19:01 | INFO     | __main__:test_spot_detection:127 | ✅ Found 0 spots:
+2025-10-28 12:19:11 | INFO     | bot_orchestrator:cleanup:209 | 🧹 Cleaning up...
+2025-10-28 12:19:12 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:19:12 | INFO     | bot_orchestrator:cleanup:211 | ✅ Cleanup complete
+2025-10-28 12:22:40 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:22:40 | INFO     | __main__:test_spot_detection:113 | 🧪 Testing regular spot detection...
+2025-10-28 12:22:40 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:22:40 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:22:40 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:22:40 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:22:40 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:22:40 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:22:40 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:22:40 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:22:40 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:22:43 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:22:43 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:22:43 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:22:43 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:22:43 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:22:45 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:22:45 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:22:48 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:22:49 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:22:51 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:22:54 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:22:54 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:22:54 | INFO     | __main__:test_spot_detection:124 | 🔍 Searching for spots...
+2025-10-28 12:22:54 | INFO     | browser_automation:find_available_spots:223 | 🔍 Searching for available regular spots...
+2025-10-28 12:22:54 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\spot_search_regular_20251028_122254.png
+2025-10-28 12:22:54 | INFO     | browser_automation:_parse_spots_from_dom:271 | 📋 Found 0 spots from DOM
+2025-10-28 12:22:54 | INFO     | browser_automation:find_available_spots:237 | 🖼️  Attempting AI image recognition...
+2025-10-28 12:22:54 | INFO     | browser_automation:_detect_spots_from_image:282 | 🤖 Image-based detection not yet implemented
+2025-10-28 12:22:54 | INFO     | browser_automation:find_available_spots:241 | ✅ Found 0 available spots
+2025-10-28 12:22:54 | INFO     | __main__:test_spot_detection:127 | ✅ Found 0 spots:
+2025-10-28 12:23:04 | INFO     | bot_orchestrator:cleanup:209 | 🧹 Cleaning up...
+2025-10-28 12:23:08 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:23:08 | INFO     | bot_orchestrator:cleanup:211 | ✅ Cleanup complete
+2025-10-28 12:29:09 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:29:09 | INFO     | __main__:run_reservation:48 | 🚀 Starting regular spot reservation...
+2025-10-28 12:29:09 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:29:09 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:29:09 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:29:09 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:29:09 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:29:09 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:29:09 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:29:09 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:29:09 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=True)...
+2025-10-28 12:29:12 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:29:12 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:29:12 | INFO     | bot_orchestrator:reserve_spot:146 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 12:29:12 | INFO     | bot_orchestrator:reserve_spot:151 | 🔐 Not authenticated, attempting login...
+2025-10-28 12:29:12 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:29:12 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:29:12 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:29:15 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:29:15 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:29:18 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:29:19 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:29:21 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:29:24 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:29:24 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:29:24 | INFO     | bot_orchestrator:reserve_spot:160 | 🚀 Using Elia reservation flow for regular spots...
+2025-10-28 12:29:24 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 12:29:26 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 12:29:38 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 12:29:38 | INFO     | elia_reservation_flow:navigate_to_target_date:43 | 📅 Setting date for regular reservation...
+2025-10-28 12:29:38 | INFO     | elia_reservation_flow:navigate_to_target_date:52 | 📅 Regular spot - navigating 14 days ahead...
+2025-10-28 12:29:40 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +1
+2025-10-28 12:29:42 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +2
+2025-10-28 12:29:45 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +3
+2025-10-28 12:29:47 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +4
+2025-10-28 12:29:50 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +5
+2025-10-28 12:29:53 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +6
+2025-10-28 12:29:55 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +7
+2025-10-28 12:29:58 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +8
+2025-10-28 12:30:00 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +9
+2025-10-28 12:30:03 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +10
+2025-10-28 12:30:05 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +11
+2025-10-28 12:30:08 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +12
+2025-10-28 12:30:10 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +13
+2025-10-28 12:30:13 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +14
+2025-10-28 12:30:14 | SUCCESS  | elia_reservation_flow:navigate_to_target_date:78 | ✅ Navigated to 14 days ahead
+2025-10-28 12:30:14 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:30:14 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:30:14 | WARNING  | elia_reservation_flow:full_reservation_flow:205 | ⚠️ No regular spots available
+2025-10-28 12:30:14 | ERROR    | bot_orchestrator:reserve_spot:168 | ❌ Failed to reserve regular spot
+2025-10-28 12:30:14 | ERROR    | __main__:run_reservation:60 | ❌ Regular spot reservation failed
+2025-10-28 12:30:14 | INFO     | bot_orchestrator:cleanup:209 | 🧹 Cleaning up...
+2025-10-28 12:30:14 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:30:14 | INFO     | bot_orchestrator:cleanup:211 | ✅ Cleanup complete
+2025-10-28 12:42:55 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:42:55 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:42:55 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:42:55 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:42:55 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:42:55 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:42:55 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:42:55 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:42:55 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:42:55 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:42:58 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:42:58 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:42:58 | ERROR    | __main__:main:369 | ❌ Fatal error: EliaParkingBot.reserve_spot() got an unexpected keyword argument 'multi_day'
+2025-10-28 12:53:52 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:53:52 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:53:52 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:53:52 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:53:52 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:53:52 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:53:52 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:53:52 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:53:52 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:53:52 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:53:56 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:53:56 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:53:56 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 12:53:56 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 12:53:56 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:53:56 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:53:56 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:54:00 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:54:04 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:54:06 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:54:07 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:54:09 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:54:12 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:54:12 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:54:12 | ERROR    | bot_orchestrator:reserve_spot:178 | ❌ Reservation workflow failed: cannot import name 'reserve_all_weekdays' from 'elia_reservation_flow' (C:\Users\tremblof\CascadeProjects\Parking bot\V4_EliaBot\elia_reservation_flow.py)
+2025-10-28 12:54:12 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 12:54:13 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:54:13 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 12:58:04 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 12:58:04 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 12:58:04 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 12:58:04 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 12:58:04 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 12:58:04 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 12:58:04 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 12:58:04 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 12:58:04 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 12:58:04 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 12:58:07 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 12:58:07 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 12:58:07 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 12:58:07 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 12:58:07 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 12:58:07 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 12:58:07 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 12:58:10 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 12:58:10 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 12:58:13 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 12:58:14 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 12:58:16 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 12:58:19 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 12:58:19 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 12:58:19 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 12:58:19 | INFO     | elia_reservation_flow:reserve_all_weekdays:292 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 12:58:19 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 12:58:20 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 12:58:28 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 12:58:28 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 12:58:28 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:28 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:28 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-10-29
+2025-10-28 12:58:28 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-10-30 Thursday...
+2025-10-28 12:58:30 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:30 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:30 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-10-30
+2025-10-28 12:58:30 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-10-31 Friday...
+2025-10-28 12:58:32 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:32 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-10-31
+2025-10-28 12:58:32 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:308 | ⏭️ Skipping weekend: 2025-11-01 Saturday
+2025-10-28 12:58:32 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:308 | ⏭️ Skipping weekend: 2025-11-02 Sunday
+2025-10-28 12:58:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-03 Monday...
+2025-10-28 12:58:34 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:34 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-03
+2025-10-28 12:58:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-04 Tuesday...
+2025-10-28 12:58:36 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:36 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:36 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-04
+2025-10-28 12:58:36 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-05 Wednesday...
+2025-10-28 12:58:38 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:38 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:38 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-05
+2025-10-28 12:58:38 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-06 Thursday...
+2025-10-28 12:58:39 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:40 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-06
+2025-10-28 12:58:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-07 Friday...
+2025-10-28 12:58:41 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:42 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:42 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-07
+2025-10-28 12:58:42 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:308 | ⏭️ Skipping weekend: 2025-11-08 Saturday
+2025-10-28 12:58:42 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:308 | ⏭️ Skipping weekend: 2025-11-09 Sunday
+2025-10-28 12:58:42 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-10 Monday...
+2025-10-28 12:58:43 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:43 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:43 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-10
+2025-10-28 12:58:43 | INFO     | elia_reservation_flow:reserve_all_weekdays:311 | 📅 Trying 2025-11-11 Tuesday...
+2025-10-28 12:58:45 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 12:58:45 | WARNING  | elia_reservation_flow:find_available_spots:137 | ⚠️ No available regular spots found
+2025-10-28 12:58:45 | INFO     | elia_reservation_flow:reserve_all_weekdays:343 | ❌ No spots available for 2025-11-11
+2025-10-28 12:58:45 | WARNING  | elia_reservation_flow:reserve_all_weekdays:349 | ⚠️ No spots could be reserved for any weekday
+2025-10-28 12:58:45 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 12:58:45 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 12:58:46 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 12:58:46 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 13:06:08 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 13:06:08 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 13:06:08 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 13:06:08 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 13:06:08 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 13:06:08 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 13:06:08 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 13:06:08 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 13:06:08 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 13:06:08 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 13:06:11 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 13:06:11 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 13:06:11 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 13:06:11 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 13:06:11 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 13:06:11 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 13:06:11 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 13:06:13 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 13:06:14 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 13:06:17 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 13:06:18 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 13:06:20 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 13:06:23 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 13:06:23 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 13:06:23 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 13:06:23 | INFO     | elia_reservation_flow:reserve_all_weekdays:358 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 13:06:23 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 13:06:24 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 13:06:31 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 13:06:31 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 13:06:31 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:31 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:32 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:32 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:32 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+13:00
+18:00
+2025-10-28 13:06:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-10-29
+2025-10-28 13:06:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-10-30 Thursday...
+2025-10-28 13:06:33 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:33 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:34 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:34 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:34 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-10-30
+2025-10-28 13:06:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-10-31 Friday...
+2025-10-28 13:06:35 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:35 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:36 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:36 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:36 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:36 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-10-31
+2025-10-28 13:06:36 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:374 | ⏭️ Skipping weekend: 2025-11-01 Saturday
+2025-10-28 13:06:36 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:374 | ⏭️ Skipping weekend: 2025-11-02 Sunday
+2025-10-28 13:06:36 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-03 Monday...
+2025-10-28 13:06:37 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:37 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:37 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:37 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:37 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:37 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-03
+2025-10-28 13:06:37 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-04 Tuesday...
+2025-10-28 13:06:39 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:39 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:39 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:39 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:39 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:39 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-04
+2025-10-28 13:06:39 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-05 Wednesday...
+2025-10-28 13:06:41 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:41 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:41 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:41 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:41 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:41 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-05
+2025-10-28 13:06:41 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-06 Thursday...
+2025-10-28 13:06:43 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:43 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:43 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:43 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:43 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:43 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-06
+2025-10-28 13:06:43 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-07 Friday...
+2025-10-28 13:06:45 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:45 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:45 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:06:45 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:06:45 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:06:45 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-07
+2025-10-28 13:06:45 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:374 | ⏭️ Skipping weekend: 2025-11-08 Saturday
+2025-10-28 13:06:45 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:374 | ⏭️ Skipping weekend: 2025-11-09 Sunday
+2025-10-28 13:06:45 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-10 Monday...
+2025-10-28 13:06:47 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:06:47 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:06:47 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:09:53 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:09:53 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:09:53 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-10
+2025-10-28 13:09:53 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | 📅 Trying 2025-11-11 Tuesday...
+2025-10-28 13:09:55 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:09:55 | INFO     | elia_reservation_flow:find_available_spots:110 | 📋 Sample elements on page: []
+2025-10-28 13:09:55 | WARNING  | elia_reservation_flow:find_available_spots:186 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:09:55 | WARNING  | elia_reservation_flow:find_available_spots:200 | ⚠️ No regular spots found at all
+2025-10-28 13:09:55 | DEBUG    | elia_reservation_flow:find_available_spots:203 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:09:55 | INFO     | elia_reservation_flow:reserve_all_weekdays:409 | ❌ No spots available for 2025-11-11
+2025-10-28 13:09:55 | WARNING  | elia_reservation_flow:reserve_all_weekdays:415 | ⚠️ No spots could be reserved for any weekday
+2025-10-28 13:09:55 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 13:09:55 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 13:09:56 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 13:09:56 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 13:10:03 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 13:10:03 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 13:10:03 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 13:10:03 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 13:10:03 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 13:10:03 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 13:10:03 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 13:10:03 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 13:10:03 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 13:10:03 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 13:10:06 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 13:10:06 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 13:10:06 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 13:10:06 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 13:10:06 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 13:10:06 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 13:10:06 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 13:10:15 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 13:10:16 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 13:10:18 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 13:10:19 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 13:10:21 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 13:10:24 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 13:10:24 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 13:10:24 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 13:10:24 | INFO     | elia_reservation_flow:reserve_all_weekdays:371 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 13:10:24 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 13:10:24 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 13:10:32 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 13:10:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 13:10:32 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:10:34 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:10:34 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:10:34 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+13:15
+18:00
+2025-10-28 13:10:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-10-29
+2025-10-28 13:10:34 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-10-30 Thursday...
+2025-10-28 13:10:35 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:10:37 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:10:37 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:10:37 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:10:37 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-10-30
+2025-10-28 13:10:37 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-10-31 Friday...
+2025-10-28 13:10:39 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:10:41 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:10:55 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:10:55 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:10:55 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-10-31
+2025-10-28 13:10:55 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:387 | ⏭️ Skipping weekend: 2025-11-01 Saturday
+2025-10-28 13:10:55 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:387 | ⏭️ Skipping weekend: 2025-11-02 Sunday
+2025-10-28 13:10:55 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-03 Monday...
+2025-10-28 13:10:57 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:10:58 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:10:58 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:10:58 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:10:58 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-03
+2025-10-28 13:10:58 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-04 Tuesday...
+2025-10-28 13:10:59 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:00 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:01 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:01 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:01 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-04
+2025-10-28 13:11:01 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-05 Wednesday...
+2025-10-28 13:11:02 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:04 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:04 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:04 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:04 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-05
+2025-10-28 13:11:04 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-06 Thursday...
+2025-10-28 13:11:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:07 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:07 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:07 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:07 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-06
+2025-10-28 13:11:07 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-07 Friday...
+2025-10-28 13:11:09 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:11 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:11 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:11 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:11 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-07
+2025-10-28 13:11:11 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:387 | ⏭️ Skipping weekend: 2025-11-08 Saturday
+2025-10-28 13:11:11 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:387 | ⏭️ Skipping weekend: 2025-11-09 Sunday
+2025-10-28 13:11:11 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-10 Monday...
+2025-10-28 13:11:12 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:14 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:14 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:14 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:14 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-10
+2025-10-28 13:11:14 | INFO     | elia_reservation_flow:reserve_all_weekdays:390 | 📅 Trying 2025-11-11 Tuesday...
+2025-10-28 13:11:16 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:11:18 | WARNING  | elia_reservation_flow:find_available_spots:199 | ⚠️ No green/clickable spots found. Trying first visible spot...
+2025-10-28 13:11:18 | WARNING  | elia_reservation_flow:find_available_spots:213 | ⚠️ No regular spots found at all
+2025-10-28 13:11:18 | DEBUG    | elia_reservation_flow:find_available_spots:216 | Page text sample: Plan interactif
+612 St-Jacques
+LT
+En direct
+Stationnement
+6:00
+18:00
+2025-10-28 13:11:18 | INFO     | elia_reservation_flow:reserve_all_weekdays:422 | ❌ No spots available for 2025-11-11
+2025-10-28 13:11:18 | WARNING  | elia_reservation_flow:reserve_all_weekdays:428 | ⚠️ No spots could be reserved for any weekday
+2025-10-28 13:11:18 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 13:11:18 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 13:11:19 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 13:11:19 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 13:18:30 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 13:18:30 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 13:18:30 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 13:18:30 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 13:18:30 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 13:18:30 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 13:18:30 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 13:18:30 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 13:18:30 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 13:18:30 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 13:18:33 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 13:18:33 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 13:18:33 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 13:18:33 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 13:18:33 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 13:18:33 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 13:18:33 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 13:18:35 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 13:18:36 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 13:18:40 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 13:18:40 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 13:18:42 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 13:18:45 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 13:18:45 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 13:18:45 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 13:18:45 | INFO     | elia_reservation_flow:reserve_all_weekdays:326 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 13:18:45 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 13:18:46 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 13:18:54 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 13:18:54 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 13:18:54 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:18:54 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:18:54 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:18:54 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-10-29
+2025-10-28 13:18:54 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-10-30 Thursday...
+2025-10-28 13:18:56 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:18:56 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:18:56 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:18:56 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-10-30
+2025-10-28 13:18:56 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-10-31 Friday...
+2025-10-28 13:18:57 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:18:58 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:18:58 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:18:58 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-10-31
+2025-10-28 13:18:58 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:342 | ⏭️ Skipping weekend: 2025-11-01 Saturday
+2025-10-28 13:18:58 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:342 | ⏭️ Skipping weekend: 2025-11-02 Sunday
+2025-10-28 13:18:58 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-03 Monday...
+2025-10-28 13:18:59 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:18:59 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:18:59 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:18:59 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-03
+2025-10-28 13:18:59 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-04 Tuesday...
+2025-10-28 13:19:01 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:01 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:19:01 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:19:01 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-04
+2025-10-28 13:19:01 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-05 Wednesday...
+2025-10-28 13:19:03 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:03 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:19:03 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:19:03 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-05
+2025-10-28 13:19:03 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-06 Thursday...
+2025-10-28 13:19:04 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:05 | INFO     | elia_reservation_flow:find_available_spots:155 | 🟢 Found 0 green circles with spots: []
+2025-10-28 13:19:05 | ERROR    | elia_reservation_flow:find_available_spots:167 | ❌ No available spots found!
+2025-10-28 13:19:05 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-06
+2025-10-28 13:19:05 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-07 Friday...
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:06 | ERROR    | elia_reservation_flow:find_available_spots:172 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-07
+2025-10-28 13:19:06 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:342 | ⏭️ Skipping weekend: 2025-11-08 Saturday
+2025-10-28 13:19:06 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:342 | ⏭️ Skipping weekend: 2025-11-09 Sunday
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-10 Monday...
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:06 | ERROR    | elia_reservation_flow:find_available_spots:172 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-10
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-11 Tuesday...
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:06 | ERROR    | elia_reservation_flow:find_available_spots:172 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-11
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-12 Wednesday...
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:06 | ERROR    | elia_reservation_flow:find_available_spots:172 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-12
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:345 | 📅 Trying 2025-11-13 Thursday...
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:19:06 | ERROR    | elia_reservation_flow:find_available_spots:172 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:19:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:377 | ❌ No spots available for 2025-11-13
+2025-10-28 13:19:06 | WARNING  | elia_reservation_flow:reserve_all_weekdays:383 | ⚠️ No spots could be reserved for any weekday
+2025-10-28 13:19:06 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 13:19:06 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 13:22:45 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 13:22:45 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 13:22:45 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 13:22:45 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 13:22:45 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 13:22:45 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 13:22:45 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 13:22:45 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 13:22:45 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 13:22:45 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 13:22:49 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 13:22:49 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 13:22:49 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 13:22:49 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 13:22:49 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 13:22:49 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 13:22:49 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 13:22:51 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 13:22:52 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 13:22:55 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 13:22:56 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 13:22:58 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 13:23:01 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 13:23:01 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 13:23:01 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 13:23:01 | INFO     | elia_reservation_flow:reserve_all_weekdays:344 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 13:23:01 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 13:23:01 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 13:23:09 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:reserve_all_weekdays:363 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 13:23:09 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 13:23:09 | INFO     | elia_reservation_flow:reserve_all_weekdays:385 | ✅ Found 1 spots for 2025-10-29
+2025-10-28 13:23:09 | ERROR    | elia_reservation_flow:reserve_all_weekdays:405 | ❌ Multi-day reservation failed: name 'reserve_spot' is not defined
+2025-10-28 13:23:09 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 13:23:09 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 13:23:10 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 13:23:10 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 13:24:49 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 13:24:49 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 13:24:49 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 13:24:49 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 13:24:49 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 13:24:49 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 13:24:49 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 13:24:49 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 13:24:49 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 13:24:49 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=False)...
+2025-10-28 13:24:52 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 13:24:52 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 13:24:52 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 13:24:52 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 13:24:52 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 13:24:52 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 13:24:52 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 13:24:56 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 13:24:56 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 13:25:00 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 13:25:00 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 13:25:02 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 13:25:06 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 13:25:06 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 13:25:06 | INFO     | bot_orchestrator:reserve_spot:162 | 🚀 Using multi-day Elia reservation flow...
+2025-10-28 13:25:06 | INFO     | elia_reservation_flow:reserve_all_weekdays:388 | 🎯 Starting multi-day reservation for regular spots...
+2025-10-28 13:25:06 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 13:25:06 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 13:25:15 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-10-29 Wednesday...
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 13:25:15 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:reserve_all_weekdays:429 | ✅ Found 1 spots for 2025-10-29
+2025-10-28 13:25:15 | INFO     | elia_reservation_flow:reserve_spot:246 | 🎯 Attempting to reserve P • 14...
+2025-10-28 13:25:18 | ERROR    | elia_reservation_flow:reserve_spot:254 | ❌ Failed to click P • 14: Page.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("text=\"P • 14\"")
+
+2025-10-28 13:25:19 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-10-30 Thursday...
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 13:25:26 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:reserve_all_weekdays:429 | ✅ Found 1 spots for 2025-10-30
+2025-10-28 13:25:26 | INFO     | elia_reservation_flow:reserve_spot:246 | 🎯 Attempting to reserve P • 14...
+2025-10-28 13:25:29 | ERROR    | elia_reservation_flow:reserve_spot:254 | ❌ Failed to click P • 14: Page.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("text=\"P • 14\"")
+
+2025-10-28 13:25:30 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-10-31 Friday...
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 13:25:32 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:reserve_all_weekdays:429 | ✅ Found 1 spots for 2025-10-31
+2025-10-28 13:25:32 | INFO     | elia_reservation_flow:reserve_spot:246 | 🎯 Attempting to reserve P • 14...
+2025-10-28 13:25:35 | ERROR    | elia_reservation_flow:reserve_spot:254 | ❌ Failed to click P • 14: Page.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("text=\"P • 14\"")
+
+2025-10-28 13:25:36 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:404 | ⏭️ Skipping weekend: 2025-11-01 Saturday
+2025-10-28 13:25:36 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:404 | ⏭️ Skipping weekend: 2025-11-02 Sunday
+2025-10-28 13:25:36 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-03 Monday...
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 13:25:38 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:reserve_all_weekdays:429 | ✅ Found 1 spots for 2025-11-03
+2025-10-28 13:25:38 | INFO     | elia_reservation_flow:reserve_spot:246 | 🎯 Attempting to reserve P • 14...
+2025-10-28 13:25:39 | ERROR    | elia_reservation_flow:reserve_spot:254 | ❌ Failed to click P • 14: Page.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator("text=\"P • 14\"")
+
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-04 Tuesday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-04
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-05 Wednesday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-05
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-06 Thursday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-06
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-07 Friday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-07
+2025-10-28 13:25:40 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:404 | ⏭️ Skipping weekend: 2025-11-08 Saturday
+2025-10-28 13:25:40 | DEBUG    | elia_reservation_flow:reserve_all_weekdays:404 | ⏭️ Skipping weekend: 2025-11-09 Sunday
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-10 Monday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-10
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-11 Tuesday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-11
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-12 Wednesday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-12
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:407 | 📅 Trying 2025-11-13 Thursday...
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 13:25:40 | ERROR    | elia_reservation_flow:find_available_spots:240 | ❌ Spot search failed: Page.screenshot: Target page, context or browser has been closed
+2025-10-28 13:25:40 | INFO     | elia_reservation_flow:reserve_all_weekdays:439 | ❌ No spots available for 2025-11-13
+2025-10-28 13:25:40 | WARNING  | elia_reservation_flow:reserve_all_weekdays:445 | ⚠️ No spots could be reserved for any weekday
+2025-10-28 13:25:40 | ERROR    | bot_orchestrator:reserve_spot:173 | ❌ Failed to reserve regular spot
+2025-10-28 13:25:40 | INFO     | bot_orchestrator:cleanup:214 | 🧹 Cleaning up...
+2025-10-28 13:25:40 | INFO     | browser_automation:close:365 | 🔚 Browser closed
+2025-10-28 13:25:40 | INFO     | bot_orchestrator:cleanup:216 | ✅ Cleanup complete
+2025-10-28 16:40:30 | INFO     | __main__:setup_logging:43 | 📝 Logging configured
+2025-10-28 16:40:30 | INFO     | __main__:run_reservation:48 | 🚀 Starting regular spot reservation...
+2025-10-28 16:40:30 | INFO     | auth_manager:__init__:37 | 🔐 AuthenticationManager initialized
+2025-10-28 16:40:30 | INFO     | browser_automation:__init__:40 | 🌐 BrowserAutomation initialized
+2025-10-28 16:40:30 | INFO     | spot_detector:__init__:29 | 🤖 SpotDetector initialized
+2025-10-28 16:40:30 | INFO     | notifier:__init__:32 | 📢 Notifier initialized with channels: None
+2025-10-28 16:40:30 | INFO     | bot_orchestrator:__init__:37 | 🤖 EliaParkingBot initialized
+2025-10-28 16:40:30 | INFO     | bot_orchestrator:initialize:41 | 🚀 Initializing bot...
+2025-10-28 16:40:30 | INFO     | auth_manager:load_session:100 | ✅ Session data loaded successfully
+2025-10-28 16:40:30 | INFO     | bot_orchestrator:initialize:50 | 🔐 Authentication required
+2025-10-28 16:40:30 | INFO     | browser_automation:initialize:44 | 🚀 Launching browser (headless=True)...
+2025-10-28 16:40:37 | SUCCESS  | browser_automation:initialize:76 | ✅ Browser initialized with persistent profile
+2025-10-28 16:40:37 | SUCCESS  | bot_orchestrator:initialize:55 | ✅ Bot initialized
+2025-10-28 16:40:37 | INFO     | bot_orchestrator:reserve_spot:147 | 🎯 Starting reservation workflow for regular spots...
+2025-10-28 16:40:37 | INFO     | bot_orchestrator:reserve_spot:152 | 🔐 Not authenticated, attempting login...
+2025-10-28 16:40:37 | INFO     | bot_orchestrator:authenticate:66 | 🔐 Starting authentication process...
+2025-10-28 16:40:37 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 1/5
+2025-10-28 16:40:37 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 16:40:40 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 16:40:40 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 16:40:42 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 16:40:42 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 16:40:44 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 16:40:47 | INFO     | bot_orchestrator:authenticate:97 | 🔐 Authentication required...
+2025-10-28 16:40:47 | INFO     | browser_automation:handle_microsoft_sso:127 | 🔐 Handling Microsoft SSO...
+2025-10-28 16:40:47 | INFO     | browser_automation:handle_microsoft_sso:131 | 📧 Microsoft login page detected
+2025-10-28 16:40:48 | INFO     | browser_automation:handle_microsoft_sso:139 | ✅ Email submitted
+2025-10-28 16:41:00 | ERROR    | browser_automation:handle_microsoft_sso:152 | ❌ Microsoft SSO failed: Timeout 10000ms exceeded.
+2025-10-28 16:41:02 | DEBUG    | browser_automation:take_screenshot:330 | 📸 Screenshot saved: screenshots\error_sso_20251028_164100.png
+2025-10-28 16:41:02 | ERROR    | bot_orchestrator:authenticate:109 | ❌ Authentication attempt 1 failed: Microsoft SSO failed
+2025-10-28 16:41:04 | INFO     | bot_orchestrator:authenticate:113 | ⏳ Retrying in 5 seconds...
+2025-10-28 16:41:09 | INFO     | bot_orchestrator:authenticate:78 | 🎯 Authentication attempt 2/5
+2025-10-28 16:41:09 | INFO     | browser_automation:navigate_to_elia:82 | 📍 Navigating to Elia...
+2025-10-28 16:41:13 | INFO     | browser_automation:navigate_to_elia:89 | 🏢 Entering organization: quebecor
+2025-10-28 16:41:14 | INFO     | browser_automation:navigate_to_elia:94 | ✅ Organization submitted
+2025-10-28 16:41:16 | INFO     | browser_automation:navigate_to_elia:106 | 📧 Entering email: louis-felix.tremblay@videotron.com
+2025-10-28 16:41:16 | INFO     | browser_automation:navigate_to_elia:111 | ✅ Email submitted
+2025-10-28 16:41:18 | SUCCESS  | browser_automation:navigate_to_elia:116 | ✅ Navigation to Elia complete
+2025-10-28 16:41:21 | SUCCESS  | bot_orchestrator:authenticate:90 | ✅ Already logged in! Session persisted.
+2025-10-28 16:41:21 | INFO     | auth_manager:save_session:76 | 💾 Session data saved and encrypted
+2025-10-28 16:41:21 | INFO     | bot_orchestrator:reserve_spot:165 | 🚀 Using single-day Elia reservation flow...
+2025-10-28 16:41:21 | INFO     | elia_reservation_flow:navigate_to_parking_map:13 | 📍 Navigating to parking map...
+2025-10-28 16:41:22 | INFO     | elia_reservation_flow:navigate_to_parking_map:19 | 🚀 Navigating to https://app.elia.io/floor-plan
+2025-10-28 16:41:30 | SUCCESS  | elia_reservation_flow:navigate_to_parking_map:29 | ✅ Parking map loaded successfully
+2025-10-28 16:41:30 | INFO     | elia_reservation_flow:navigate_to_target_date:43 | 📅 Setting date for regular reservation...
+2025-10-28 16:41:30 | INFO     | elia_reservation_flow:navigate_to_target_date:52 | 📅 Regular spot - navigating 15 days ahead...
+2025-10-28 16:41:33 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +1
+2025-10-28 16:41:35 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +2
+2025-10-28 16:41:38 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +3
+2025-10-28 16:41:40 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +4
+2025-10-28 16:41:43 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +5
+2025-10-28 16:41:45 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +6
+2025-10-28 16:41:48 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +7
+2025-10-28 16:41:51 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +8
+2025-10-28 16:41:54 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +9
+2025-10-28 16:41:56 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +10
+2025-10-28 16:41:59 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +11
+2025-10-28 16:42:01 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +12
+2025-10-28 16:42:04 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +13
+2025-10-28 16:42:06 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +14
+2025-10-28 16:42:09 | DEBUG    | elia_reservation_flow:navigate_to_target_date:68 |   Day +15
+2025-10-28 16:42:10 | SUCCESS  | elia_reservation_flow:navigate_to_target_date:78 | ✅ Navigated to 14 days ahead
+2025-10-28 16:42:21 | INFO     | elia_reservation_flow:find_available_spots:90 | 🔍 Searching for regular spots...
+2025-10-28 16:42:21 | INFO     | elia_reservation_flow:find_available_spots:131 | 📊 SVG Debug: {'svgCount': 25, 'circleCount': 0, 'pathCount': 28, 'rectCount': 3, 'greenSamples': [{'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}, {'type': 'path', 'fill': '#FF5837', 'stroke': 'none', 'className': {}}]}
+2025-10-28 16:42:21 | INFO     | elia_reservation_flow:find_available_spots:220 | 🔍 Detection results: []
+2025-10-28 16:42:21 | INFO     | elia_reservation_flow:find_available_spots:223 | 🔍 Detection results: []
+2025-10-28 16:42:21 | WARNING  | elia_reservation_flow:find_available_spots:234 | ⚠️ No spots detected. Trying known available spot P • 14
+2025-10-28 16:42:21 | INFO     | elia_reservation_flow:reserve_spot:246 | 🎯 Attempting to reserve P • 14...
