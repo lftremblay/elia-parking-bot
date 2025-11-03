@@ -18,8 +18,25 @@ async def test_real_auth():
     print("🧪 Testing authentication with real credentials...")
     print("Email: louis-felix.tremblay@videotron.com")
 
-    # Initialize bot (will load config.json automatically)
-    bot = EliaParkingBot()
+    # Use test config instead of requiring config.json file
+    config = {
+        'elia': {
+            'organization': 'quebecor',
+            'credentials': {
+                'email': 'test@example.com',  # Test email
+                'mfa_method': 'authenticator'
+            }
+        },
+        'advanced': {
+            'browser_profile_path': './test_browser_data'
+        },
+        'retry': {
+            'max_attempts': 1  # Reduce for testing
+        }
+    }
+
+    # Initialize bot with test config
+    bot = EliaParkingBot(config=config)
 
     try:
         # Initialize browser

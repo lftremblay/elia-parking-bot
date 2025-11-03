@@ -180,7 +180,14 @@ async def test_auth_manager():
     from dotenv import load_dotenv
     load_dotenv()
 
-    auth = AuthenticationManager()
+    # Use test config for authentication manager
+    config = {
+        'mfa': {
+            'totp_secret': '5swdv5gnqktkrytj'  # Test TOTP secret
+        }
+    }
+
+    auth = AuthenticationManager(config=config)
 
     # Test TOTP generation
     print("🔢 Testing TOTP code generation...")
