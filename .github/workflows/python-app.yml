@@ -32,7 +32,7 @@ jobs:
         
         # Full linting as informational only (won't fail the build)
         echo "=== Full linting results (informational) ==="
-        flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv* || echo "Style warnings found (non-blocking)"
+        flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv* || true
     
     - name: Run tests
       run: |
