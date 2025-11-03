@@ -8,7 +8,6 @@ import numpy as np
 from pathlib import Path
 from typing import List, Dict, Tuple
 from loguru import logger
-from PIL import Image
 
 
 class SpotDetector:
@@ -135,8 +134,8 @@ class SpotDetector:
             # This would use OCR - for now, we'll use template matching
             
             # Look for circular/rectangular regions that might be spots
-            # Using edge detection
-            edges = cv2.Canny(gray, 50, 150)
+            # Using edge detection (currently not used)
+            # edges = cv2.Canny(gray, 50, 150)
             
             # Find circles (potential spot indicators)
             circles = cv2.HoughCircles(

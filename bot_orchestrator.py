@@ -5,8 +5,6 @@ Coordinates authentication, spot detection, and reservation
 
 import asyncio
 import json
-from pathlib import Path
-from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 from loguru import logger
 

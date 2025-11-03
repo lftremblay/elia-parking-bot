@@ -7,7 +7,7 @@ import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict
 from loguru import logger
 
 try:
@@ -407,7 +407,6 @@ class BrowserAutomation:
                 await self.page.fill(email_selector, "")
                 await self.page.type(email_selector, email, delay=75)
                 logger.info(f"✅ Email entered using selector: {email_selector}")
-
                 submit_selector = await self._wait_for_first_selector(submit_selectors, timeout=3000, state='visible')
                 if submit_selector:
                     await self.page.click(submit_selector)
@@ -1101,9 +1100,6 @@ class BrowserAutomation:
             # Get localStorage
             local_storage = await self.page.evaluate('() => JSON.stringify(localStorage)')
             storage_data = json.loads(local_storage)
-            
-            # Get cookies
-            cookies = await self.context.cookies()
             
             # Look for tokens
             tokens = {}
