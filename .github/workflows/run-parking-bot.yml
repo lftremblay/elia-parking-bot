@@ -1,0 +1,86 @@
+name: Run Parking Bot
+
+on:
+  workflow_dispatch:
+    inputs:
+      spot_type:
+        description: 'Type of parking spot to reserve'
+        required: true
+        default: 'regular'
+        type: choice
+        options:
+        - regular
+        - executive
+      test_mode:
+        description: 'Run in test mode (no actual reservation)'
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
+    - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
+  push:
+    branches: [ 'master' ]  # Also run on pushes to master for testing
+
+jobs:
+  reserve-parking:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Playwright browsers
+      run: playwright install chromium
+
+    - name: Create config directory
+      run: |
+        New-Item -ItemType Directory -Force -Path config
+        New-Item -ItemType Directory -Force -Path logs
+        New-Item -ItemType Directory -Force -Path screenshots
+        New-Item -ItemType Directory -Force -Path session_data
+
+    - name: Run Parking Reservation
+      env:
+        ELIA_PASSWORD: ${{ secrets.ELIA_PASSWORD }}
+        TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        # Determine spot type based on schedule or manual trigger
+        if ($env:GITHUB_EVENT_NAME -eq 'schedule' -and $env:GITHUB_EVENT_SCHEDULE -eq '0 0 * * 1-5') {
+          $spotType = 'executive'
+          Write-Host "Scheduled executive spot reservation"
+        } elseif ($env:GITHUB_EVENT_NAME -eq 'schedule' -and $env:GITHUB_EVENT_SCHEDULE -eq '0 6 * * 1-5') {
+          $spotType = 'regular'
+          Write-Host "Scheduled regular spot reservation"
+        } elseif ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+          $spotType = '${{ inputs.spot_type }}'
+          Write-Host "Manual trigger for $spotType spot"
+        } else {
+          $spotType = 'regular'
+          Write-Host "Defaulting to regular spot"
+        }
+
+        # Run the bot
+        python main.py --reserve $spotType
+
+    - name: Upload logs and screenshots on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: parking-bot-logs-${{ github.run_number }}
+        path: |
+          logs/
+          screenshots/
+          session_data/
