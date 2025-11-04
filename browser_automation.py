@@ -550,7 +550,7 @@ class BrowserAutomation:
                     'a:has-text("Use a different verification option")',
                     'a:has-text("Sign in another way")'
                 ]
-                ]
+
 
                 # Check for and handle any MFA approval buttons first
                 try:
@@ -805,10 +805,10 @@ class BrowserAutomation:
                                 }
                             """)
                             
-                            logger.info(f"🔍 Login page analysis: {login_form_elements}")
+                            logger.info(f"🔍 Login page analysis: {has_login_form}")
                             
                             # If we see a login form with email/password after MFA, we're likely in a loop
-                            if login_form_elements.get('hasLoginForm') and login_form_elements.get('hasEmailField'):
+                            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
                                 logger.error("❌ Detected login form after MFA - likely a redirect loop")
                                 
                                 # Try to get any error messages
