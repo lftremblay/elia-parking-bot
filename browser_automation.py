@@ -567,6 +567,7 @@ class BrowserAutomation:
 
     async def handle_mfa(self, method: str = "authenticator", max_retries: int = 3, email: str = None) -> bool:
         """Handle MFA challenge with robust retry logic and improved Microsoft SSO integration"""
+        logger.info(f"🔍 MFA called with email: {email is not None and '***' or 'None'}")
         if not PYOTP_AVAILABLE:
             logger.error("❌ pyotp is required for MFA handling. Install with: pip install pyotp")
             return False
@@ -579,17 +580,22 @@ class BrowserAutomation:
                 email_input = await self.page.query_selector('input[type="email"]')
                 if email_input and email:
                     logger.warning("📧 Unexpected email prompt during MFA - re-entering email")
-                    await email_input.fill("")
-                    await email_input.type(email, delay=75)
-                    await self.page.keyboard.press('Enter')
-                    logger.info("✅ Re-entered email during MFA")
-                    await asyncio.sleep(3)
-                    
-                    # Check if we're back to password prompt
-                    password_input = await self.page.query_selector('input[type="password"]')
-                    if password_input:
-                        logger.info("🔄 Back to password prompt after email re-entry")
-                        continue  # Restart MFA attempt
+                    logger.info(f"🔍 Email value check: {repr(email)}")
+                    try:
+                        await email_input.fill("")
+                        await email_input.type(email, delay=75)
+                        await self.page.keyboard.press('Enter')
+                        logger.info("✅ Re-entered email during MFA")
+                        await asyncio.sleep(3)
+                        
+                        # Check if we're back to password prompt
+                        password_input = await self.page.query_selector('input[type="password"]')
+                        if password_input:
+                            logger.info("🔄 Back to password prompt after email re-entry")
+                            continue  # Restart MFA attempt
+                    except Exception as email_error:
+                        logger.error(f"❌ Error re-entering email: {email_error}")
+                        continue
 
                 # Generate and enter TOTP code
                 totp = pyotp.TOTP(self.auth_manager.totp_secret)
