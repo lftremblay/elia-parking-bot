@@ -1,4 +1,4 @@
-name: Run Parking Bot
+name: Manual Parking Bot (Windows)
 
 on:
   workflow_dispatch:
@@ -16,11 +16,6 @@ on:
         required: false
         default: true
         type: boolean
-  schedule:
-    - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
-    - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
-  push:
-    branches: [ 'master' ]  # Also run on pushes to master for testing
 
 jobs:
   reserve-parking:
