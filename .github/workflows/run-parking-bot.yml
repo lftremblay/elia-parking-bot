@@ -34,13 +34,12 @@ jobs:
 
     - name: Create config.json
       run: |
-        cat > config.json << 'EOF'
-        {
+        printf '{
           "elia": {
             "organization": "quebecor",
             "url": "https://app.elia.io/",
             "credentials": {
-              "email": "${ELIA_EMAIL}",
+              "email": "%s",
               "use_sso": true,
               "mfa_method": "authenticator"
             }
@@ -67,9 +66,9 @@ jobs:
             "aggressive_refresh": true
           },
           "notifications": {
-            "discord_webhook": "${DISCORD_WEBHOOK_URL}",
-            "telegram_bot_token": "${TELEGRAM_BOT_TOKEN}",
-            "telegram_chat_id": "${TELEGRAM_CHAT_ID}",
+            "discord_webhook": "%s",
+            "telegram_bot_token": "%s",
+            "telegram_chat_id": "%s",
             "email": {
               "enabled": false
             }
@@ -82,14 +81,7 @@ jobs:
             "ai_spot_detection": true,
             "use_api_when_possible": true
           }
-        }
-        EOF
-        
-        # Replace variables in config.json
-        sed -i "s/\${ELIA_EMAIL}/$ELIA_EMAIL/g" config.json
-        sed -i "s/\${DISCORD_WEBHOOK_URL}/$DISCORD_WEBHOOK_URL/g" config.json
-        sed -i "s/\${TELEGRAM_BOT_TOKEN}/$TELEGRAM_BOT_TOKEN/g" config.json
-        sed -i "s/\${TELEGRAM_CHAT_ID}/$TELEGRAM_CHAT_ID/g" config.json
+        }\n' "$ELIA_EMAIL" "$DISCORD_WEBHOOK_URL" "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID" > config.json
         
         echo "Created config.json"
 
