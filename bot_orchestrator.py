@@ -118,7 +118,7 @@ class EliaParkingBot:
                     mfa_method = self.config.get('elia', {}).get('credentials', {}).get('mfa_method', 'authenticator')
                     if mfa_method != 'none':
                         logger.info(f"🔢 Handling MFA ({mfa_method})...")
-                        mfa_success = await self.browser.handle_mfa(mfa_method, max_retries=3)
+                        mfa_success = await self.browser.handle_mfa(mfa_method, max_retries=3, email=email)
                         if not mfa_success:
                             raise Exception("MFA failed")
                         
