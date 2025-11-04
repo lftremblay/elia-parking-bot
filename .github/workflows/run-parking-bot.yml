@@ -1,21 +1,6 @@
-name: Run Parking Bot
+name: Scheduled Parking Bot
 
 on:
-  workflow_dispatch:
-    inputs:
-      spot_type:
-        description: 'Type of parking spot to reserve'
-        required: true
-        default: 'regular'
-        type: choice
-        options:
-        - regular
-        - executive
-      test_mode:
-        description: 'Run in test mode (no actual reservation)'
-        required: false
-        default: true
-        type: boolean
   schedule:
     - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
     - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
@@ -24,7 +9,7 @@ on:
 
 jobs:
   reserve-parking:
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && 'windows-latest' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -45,64 +30,62 @@ jobs:
 
     - name: Create config directory
       run: |
-        New-Item -ItemType Directory -Force -Path config
-        New-Item -ItemType Directory -Force -Path logs
-        New-Item -ItemType Directory -Force -Path screenshots
-        New-Item -ItemType Directory -Force -Path session_data
+        mkdir -p config logs screenshots session_data
 
     - name: Create config.json
       run: |
-        $config = @{
-            'elia' = @{
-                'organization' = 'quebecor'
-                'url' = 'https://app.elia.io/'
-                'credentials' = @{
-                    'email' = $env:ELIA_EMAIL
-                    'use_sso' = $true
-                    'mfa_method' = 'authenticator'
-                }
+        cat > config.json << 'EOF'
+        {
+          "elia": {
+            "organization": "quebecor",
+            "url": "https://app.elia.io/",
+            "credentials": {
+              "email": "$ELIA_EMAIL",
+              "use_sso": true,
+              "mfa_method": "authenticator"
             }
-            'schedules' = @{
-                'executive_spots' = @{
-                    'enabled' = $true
-                    'time' = '00:00:00'
-                    'days_advance' = 14
-                    'spot_type' = 'executive'
-                    'weekdays_only' = $true
-                }
-                'regular_spots' = @{
-                    'enabled' = $true
-                    'time' = '06:00:00'
-                    'days_advance' = 14
-                    'spot_type' = 'regular'
-                    'weekdays_only' = $true
-                }
+          },
+          "schedules": {
+            "executive_spots": {
+              "enabled": true,
+              "time": "00:00:00",
+              "days_advance": 14,
+              "spot_type": "executive",
+              "weekdays_only": true
+            },
+            "regular_spots": {
+              "enabled": true,
+              "time": "06:00:00",
+              "days_advance": 14,
+              "spot_type": "regular",
+              "weekdays_only": true
             }
-            'retry' = @{
-                'max_attempts' = 5
-                'backoff_seconds' = @(5, 10, 30, 60, 120)
-                'aggressive_refresh' = $true
+          },
+          "retry": {
+            "max_attempts": 5,
+            "backoff_seconds": [5, 10, 30, 60, 120],
+            "aggressive_refresh": true
+          },
+          "notifications": {
+            "discord_webhook": "$DISCORD_WEBHOOK_URL",
+            "telegram_bot_token": "$TELEGRAM_BOT_TOKEN",
+            "telegram_chat_id": "$TELEGRAM_CHAT_ID",
+            "email": {
+              "enabled": false
             }
-            'notifications' = @{
-                'discord_webhook' = $env:DISCORD_WEBHOOK_URL
-                'telegram_bot_token' = $env:TELEGRAM_BOT_TOKEN
-                'telegram_chat_id' = $env:TELEGRAM_CHAT_ID
-                'email' = @{
-                    'enabled' = $false
-                }
-            }
-            'advanced' = @{
-                'headless' = $true
-                'browser_profile_path' = './browser_data'
-                'session_persistence' = $true
-                'screenshot_on_error' = $true
-                'ai_spot_detection' = $true
-                'use_api_when_possible' = $true
-            }
+          },
+          "advanced": {
+            "headless": true,
+            "browser_profile_path": "./browser_data",
+            "session_persistence": true,
+            "screenshot_on_error": true,
+            "ai_spot_detection": true,
+            "use_api_when_possible": true
+          }
         }
-        
-        $config | ConvertTo-Json -Depth 10 | Out-File -FilePath 'config.json' -Encoding UTF8
-        Write-Host "Created config.json"
+        EOF
+
+        echo "Created config.json"
 
     - name: Run Parking Reservation
       env:
@@ -114,22 +97,19 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
         # Determine spot type based on schedule or manual trigger
-        if ($env:GITHUB_EVENT_NAME -eq 'schedule' -and $env:GITHUB_EVENT_SCHEDULE -eq '0 0 * * 1-5') {
-          $spotType = 'executive'
-          Write-Host "Scheduled executive spot reservation"
-        } elseif ($env:GITHUB_EVENT_NAME -eq 'schedule' -and $env:GITHUB_EVENT_SCHEDULE -eq '0 6 * * 1-5') {
-          $spotType = 'regular'
-          Write-Host "Scheduled regular spot reservation"
-        } elseif ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
-          $spotType = '${{ inputs.spot_type }}'
-          Write-Host "Manual trigger for $spotType spot"
-        } else {
-          $spotType = 'regular'
-          Write-Host "Defaulting to regular spot"
-        }
+        if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$GITHUB_EVENT_SCHEDULE" = "0 0 * * 1-5" ]; then
+          spot_type="executive"
+          echo "Scheduled executive spot reservation"
+        elif [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$GITHUB_EVENT_SCHEDULE" = "0 6 * * 1-5" ]; then
+          spot_type="regular"
+          echo "Scheduled regular spot reservation"
+        else
+          spot_type="regular"
+          echo "Defaulting to regular spot"
+        fi
 
         # Run the bot
-        python main.py --reserve $spotType
+        python main.py --reserve $spot_type
 
     - name: Upload logs and screenshots on failure
       if: failure()
