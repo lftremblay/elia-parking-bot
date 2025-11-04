@@ -34,7 +34,7 @@ jobs:
 
     - name: Create config.json
       run: |
-        cat > config.json << EOF
+        cat > config.json << 'EOF'
         {
           "elia": {
             "organization": "quebecor",
@@ -84,7 +84,13 @@ jobs:
           }
         }
         EOF
-
+        
+        # Replace variables in config.json
+        sed -i "s/\${ELIA_EMAIL}/$ELIA_EMAIL/g" config.json
+        sed -i "s/\${DISCORD_WEBHOOK_URL}/$DISCORD_WEBHOOK_URL/g" config.json
+        sed -i "s/\${TELEGRAM_BOT_TOKEN}/$TELEGRAM_BOT_TOKEN/g" config.json
+        sed -i "s/\${TELEGRAM_CHAT_ID}/$TELEGRAM_CHAT_ID/g" config.json
+        
         echo "Created config.json"
 
     - name: Run Parking Reservation
