@@ -107,7 +107,6 @@ class BrowserAutomation:
         self.context = await self.playwright.chromium.launch_persistent_context(
                 user_data_dir=str(self.profile_path),
                 headless=headless,
-                executable_path="./browser_data/chrome-win/chrome.exe",  # Use custom browser
                 args=browser_args,
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
