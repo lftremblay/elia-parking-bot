@@ -597,9 +597,10 @@ class BrowserAutomation:
                         continue
 
                 # Generate and enter TOTP code
-                totp = pyotp.TOTP(self.auth_manager.totp_secret)
-                totp_code = totp.now()
-                logger.info(f"🔢 Generated TOTP code: {totp_code[0:2]}****")
+                totp_code = self.auth_manager.get_totp_code()
+                if not totp_code:
+                    logger.error("❌ Failed to generate TOTP code - check TOTP_SECRET configuration")
+                    continue
 
                 # Try multiple input field selectors
                 code_input_selectors = [
