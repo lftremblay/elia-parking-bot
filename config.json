@@ -12,7 +12,7 @@
     "executive_spots": {
       "enabled": true,
       "time": "00:00:00",
-      "days_advance": 16,
+      "days_advance": 1,
       "spot_type": "executive",
       "weekdays_only": true
     },

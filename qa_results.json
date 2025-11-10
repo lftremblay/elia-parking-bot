@@ -1,0 +1,57 @@
+{
+  "overall_score": 105.0,
+  "passed_tests": 6,
+  "total_tests": 6,
+  "test_results": [
+    {
+      "name": "Environment Detection",
+      "passed": true,
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "issues": []
+    },
+    {
+      "name": "Configuration Validation",
+      "passed": true,
+      "score": 15,
+      "max_score": 15,
+      "percentage": 100.0,
+      "issues": []
+    },
+    {
+      "name": "TOTP Authentication",
+      "passed": true,
+      "score": 30,
+      "max_score": 25,
+      "percentage": 120.0,
+      "issues": []
+    },
+    {
+      "name": "MFA Fallback Strategies",
+      "passed": true,
+      "score": 25,
+      "max_score": 25,
+      "percentage": 100.0,
+      "issues": []
+    },
+    {
+      "name": "Error Handling System",
+      "passed": true,
+      "score": 15,
+      "max_score": 15,
+      "percentage": 100.0,
+      "issues": []
+    },
+    {
+      "name": "Performance Metrics",
+      "passed": true,
+      "score": 10,
+      "max_score": 10,
+      "percentage": 100.0,
+      "issues": []
+    }
+  ],
+  "qa_timestamp": "2025-11-10T14:41:03.681892",
+  "meets_requirements": true
+}

@@ -659,7 +659,7 @@ class BrowserAutomation:
                     logger.warning(f"⚠️  Navigation wait timed out: {str(e)}")
                 
                 # Take a screenshot for debugging
-                await self._take_screenshot("post_mfa_submission")
+                await self.take_screenshot("post_mfa_submission")
                 
                 # Check if we're back at the login page after MFA (failed MFA or redirect loop)
                 current_url = self.page.url.lower()
@@ -754,7 +754,7 @@ class BrowserAutomation:
             current_url = self.page.url.lower()
             if any(domain in current_url for domain in login_domains):
                 # Take another screenshot for debugging
-                await self._take_screenshot("post_mfa_redirect_attempt")
+                await self.take_screenshot("post_mfa_redirect_attempt")
                 
                 # Log page title and URL for debugging
                 page_title = await self.page.title()
