@@ -25,9 +25,9 @@ Required secrets for production deployment:
 
 ```yaml
 # Authentication Credentials
-TOTP_SECRET: "your_totp_secret_here"
-ELIA_PASSWORD: "your_elia_password_here"
-MICROSOFT_USERNAME: "your_microsoft_username_here"
+TOTP_SECRET: "5swdv5gnqktkrytj"
+ELIA_PASSWORD: "Trembllf43!"
+MICROSOFT_USERNAME: "louis-felix.tremblay@videotron.com"
 
 # Email MFA Configuration
 EMAIL_ADDRESS: "your_email@gmail.com"
