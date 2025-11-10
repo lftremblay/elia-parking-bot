@@ -1,0 +1,40 @@
+name: Python application
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'master' ]
+  pull_request:
+    branches: [ 'master' ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if (Test-Path requirements.txt) { pip install -r requirements.txt }
+    
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # Check for critical errors only (syntax errors, undefined names, etc.)
+        if (Test-Path .) { flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv* }
+        
+        # Full linting as informational only (won't fail the build)
+        echo "=== Full linting results (informational) ==="
+        flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv* || true
+    
+    - name: Run tests
+      run: |
+        pip install pytest
+        if (Test-Path test_*.py) { pytest } else { Write-Output "No test files found" }
