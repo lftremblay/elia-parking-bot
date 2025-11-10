@@ -68,22 +68,12 @@ jobs:
         pip install pytest pytest-cov loguru
         
     - name: Install Playwright browsers
-      id: playwright-install
-      uses: playwright/setup-playwright@v1
-      with:
-        playwright-version: 'latest'
-        browsers: chromium
-        install-deps: true
-        run-install: true
-      continue-on-error: true
-        
-    - name: Fallback Playwright installation
-      if: steps.playwright-install.outcome == 'failure'
       run: |
-        echo "🔧 Using fallback Playwright installation..."
+        echo "🎭 Installing Playwright browsers for Quinn QA validation..."
         sudo apt-get update
-        sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1
+        sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2-dev libatspi2.0-0 libgtk-3-0
         python -m playwright install chromium --with-deps
+        echo "✅ Playwright installation completed"
         
     - name: Configure Cloud Environment
       run: |
