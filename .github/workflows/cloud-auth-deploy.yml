@@ -68,9 +68,12 @@ jobs:
         pip install pytest pytest-cov loguru
         
     - name: Install Playwright browsers
-      run: |
-        python -m playwright install chromium
-        python -m playwright install-deps
+      uses: playwright/setup-playwright@v1
+      with:
+        playwright-version: 'latest'
+        browsers: chromium
+        install-deps: true
+        run-install: true
         
     - name: Configure Cloud Environment
       run: |
