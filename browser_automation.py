@@ -969,15 +969,14 @@ class BrowserAutomation:
                                             return allText.join(' | ');
                                         }
                                     """)
-            
-            try:
-                if visible_text:
-                    logger.info(f"📄 Page content: {visible_text[:200]}...")
-            except Exception as e:
-                logger.debug(f"Could not get page text: {e}")
+                        
+                        if visible_text:
+                            logger.info(f"📄 Page content: {visible_text[:200]}...")
+                    except Exception as e:
+                        logger.debug(f"Could not get page text: {e}")
                     
-            except Exception as e:
-                logger.debug(f"Could not get page title/URL: {e}")
+        except Exception as e:
+            logger.debug(f"Could not get page title/URL: {e}")
                 
                 await asyncio.sleep(check_interval)
                 elapsed += check_interval
