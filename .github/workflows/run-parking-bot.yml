@@ -28,7 +28,9 @@ jobs:
         pip install -r requirements.txt
 
     - name: Install Playwright browsers
-      run: playwright install chromium
+      run: |
+        playwright install chromium
+        playwright install-deps chromium
 
     - name: Create config directory
       run: |

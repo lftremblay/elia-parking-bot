@@ -98,10 +98,51 @@ class BrowserAutomation:
             ])
         
         # Launch browser with persistent context for session persistence
+        # Cross-platform browser executable detection
+        executable_path = None
+        
+        # Environment debugging
+        import platform
+        import os
+        
+        logger.info(f"🔍 Environment: {platform.system()}")
+        logger.info(f"🔍 Platform: {platform.platform()}")
+        logger.info(f"🔍 Architecture: {platform.architecture()}")
+        
+        if platform.system() == "Windows":
+            custom_path = "./browser_data/chrome-win/chrome.exe"
+            if os.path.exists(custom_path):
+                executable_path = custom_path
+                logger.info(f"🌐 Using custom Windows browser: {custom_path}")
+            else:
+                logger.warning(f"⚠️ Custom Windows browser not found at: {custom_path}")
+                logger.info("🌐 Falling back to system Playwright browser")
+        elif platform.system() == "Linux":
+            # In GitHub Actions, use system Playwright installation
+            logger.info("🌐 Using system Playwright browser installation")
+            # Verify Playwright browser is available
+            try:
+                import subprocess
+                result = subprocess.run(['which', 'chromium-browser'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    logger.info(f"🌐 Found system Chromium at: {result.stdout.strip()}")
+                else:
+                    logger.info("🌐 Using Playwright's built-in Chromium")
+            except Exception as e:
+                logger.debug(f"Could not verify system browser: {e}")
+        elif platform.system() == "Darwin":  # macOS
+            custom_path = "./browser_data/chrome-mac/Chromium.app/Contents/MacOS/Chromium"
+            if os.path.exists(custom_path):
+                executable_path = custom_path
+                logger.info(f"🌐 Using custom macOS browser: {custom_path}")
+            else:
+                logger.warning(f"⚠️ Custom macOS browser not found at: {custom_path}")
+                logger.info("🌐 Falling back to system Playwright browser")
+        
         self.context = await self.playwright.chromium.launch_persistent_context(
                 user_data_dir=str(self.profile_path),
                 headless=headless,
-                executable_path="./browser_data/chrome-win/chrome.exe",  # Use custom browser
+                executable_path=executable_path,  # Use detected browser path
                 args=browser_args,
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
