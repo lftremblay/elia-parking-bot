@@ -1,0 +1,111 @@
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Copy, BookOpen, List, FileText } from "lucide-react";
+import { StandardMarkdownViewer } from "./StandardMarkdownViewer";
+
+interface PRDViewerProps {
+  content: string;
+  selectedFile: string;
+}
+
+interface TableOfContentsItem {
+  id: string;
+  title: string;
+  level: number;
+}
+
+export const PRDViewer = ({ content, selectedFile }: PRDViewerProps) => {
+  const [showTOC, setShowTOC] = useState(true);
+  const [toc, setTOC] = useState<TableOfContentsItem[]>([]);
+
+  useEffect(() => {
+    // Extract headings for table of contents
+    const lines = content.split('\n');
+    const headings: TableOfContentsItem[] = [];
+    
+    lines.forEach((line, index) => {
+      const match = line.match(/^(#{1,6})\s+(.+)$/);
+      if (match) {
+        const level = match[1].length;
+        const title = match[2].trim();
+        const id = `heading-${index}`;
+        headings.push({ id, title, level });
+      }
+    });
+    
+    setTOC(headings);
+  }, [content]);
+
+  const scrollToHeading = (title: string) => {
+    // In a real implementation, this would scroll to the heading
+    console.log(`Scrolling to: ${title}`);
+  };
+
+  return (
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+        <div className="flex items-center space-x-3">
+          <BookOpen className="h-5 w-5 text-green-600" />
+          <div>
+            <h2 className="font-semibold text-gray-900">{selectedFile}</h2>
+            <p className="text-sm text-gray-600">Product Requirements Document</p>
+          </div>
+        </div>
+        
+        <div className="flex space-x-2">
+          <Button 
+            variant={showTOC ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setShowTOC(!showTOC)}
+          >
+            <List className="h-4 w-4 mr-1" />
+            TOC
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Table of Contents Sidebar */}
+        {showTOC && (
+          <div className="w-80 border-r border-gray-200 bg-gray-50 overflow-y-auto">
+            <div className="p-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Contents</h3>
+              <div className="space-y-1">
+                {toc.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => scrollToHeading(item.title)}
+                    className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-200 rounded transition-colors"
+                    style={{ paddingLeft: `${(item.level - 1) * 12 + 8}px` }}
+                  >
+                    <span className={`${item.level === 1 ? 'font-semibold' : item.level === 2 ? 'font-medium' : ''}`}>
+                      {item.title}
+                    </span>
+                    {item.level === 2 && (
+                      <span className="ml-2 text-xs text-green-600 bg-green-100 px-1 rounded">Epic</span>
+                    )}
+                    {item.level === 3 && (
+                      <span className="ml-2 text-xs text-blue-600 bg-blue-100 px-1 rounded">Story</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-8">
+            <StandardMarkdownViewer content={content} selectedFile={selectedFile} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

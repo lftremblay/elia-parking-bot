@@ -1,0 +1,41 @@
+
+import { Button } from "@/components/ui/button";
+import { Copy, Settings } from "lucide-react";
+
+interface YAMLViewerProps {
+  content: string;
+  selectedFile: string;
+}
+
+export const YAMLViewer = ({ content, selectedFile }: YAMLViewerProps) => {
+  return (
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+        <div className="flex items-center space-x-3">
+          <Settings className="h-5 w-5 text-orange-600" />
+          <div>
+            <h2 className="font-semibold text-gray-900">{selectedFile}</h2>
+            <p className="text-sm text-gray-600">YAML Configuration</p>
+          </div>
+        </div>
+        
+        <div className="flex space-x-2">
+          <Button variant="ghost" size="sm">
+            <Copy className="h-4 w-4 mr-1" />
+            Copy
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+            <code className="language-yaml">{content}</code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};

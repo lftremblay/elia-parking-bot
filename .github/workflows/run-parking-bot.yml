@@ -5,7 +5,9 @@ on:
     - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
     - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
   push:
-    branches: [ 'master' ]  # Also run on pushes to master for testing
+    branches: [ 'main', 'master' ]  # Run on pushes to main/master for testing
+  pull_request:
+    branches: [ 'main', 'master' ]  # Run on pull requests for testing
 
 jobs:
   reserve-parking:
@@ -13,7 +15,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -26,7 +28,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Install Playwright browsers
-      run: playwright install chromium
+      run: |
+        playwright install chromium --force
 
     - name: Create config directory
       run: |

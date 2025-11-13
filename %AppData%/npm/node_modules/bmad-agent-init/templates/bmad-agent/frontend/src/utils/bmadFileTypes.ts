@@ -1,0 +1,279 @@
+
+import { 
+  File, 
+  Folder, 
+  FolderOpen, 
+  FileText, 
+  Settings, 
+  Users, 
+  CheckSquare, 
+  Code, 
+  Image, 
+  Database, 
+  Workflow, 
+  BookOpen,
+  Layout,
+  Palette,
+  Archive,
+  GitBranch,
+  History,
+  RefreshCw,
+  Link
+} from "lucide-react";
+
+export interface BMADFileType {
+  icon: any;
+  category: string;
+  description: string;
+  color: string;
+}
+
+export const BMAD_FILE_TYPES: Record<string, BMADFileType> = {
+  // Primary BMAD Artifacts
+  "index.md": {
+    icon: Layout,
+    category: "dashboard",
+    description: "Project Dashboard/Overview",
+    color: "text-blue-600"
+  },
+  "project-brief.md": {
+    icon: FileText,
+    category: "core-doc",
+    description: "Project Brief",
+    color: "text-purple-600"
+  },
+  "prd.md": {
+    icon: BookOpen,
+    category: "core-doc", 
+    description: "Product Requirements Document",
+    color: "text-green-600"
+  },
+  "prd.draft.md": {
+    icon: BookOpen,
+    category: "draft",
+    description: "PRD Draft",
+    color: "text-green-400"
+  },
+  "architecture.md": {
+    icon: Database,
+    category: "architecture",
+    description: "System Architecture",
+    color: "text-red-600"
+  },
+  "front-end-architecture.md": {
+    icon: Layout,
+    category: "architecture",
+    description: "Frontend Architecture",
+    color: "text-cyan-600"
+  },
+  "ux-ui-spec.md": {
+    icon: Palette,
+    category: "design",
+    description: "UX/UI Specification",
+    color: "text-pink-600"
+  },
+  "tech-stack.md": {
+    icon: Code,
+    category: "technical",
+    description: "Technology Stack",
+    color: "text-orange-600"
+  },
+  "data-models.md": {
+    icon: Database,
+    category: "technical",
+    description: "Data Models",
+    color: "text-indigo-600"
+  },
+  "api-reference.md": {
+    icon: Link,
+    category: "technical",
+    description: "API Reference",
+    color: "text-teal-600"
+  },
+  "component-view.md": {
+    icon: Archive,
+    category: "architecture",
+    description: "Component View",
+    color: "text-amber-600"
+  },
+  "sequence-diagrams.md": {
+    icon: Workflow,
+    category: "diagrams",
+    description: "Sequence Diagrams",
+    color: "text-emerald-600"
+  },
+  "project-structure.md": {
+    icon: Folder,
+    category: "technical",
+    description: "Project Structure",
+    color: "text-slate-600"
+  },
+  "environment-vars.md": {
+    icon: Settings,
+    category: "configuration",
+    description: "Environment Variables",
+    color: "text-gray-600"
+  },
+  "operational-guidelines.md": {
+    icon: CheckSquare,
+    category: "guidelines",
+    description: "Operational Guidelines",
+    color: "text-blue-500"
+  },
+  "key-references.md": {
+    icon: Link,
+    category: "reference",
+    description: "Key References",
+    color: "text-violet-600"
+  },
+  "change-log.md": {
+    icon: History,
+    category: "tracking",
+    description: "Change Log",
+    color: "text-yellow-600"
+  },
+  "v0-prompt.md": {
+    icon: RefreshCw,
+    category: "initialization",
+    description: "V0 Prompt",
+    color: "text-rose-600"
+  }
+};
+
+export const BMAD_DIRECTORY_TYPES: Record<string, BMADFileType> = {
+  "epics": {
+    icon: GitBranch,
+    category: "structure",
+    description: "Project Epics",
+    color: "text-purple-500"
+  },
+  "stories": {
+    icon: BookOpen,
+    category: "structure", 
+    description: "User Stories",
+    color: "text-green-500"
+  },
+  "diagrams": {
+    icon: Workflow,
+    category: "visuals",
+    description: "Diagrams",
+    color: "text-blue-500"
+  },
+  "images": {
+    icon: Image,
+    category: "assets",
+    description: "Image Assets",
+    color: "text-pink-500"
+  },
+  "checklists": {
+    icon: CheckSquare,
+    category: "bmad-agent",
+    description: "BMAD Checklists",
+    color: "text-orange-500"
+  },
+  "data": {
+    icon: Database,
+    category: "bmad-agent",
+    description: "BMAD Data",
+    color: "text-red-500"
+  },
+  "personas": {
+    icon: Users,
+    category: "bmad-agent",
+    description: "BMAD Personas",
+    color: "text-cyan-500"
+  },
+  "tasks": {
+    icon: CheckSquare,
+    category: "bmad-agent",
+    description: "BMAD Tasks",
+    color: "text-emerald-500"
+  },
+  "templates": {
+    icon: FileText,
+    category: "bmad-agent",
+    description: "BMAD Templates",
+    color: "text-indigo-500"
+  }
+};
+
+export function getBMADFileType(filename: string, isDirectory: boolean = false): BMADFileType {
+  if (isDirectory) {
+    return BMAD_DIRECTORY_TYPES[filename] || {
+      icon: Folder,
+      category: "directory",
+      description: "Directory",
+      color: "text-gray-600"
+    };
+  }
+
+  // Check exact filename matches first
+  if (BMAD_FILE_TYPES[filename]) {
+    return BMAD_FILE_TYPES[filename];
+  }
+
+  // Check patterns for epics, stories, etc.
+  if (filename.match(/^epic-\d+\.md$/)) {
+    return {
+      icon: GitBranch,
+      category: "epic",
+      description: "Epic Document",
+      color: "text-purple-600"
+    };
+  }
+
+  if (filename.match(/^story-.*\.md$/)) {
+    return {
+      icon: BookOpen,
+      category: "story",
+      description: "User Story",
+      color: "text-green-600"
+    };
+  }
+
+  // Default file type detection
+  const extension = filename.split('.').pop()?.toLowerCase();
+  
+  switch (extension) {
+    case 'md':
+      return {
+        icon: FileText,
+        category: "markdown",
+        description: "Markdown Document",
+        color: "text-blue-600"
+      };
+    case 'yml':
+    case 'yaml':
+      return {
+        icon: Settings,
+        category: "configuration",
+        description: "YAML Configuration",
+        color: "text-orange-600"
+      };
+    case 'txt':
+      return {
+        icon: File,
+        category: "text",
+        description: "Text File",
+        color: "text-gray-600"
+      };
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'svg':
+      return {
+        icon: Image,
+        category: "image",
+        description: "Image File",
+        color: "text-pink-600"
+      };
+    default:
+      return {
+        icon: File,
+        category: "file",
+        description: "File",
+        color: "text-gray-500"
+      };
+  }
+}

@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Tuple
 from loguru import logger
+import pyotp
 
 try:
     from playwright.async_api import async_playwright, Page, Browser, BrowserContext
@@ -98,10 +99,51 @@ class BrowserAutomation:
             ])
         
         # Launch browser with persistent context for session persistence
+        # Cross-platform browser executable detection
+        executable_path = None
+        
+        # Environment debugging
+        import platform
+        import os
+        
+        logger.info(f"🔍 Environment: {platform.system()}")
+        logger.info(f"🔍 Platform: {platform.platform()}")
+        logger.info(f"🔍 Architecture: {platform.architecture()}")
+        
+        if platform.system() == "Windows":
+            custom_path = "./browser_data/chrome-win/chrome.exe"
+            if os.path.exists(custom_path):
+                executable_path = custom_path
+                logger.info(f"🌐 Using custom Windows browser: {custom_path}")
+            else:
+                logger.warning(f"⚠️ Custom Windows browser not found at: {custom_path}")
+                logger.info("🌐 Falling back to system Playwright browser")
+        elif platform.system() == "Linux":
+            # In GitHub Actions, use system Playwright installation
+            logger.info("🌐 Using system Playwright browser installation")
+            # Verify Playwright browser is available
+            try:
+                import subprocess
+                result = subprocess.run(['which', 'chromium-browser'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    logger.info(f"🌐 Found system Chromium at: {result.stdout.strip()}")
+                else:
+                    logger.info("🌐 Using Playwright's built-in Chromium")
+            except Exception as e:
+                logger.debug(f"Could not verify system browser: {e}")
+        elif platform.system() == "Darwin":  # macOS
+            custom_path = "./browser_data/chrome-mac/Chromium.app/Contents/MacOS/Chromium"
+            if os.path.exists(custom_path):
+                executable_path = custom_path
+                logger.info(f"🌐 Using custom macOS browser: {custom_path}")
+            else:
+                logger.warning(f"⚠️ Custom macOS browser not found at: {custom_path}")
+                logger.info("🌐 Falling back to system Playwright browser")
+        
         self.context = await self.playwright.chromium.launch_persistent_context(
                 user_data_dir=str(self.profile_path),
                 headless=headless,
-                executable_path="./browser_data/chrome-win/chrome.exe",  # Use custom browser
+                executable_path=executable_path,  # Use detected browser path
                 args=browser_args,
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -667,99 +709,102 @@ class BrowserAutomation:
                 
                 if any(domain in current_url for domain in login_domains):
                     # Enhanced error detection
-                    error_messages = [
-                'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
-                'unable to sign in', 'sign-in was blocked', 'account is locked',
-                'temporarily disabled', 'suspicious activity', 'unusual sign-in',
-                'verify your identity', 'additional verification', 'security info',
-                'we couldn\'t sign you in', 'your account has been locked',
-                'this account has been locked', 'too many attempts'
-            ]
-            
-            # Check for error messages in the page content
-            page_content = (await self.page.content()).lower()
-            found_errors = [msg for msg in error_messages if msg in page_content]
-            
-            if found_errors:
-                self.logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
-                return False
+                    try:
+                        error_messages = [
+                            'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
+                            'unable to sign in', 'sign-in was blocked', 'account is locked',
+                            'temporarily disabled', 'suspicious activity', 'unusual sign-in',
+                            'verify your identity', 'additional verification', 'security info',
+                            'we couldn\'t sign you in', 'your account has been locked',
+                            'this account has been locked', 'too many attempts'
+                        ]
+                        
+                        # Check for error messages in the page content
+                        page_content = (await self.page.content()).lower()
+                        found_errors = [msg for msg in error_messages if msg in page_content]
+                        
+                        if found_errors:
+                            self.logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
+                            return False
+                            
+                        # Check for specific error elements
+                        error_selectors = [
+                            'div#error', 'div.error', 'div.alert-error', 'div.message-error',
+                            'div.error-message', 'span.error', 'p.error', 'div[role="alert"]',
+                            'div[class*="error"]', 'div[class*="alert"]', 'div[class*="message"]'
+                        ]
+                        
+                        for selector in error_selectors:
+                            error_element = await self.page.query_selector(selector)
+                            if error_element:
+                                error_text = (await error_element.inner_text()).strip()
+                                if error_text and len(error_text) < 500:  # Sanity check for error text length
+                                    self.logger.warning(f"⚠️  MFA failed - error: {error_text}")
+                                    return False
+                    except Exception as e:
+                        logger.warning(f"⚠️  Error checking MFA failure: {str(e)}")
                 
-            # Check for specific error elements
-            error_selectors = [
-                'div#error', 'div.error', 'div.alert-error', 'div.message-error',
-                'div.error-message', 'span.error', 'p.error', 'div[role="alert"]',
-                'div[class*="error"]', 'div[class*="alert"]', 'div[class*="message"]'
-            ]
-            
-            for selector in error_selectors:
-                error_element = await self.page.query_selector(selector)
-                if error_element:
-                    error_text = (await error_element.inner_text()).strip()
-                    if error_text and len(error_text) < 500:  # Sanity check for error text length
-                        self.logger.warning(f"⚠️  MFA failed - error: {error_text}")
-                        return False
-            
-            # Check for MFA retry prompt or other indicators
-            retry_indicators = [
-                'try another way', 'i can\'t use my authenticator app',
-                'sign in another way', 'try a different verification method',
-                'i don\'t have access to this', 'having trouble?', 'trouble signing in?'
-            ]
-            
-            # Look for retry indicators in buttons and links
-            all_elements = await self.page.query_selector_all('a, button, input[type="button"], input[type="submit"]')
-            for element in all_elements:
-                try:
-                    element_text = (await element.inner_text()).lower()
-                    if any(indicator in element_text for indicator in retry_indicators):
-                        self.logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
-                        return False
-                except:
-                    continue
-            
-            # If we're back at the email entry page, MFA failed
-            email_input = await self.page.query_selector('input[type="email"]')
-            if email_input:
-                self.logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
-                return False
-            
-            # Last resort: Check for any interactive elements that might help us proceed
-            self.logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
-            
-            # Try to find and click a "Continue" or "Next" button if present
-            possible_actions = [
-                ('continue', ['continue', 'next', 'proceed', 'ok', 'yes', 'verify', 'submit']),
+                # Check for MFA retry prompt or other indicators
+                retry_indicators = [
+                    'try another way', 'i can\'t use my authenticator app',
+                    'sign in another way', 'try a different verification method',
+                    'i don\'t have access to this', 'having trouble?', 'trouble signing in?'
+                ]
+                
+                # Look for retry indicators in buttons and links
+                all_elements = await self.page.query_selector_all('a, button, input[type="button"], input[type="submit"]')
+                for element in all_elements:
+                    try:
+                        element_text = (await element.inner_text()).lower()
+                        if any(indicator in element_text for indicator in retry_indicators):
+                            self.logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
+                            return False
+                    except:
+                        continue
+                
+                # If we're back at the email entry page, MFA failed
+                email_input = await self.page.query_selector('input[type="email"]')
+                if email_input:
+                    self.logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
+                    return False
+                
+                # Last resort: Check for any interactive elements that might help us proceed
+                self.logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
+                
+                # Try to find and click a "Continue" or "Next" button if present
+                possible_actions = [
+                    ('continue', ['continue', 'next', 'proceed', 'ok', 'yes', 'verify', 'submit']),
                 ('skip', ['skip', 'maybe later', 'do this later', 'not now']),
                 ('use another method', ['use another method', 'try another way', 'other options'])
             ]
             
-            clicked = False
-            for action_name, keywords in possible_actions:
-                if clicked:
-                    break
-                    
-                for element in all_elements:
-                    try:
-                        element_text = (await element.inner_text()).lower()
-                        if any(keyword in element_text for keyword in keywords):
-                            await element.click()
-                            self.logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
-                            await asyncio.sleep(3)  # Wait for navigation
-                            clicked = True
-                            break
-                    except:
-                        continue
+                clicked = False
+                for action_name, keywords in possible_actions:
+                    if clicked:
+                        break
+                        
+                    for element in all_elements:
+                        try:
+                            element_text = (await element.inner_text()).lower()
+                            if any(keyword in element_text for keyword in keywords):
+                                await element.click()
+                                self.logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
+                                await asyncio.sleep(3)  # Wait for navigation
+                                clicked = True
+                                break
+                        except:
+                            continue
             
             # If we're still on a login page after attempting to proceed, log detailed info
-            current_url = self.page.url.lower()
-            if any(domain in current_url for domain in login_domains):
-                # Take another screenshot for debugging
-                await self.take_screenshot("post_mfa_redirect_attempt")
-                
-                # Log page title and URL for debugging
-                page_title = await self.page.title()
-                self.logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
-                self.logger.warning(f"⚠️  Current URL: {current_url}")
+                current_url = self.page.url.lower()
+                if any(domain in current_url for domain in login_domains):
+                    # Take another screenshot for debugging
+                    await self.take_screenshot("post_mfa_redirect_attempt")
+                    
+                    # Log page title and URL for debugging
+                    page_title = await self.page.title()
+                    self.logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
+                    self.logger.warning(f"⚠️  Current URL: {current_url}")
                 
                 # Log visible text (first 500 chars) for context
                 try:
@@ -771,10 +816,14 @@ class BrowserAutomation:
                     self.logger.warning("⚠️  Could not retrieve page content")
                 
                 return False
-
-        # After MFA success checks
-        logger.info("✅ MFA verification appears successful")
-        return True
+                
+                # After MFA success checks
+                logger.info("✅ MFA verification appears successful")
+                return True
+                
+            except Exception as e:
+                logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
+                await self.take_screenshot(f"error_mfa_attempt_{attempt}")
 
     async def _detect_login_loop(self, current_url: str) -> bool:
         """Detect if we're stuck in a login redirect loop."""
@@ -805,15 +854,15 @@ class BrowserAutomation:
                                 }
                             """)
                             
-                            logger.info(f"🔍 Login page analysis: {has_login_form}")
-                            
-                            # If we see a login form with email/password after MFA, we're likely in a loop
-                            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
-                                logger.error("❌ Detected login form after MFA - likely a redirect loop")
-                                
-                                # Try to get any error messages
-                                try:
-                                    error_messages = await self.page.evaluate("""
+            logger.info(f"🔍 Login page analysis: {has_login_form}")
+            
+            # If we see a login form with email/password after MFA, we're likely in a loop
+            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
+                logger.error("❌ Detected login form after MFA - likely a redirect loop")
+                
+                # Try to get any error messages
+                try:
+                    error_messages = await self.page.evaluate("""
                                         () => {
                                             const errorSelectors = [
                                                 '.error', '.alert', '.message', '.validation',
@@ -834,114 +883,114 @@ class BrowserAutomation:
                                             return errors;
                                         }
                                     """)
-                                    
-                                    if error_messages:
-                                        logger.error(f"❌ Error messages on login page: {error_messages}")
-                                
-                                except Exception as e:
-                                    logger.debug(f"Could not extract error messages: {e}")
-                                
-                                return False
                     
-                        # Check for MFA input elements
-                        mfa_still_present = await self._is_selector_present([
-                            'input[name="otc"]',
-                            'input[name="code"]',
-                            '#idTxtBx_SAOTCC_OTC',
-                            'button:has-text("Verify")',
-                            'button:has-text("Submit")',
-                            'button:has-text("Continue")',
-                            'button:has-text("Next")',
-                            'button:has-text("Sign in")',
-                            'button:has-text("Approve")',
-                            'button:has-text("Allow")',
-                            'button:has-text("Confirm")',
-                            'button:has-text("Done")',
-                            'button:has-text("Finish")',
-                            'button:has-text("Close")',
-                            'button:has-text("OK")',
-                            'button:has-text("Got it")',
-                            'button:has-text("I understand")',
-                            'button:has-text("I agree")',
-                            'button:has-text("I accept")',
-                            'button:has-text("I confirm")',
-                            'button:has-text("I acknowledge")'
-                        ])
-                        
-                        # If MFA input is gone and we've been redirected
-                        if not mfa_still_present and elapsed > 5:
-                            current_url = self.page.url.lower()
-                            login_indicators = ['login', 'auth', 'signin', 'microsoftonline']
-                            
-                            if not any(indicator in current_url for indicator in login_indicators):
-                                logger.info(f"✅ MFA input cleared and not on login page, assuming success. Current URL: {self.page.url}")
-                                await asyncio.sleep(2)  # Wait for any final redirects
-                                return True
-                            else:
-                                logger.info(f"⚠️ MFA input cleared but still on login page. Current URL: {self.page.url}")
-                                
-                                # Try to find and click any continue/next buttons
-                                continue_buttons = [
-                                    'button:has-text("Continue")',
-                                    'button:has-text("Next")',
-                                    'button:has-text("Sign in")',
-                                    'button:has-text("Approve")',
-                                    'button:has-text("Allow")',
-                                    'button:has-text("Confirm")',
-                                    'button:has-text("Done")',
-                                    'button:has-text("Finish")',
-                                    'button:has-text("Close")',
-                                    'button:has-text("OK")',
-                                    'button:has-text("Got it")',
-                                    'button:has-text("I understand")',
-                                    'button:has-text("I agree")',
-                                    'button:has-text("I accept")',
-                                    'button:has-text("I confirm")',
-                                    'button:has-text("I acknowledge")',
-                                    'input[type="submit"]',
-                                    'button[type="submit"]',
-                                    'button:has-text("Submit")',
-                                    'button:has-text("Continue")',
-                                    'button:has-text("Next")',
-                                    'button:has-text("Sign in")',
-                                    'button:has-text("Approve")',
-                                    'button:has-text("Allow")',
-                                    'button:has-text("Confirm")',
-                                    'button:has-text("Done")',
-                                    'button:has-text("Finish")',
-                                    'button:has-text("Close")',
-                                    'button:has-text("OK")',
-                                    'button:has-text("Got it")',
-                                    'button:has-text("I understand")',
-                                    'button:has-text("I agree")',
-                                    'button:has-text("I accept")',
-                                    'button:has-text("I confirm")',
-                                    'button:has-text("I acknowledge")'
-                                ]
-                                
-                                for button_sel in continue_buttons:
-                                    try:
-                                        if await self.page.is_visible(button_sel, timeout=1000):
-                                            await self.page.click(button_sel)
-                                            logger.info(f"✅ Clicked button: {button_sel}")
-                                            await asyncio.sleep(2)  # Wait for any redirects
-                                            return True
-                                    except Exception as e:
-                                        continue
-                        
-                        # Take periodic screenshots for debugging
-                        if elapsed % 10 == 0:  # Every 10 seconds
-                            await self.take_screenshot(f"mfa_wait_{elapsed}s")
-                            
-                            # Try to get page title and URL for debugging
-                            try:
-                                page_title = await self.page.title()
-                                page_url = self.page.url
-                                logger.info(f"🔄 Waiting for MFA... Title: {page_title}, URL: {page_url}")
-                                
-                                # Check for any visible text that might indicate the current state
-                                try:
-                                    visible_text = await self.page.evaluate("""
+                    if error_messages:
+                        logger.error(f"❌ Error messages on login page: {error_messages}")
+                    
+                except Exception as e:
+                    logger.debug(f"Could not extract error messages: {e}")
+                
+                return False
+            
+            # Check for MFA input elements
+            mfa_still_present = await self._is_selector_present([
+                'input[name="otc"]',
+                'input[name="code"]',
+                '#idTxtBx_SAOTCC_OTC',
+                'button:has-text("Verify")',
+                'button:has-text("Submit")',
+                'button:has-text("Continue")',
+                'button:has-text("Next")',
+                'button:has-text("Sign in")',
+                'button:has-text("Approve")',
+                'button:has-text("Allow")',
+                'button:has-text("Confirm")',
+                'button:has-text("Done")',
+                'button:has-text("Finish")',
+                'button:has-text("Close")',
+                'button:has-text("OK")',
+                'button:has-text("Got it")',
+                'button:has-text("I understand")',
+                'button:has-text("I agree")',
+                'button:has-text("I accept")',
+                'button:has-text("I confirm")',
+                'button:has-text("I acknowledge")'
+            ])
+            
+            # If MFA input is gone and we've been redirected
+            if not mfa_still_present and elapsed > 5:
+                current_url = self.page.url.lower()
+                login_indicators = ['login', 'auth', 'signin', 'microsoftonline']
+                
+                if not any(indicator in current_url for indicator in login_indicators):
+                    logger.info(f"✅ MFA input cleared and not on login page, assuming success. Current URL: {self.page.url}")
+                    await asyncio.sleep(2)  # Wait for any final redirects
+                    return True
+                else:
+                    logger.info(f"⚠️ MFA input cleared but still on login page. Current URL: {self.page.url}")
+                
+                # Try to find and click any continue/next buttons
+                continue_buttons = [
+                    'button:has-text("Continue")',
+                    'button:has-text("Next")',
+                    'button:has-text("Sign in")',
+                    'button:has-text("Approve")',
+                    'button:has-text("Allow")',
+                    'button:has-text("Confirm")',
+                    'button:has-text("Done")',
+                    'button:has-text("Finish")',
+                    'button:has-text("Close")',
+                    'button:has-text("OK")',
+                    'button:has-text("Got it")',
+                    'button:has-text("I understand")',
+                    'button:has-text("I agree")',
+                    'button:has-text("I accept")',
+                    'button:has-text("I confirm")',
+                    'button:has-text("I acknowledge")',
+                    'input[type="submit"]',
+                    'button[type="submit"]',
+                    'button:has-text("Submit")',
+                    'button:has-text("Continue")',
+                    'button:has-text("Next")',
+                    'button:has-text("Sign in")',
+                    'button:has-text("Approve")',
+                    'button:has-text("Allow")',
+                    'button:has-text("Confirm")',
+                    'button:has-text("Done")',
+                    'button:has-text("Finish")',
+                    'button:has-text("Close")',
+                    'button:has-text("OK")',
+                    'button:has-text("Got it")',
+                    'button:has-text("I understand")',
+                    'button:has-text("I agree")',
+                    'button:has-text("I accept")',
+                    'button:has-text("I confirm")',
+                    'button:has-text("I acknowledge")'
+                ]
+                
+                for button_sel in continue_buttons:
+                    try:
+                        if await self.page.is_visible(button_sel, timeout=1000):
+                            await self.page.click(button_sel)
+                            logger.info(f"✅ Clicked button: {button_sel}")
+                            await asyncio.sleep(2)  # Wait for any redirects
+                            return True
+                    except Exception as e:
+                        continue
+                
+                # Take periodic screenshots for debugging
+                if elapsed % 10 == 0:  # Every 10 seconds
+                    await self.take_screenshot(f"mfa_wait_{elapsed}s")
+                
+                # Try to get page title and URL for debugging
+                try:
+                    page_title = await self.page.title()
+                    page_url = self.page.url
+                    logger.info(f"🔄 Waiting for MFA... Title: {page_title}, URL: {page_url}")
+                    
+                    # Check for any visible text that might indicate the current state
+                    try:
+                        visible_text = await self.page.evaluate("""
                                         () => {
                                             const allText = [];
                                             const walker = document.createTreeWalker(
@@ -962,72 +1011,43 @@ class BrowserAutomation:
                                             return allText.join(' | ');
                                         }
                                     """)
-                                    
-                                    if (visible_text):
-                                        logger.info(f"📄 Page content: {visible_text[:200]}...")
-                                except Exception as e:
-                                    logger.debug(f"Could not get page text: {e}")
-                                    
-                            except Exception as e:
-                                logger.debug(f"Could not get page title/URL: {e}")
-                    
-                        await asyncio.sleep(check_interval)
-                        elapsed += check_interval
-                
-                # Timeout - log detailed information before failing
-                logger.warning("⚠️ MFA verification timeout - gathering diagnostic information...")
-                
-                try:
-                    # Get final page state
-                    final_url = self.page.url
-                    final_title = await self.page.title()
-                    logger.warning(f"🔍 Final URL: {final_url}")
-                    logger.warning(f"🔍 Page title: {final_title}")
-                    
-                    # Take a screenshot
-                    screenshot_path = await self.take_screenshot("mfa_timeout_final")
-                    logger.warning(f"📸 Screenshot saved to: {screenshot_path}")
-                    
-                    # Log page content for debugging
-                    try:
-                        page_content = await self.page.content()
-                        logger.debug(f"📄 Page content (first 1000 chars): {page_content[:1000]}...")
+                        
+                        if visible_text:
+                            logger.info(f"📄 Page content: {visible_text[:200]}...")
                     except Exception as e:
-                        logger.debug(f"Could not get page content: {e}")
+                        logger.debug(f"Could not get page text: {e}")
                     
                 except Exception as e:
-                    logger.error(f"❌ Error gathering diagnostic information: {e}")
+                    logger.debug(f"Could not get page title/URL: {e}")
                 
-                return False
-                    
-                elif method == "email":
-                    logger.info("📧 Email MFA detected - waiting for manual code entry...")
-                    await asyncio.sleep(60)  # Give time for manual entry
-                    return True
-                
-                elif method == "push":
-                    logger.info("📱 Push notification MFA - waiting for approval...")
-                    # Wait up to 2 minutes for push approval
-                    await asyncio.sleep(120)
-                    return True
-                
-                else:
-                    logger.warning(f"⚠️ Unsupported MFA method: {method}")
-                    return False
-                
+                await asyncio.sleep(check_interval)
+                elapsed += check_interval
+        
+        # Timeout - log detailed information before failing
+        logger.warning("⚠️ MFA verification timeout - gathering diagnostic information...")
+        
+        try:
+            # Get final page state
+            final_url = self.page.url
+            final_title = await self.page.title()
+            logger.warning(f"🔍 Final URL: {final_url}")
+            logger.warning(f"🔍 Page title: {final_title}")
+            
+            # Take a screenshot
+            screenshot_path = await self.take_screenshot("mfa_timeout_final")
+            logger.warning(f"📸 Screenshot saved to: {screenshot_path}")
+            
+            # Log page content for debugging
+            try:
+                page_content = await self.page.content()
+                logger.debug(f"📄 Page content (first 1000 chars): {page_content[:1000]}...")
             except Exception as e:
-                logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
-                await self.take_screenshot(f"error_mfa_attempt_{attempt}")
-                
-                if attempt < max_retries:
-                    backoff = 2 ** attempt
-                    logger.info(f"⏳ Retrying MFA in {backoff} seconds...")
-                    await asyncio.sleep(backoff)
-                else:
-                    logger.error(f"❌ All {max_retries} MFA attempts failed")
+                logger.debug(f"Could not get page content: {e}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error gathering diagnostic information: {e}")
         
         return False
-    
     async def wait_for_dashboard(self, timeout: int = 60000) -> bool:
         """Wait for successful login and dashboard load with flexible detection"""
         try:

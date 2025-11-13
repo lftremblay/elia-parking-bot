@@ -1,0 +1,184 @@
+
+import { useState, useEffect } from "react";
+import { BMADContentViewerFactory } from "./viewers/BMADContentViewerFactory";
+import { readFileContent } from "../utils/fileSystem"; // Import the utility function
+
+interface ContentViewerProps {
+  selectedFile: string | null;
+  selectedProject: string | null;
+}
+
+// Enhanced mock content for different BMAD artifacts
+const mockContentMap: Record<string, string> = {
+  "docs/index.md": `# E-Commerce Platform Project Dashboard
+
+## Project Overview
+
+This is the main dashboard for the e-commerce platform project, showcasing the BMAD (Breakthrough Method of Agile ai-driven Development) framework implementation.
+
+## Current Status
+
+- **Project Phase**: Development
+- **Sprint**: Sprint 3
+- **Completion**: 75%
+
+## Key Metrics
+
+- Total Epics: 5
+- Completed Stories: 23
+- In Progress: 8
+- Blocked: 2
+
+## Recent Updates
+
+- Payment processing integration completed
+- User authentication system deployed
+- Mobile responsive design implemented`,
+
+  "docs/prd.md": `# Product Requirements Document - E-Commerce Platform
+
+## 1. Executive Summary
+
+This PRD outlines the requirements for building a modern e-commerce platform.
+
+## 2. Epic 1: User Management
+
+### Story 1.1: User Registration
+- As a new user, I want to create an account
+- Acceptance criteria:
+  - Email validation
+  - Password strength requirements
+  - Email confirmation
+
+### Story 1.2: User Login
+- As a registered user, I want to log into my account
+
+## 3. Epic 2: Product Catalog
+
+### Story 2.1: Browse Products
+- As a customer, I want to browse available products
+
+### Story 2.2: Search Products
+- As a customer, I want to search for specific products`,
+
+  "docs/architecture.md": `# System Architecture
+
+## Overview
+
+The e-commerce platform follows a microservices architecture pattern.
+
+\`\`\`mermaid
+graph TB
+    A[Frontend App] --> B[API Gateway]
+    B --> C[User Service]
+    B --> D[Product Service]
+    B --> E[Order Service]
+    B --> F[Payment Service]
+    
+    C --> G[(User DB)]
+    D --> H[(Product DB)]
+    E --> I[(Order DB)]
+    F --> J[Payment Provider]
+\`\`\`
+
+## Core Components
+
+### User Service
+Handles user authentication and profile management.
+
+### Product Service
+Manages product catalog and inventory.`,
+
+  "bmad-agent/checklists/story-draft-checklist.md": `# Story Draft Checklist
+
+## User Story Validation
+
+- [ ] Story follows "As a... I want... So that..." format
+- [ ] Acceptance criteria are clearly defined
+- [ ] Story is testable
+- [ ] Story provides business value
+- [ ] Story is independent of other stories
+
+## Technical Considerations
+
+- [ ] Technical feasibility assessed
+- [ ] Dependencies identified
+- [ ] Effort estimation completed
+- [ ] Risk assessment done
+
+## Quality Assurance
+
+- [ ] Test scenarios defined
+- [ ] Edge cases considered
+- [ ] Performance requirements specified`,
+
+  "bmad-agent/tasks/checklist-mappings.yml": `# BMAD Checklist Mappings Configuration
+
+story_checklists:
+  - name: "story-draft-checklist"
+    phases: ["analysis", "draft"]
+    required: true
+  
+  - name: "story-validation-checklist"
+    phases: ["review", "approval"]
+    required: true
+
+epic_checklists:
+  - name: "epic-planning-checklist"
+    phases: ["planning"]
+    required: true
+
+project_checklists:
+  - name: "project-setup-checklist"
+    phases: ["initialization"]
+    required: true`
+};
+
+export const ContentViewer = ({ selectedFile, selectedProject }: ContentViewerProps) => {
+  const [content, setContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedFile) {
+      const loadContent = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const fetchedContent = await readFileContent(selectedFile);
+          setContent(fetchedContent);
+        } catch (err) {
+          console.error(`Error loading content for ${selectedFile}:`, err);
+          setError(`Failed to load content for ${selectedFile}.`);
+          setContent(''); // Clear content on error
+        }
+        setIsLoading(false);
+      };
+      loadContent();
+    } else {
+      setContent(''); // Clear content if no file is selected
+      setError(null);
+      setIsLoading(false);
+    }
+  }, [selectedFile]);
+
+  if (isLoading) {
+    return <div className="p-4">Loading content...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+
+  if (!selectedFile) {
+    return <div className="p-4 text-gray-500">Select a file to view its content.</div>;
+  }
+
+  return (
+    <BMADContentViewerFactory 
+      selectedFile={selectedFile}
+      selectedProject={selectedProject}
+      content={content}
+    />
+  );
+};
