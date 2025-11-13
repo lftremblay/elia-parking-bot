@@ -975,8 +975,8 @@ class BrowserAutomation:
                     except Exception as e:
                         logger.debug(f"Could not get page text: {e}")
                     
-        except Exception as e:
-            logger.debug(f"Could not get page title/URL: {e}")
+                except Exception as e:
+                    logger.debug(f"Could not get page title/URL: {e}")
                 
                 await asyncio.sleep(check_interval)
                 elapsed += check_interval
@@ -1006,35 +1006,6 @@ class BrowserAutomation:
             logger.error(f"❌ Error gathering diagnostic information: {e}")
         
         return False
-                    
-                elif method == "email":
-                    logger.info("📧 Email MFA detected - waiting for manual code entry...")
-                    await asyncio.sleep(60)  # Give time for manual entry
-                    return True
-                
-                elif method == "push":
-                    logger.info("📱 Push notification MFA - waiting for approval...")
-                    # Wait up to 2 minutes for push approval
-                    await asyncio.sleep(120)
-                    return True
-                
-                else:
-                    logger.warning(f"⚠️ Unsupported MFA method: {method}")
-                    return False
-                
-            except Exception as e:
-                logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
-                await self.take_screenshot(f"error_mfa_attempt_{attempt}")
-                
-                if attempt < max_retries:
-                    backoff = 2 ** attempt
-                    logger.info(f"⏳ Retrying MFA in {backoff} seconds...")
-                    await asyncio.sleep(backoff)
-                else:
-                    logger.error(f"❌ All {max_retries} MFA attempts failed")
-        
-        return False
-    
     async def wait_for_dashboard(self, timeout: int = 60000) -> bool:
         """Wait for successful login and dashboard load with flexible detection"""
         try:
