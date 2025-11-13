@@ -638,8 +638,10 @@ class BrowserAutomation:
                     logger.warning("⚠️  Could not detect MFA prompt, attempting to proceed...")
                 
                 # Generate and enter TOTP code
-                totp = pyotp.TOTP(self.auth_manager.totp_secret)
-                totp_code = totp.now()
+                totp_code = self.auth_manager.get_totp_code()
+                if not totp_code:
+                    logger.error("❌ Could not generate TOTP code - authentication manager failed")
+                    return False
                 logger.info(f"🔢 Generated TOTP code: {totp_code[0:2]}****")
                 
                 # Try multiple input field selectors
