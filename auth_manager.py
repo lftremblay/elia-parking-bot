@@ -174,8 +174,8 @@ class AuthenticationManager:
         # If no expiry time, assume valid for now
         return True
     
-    def get_totp_code(self) -> Optional[str]:
-        """Generate TOTP code for MFA"""
+    def get_totp_code(self, time_offset: int = 0) -> Optional[str]:
+        """Generate TOTP code for MFA with time offset support"""
         # First try config file
         totp_secret = self.config.get('mfa', {}).get('totp_secret')
         
@@ -191,13 +191,40 @@ class AuthenticationManager:
             return None
         
         try:
+            import time
+            from datetime import datetime, timedelta
+            
+            # Create TOTP with the secret
             totp = pyotp.TOTP(totp_secret)
-            code = totp.now()
-            logger.info(f"🔢 Generated TOTP code: {code[:2]}****")
+            
+            # Apply time offset if specified (for synchronization issues)
+            if time_offset != 0:
+                current_time = time.time()
+                adjusted_time = current_time + time_offset
+                code = totp.at(adjusted_time)
+                logger.info(f"🔢 Generated TOTP code with {time_offset}s offset: {code[:2]}****")
+            else:
+                code = totp.now()
+                logger.info(f"🔢 Generated TOTP code: {code[:2]}****")
+            
             return code
+            
         except Exception as e:
-            logger.error(f"❌ TOTP generation failed: {e}")
+            logger.error(f"❌ Failed to generate TOTP code: {e}")
             return None
+    
+    def get_multiple_totp_codes(self, count: int = 3) -> list:
+        """Generate multiple TOTP codes for different time windows"""
+        codes = []
+        time_offsets = [-30, 0, 30]  # Previous, current, next 30-second windows
+        
+        for offset in time_offsets[:count]:
+            code = self.get_totp_code(time_offset=offset)
+            if code:
+                codes.append((offset, code))
+        
+        logger.info(f"🔄 Generated {len(codes)} TOTP codes for different time windows")
+        return codes
     
     def prepare_auth_headers(self) -> Dict[str, str]:
         """Prepare authentication headers"""
