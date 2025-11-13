@@ -643,6 +643,19 @@ class BrowserAutomation:
                     logger.error("❌ Could not generate TOTP code - authentication manager failed")
                     return False
                 logger.info(f"🔢 Generated TOTP code: {totp_code[0:2]}****")
+                logger.info(f"🕐 TOTP code generated at: {time.strftime('%H:%M:%S')}")
+                logger.info(f"🔢 Full TOTP code for debugging: {totp_code}")
+                
+                # Wait a moment for the page to be fully ready
+                await asyncio.sleep(1)
+                
+                # Generate a fresh code right before entry to ensure it's valid
+                fresh_totp_code = self.auth_manager.get_totp_code()
+                logger.info(f"🔄 Fresh TOTP code for entry: {fresh_totp_code}")
+                logger.info(f"🕐 Fresh code generated at: {time.strftime('%H:%M:%S')}")
+                
+                # Use the fresh code for entry
+                entry_code = fresh_totp_code
                 
                 # Try multiple input field selectors
                 code_input_selectors = [
@@ -660,8 +673,9 @@ class BrowserAutomation:
                     try:
                         input_field = await self.page.query_selector(selector)
                         if input_field:
-                            await input_field.fill(totp_code)
+                            await input_field.fill(entry_code)
                             logger.info(f"✅ TOTP code entered using selector: {selector}")
+                            logger.info(f"🕐 Code entered at: {time.strftime('%H:%M:%S')}")
                             code_entered = True
                             break
                     except Exception as e:
@@ -670,8 +684,10 @@ class BrowserAutomation:
                 if not code_entered:
                     # Last resort: Try to focus and type the code
                     try:
-                        await self.page.keyboard.type(totp_code)
+                        await self.page.focus('body')  # Focus on page first
+                        await self.page.keyboard.type(entry_code)
                         logger.info("✅ TOTP code entered via keyboard typing")
+                        logger.info(f"🕐 Code entered at: {time.strftime('%H:%M:%S')}")
                     except Exception as e:
                         logger.error(f"❌ Failed to enter TOTP code: {str(e)}")
                         continue
