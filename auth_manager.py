@@ -15,6 +15,16 @@ from cryptography.fernet import Fernet
 from pathlib import Path
 import pickle
 
+# Playwright imports for cloud authentication
+try:
+    from playwright.async_api import Page, Browser, BrowserContext
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+    Page = None
+    Browser = None
+    BrowserContext = None
+
 
 class AuthenticationManager:
     """Manages authentication with multiple fallback strategies"""

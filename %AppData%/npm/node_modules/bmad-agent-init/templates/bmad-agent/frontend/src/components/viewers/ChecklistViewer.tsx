@@ -1,0 +1,120 @@
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Copy, CheckSquare, Circle, CheckCircle } from "lucide-react";
+
+interface ChecklistViewerProps {
+  content: string;
+  selectedFile: string;
+}
+
+export const ChecklistViewer = ({ content, selectedFile }: ChecklistViewerProps) => {
+  const [showStats, setShowStats] = useState(true);
+
+  // Parse checklist items
+  const parseChecklist = (content: string) => {
+    const lines = content.split('\n');
+    const items = lines.map((line, index) => {
+      const checkedMatch = line.match(/^(\s*)-\s*\[x\]\s*(.+)$/i);
+      const uncheckedMatch = line.match(/^(\s*)-\s*\[\s*\]\s*(.+)$/);
+      
+      if (checkedMatch) {
+        return {
+          id: index,
+          text: checkedMatch[2],
+          checked: true,
+          indent: checkedMatch[1].length
+        };
+      } else if (uncheckedMatch) {
+        return {
+          id: index,
+          text: uncheckedMatch[2],
+          checked: false,
+          indent: uncheckedMatch[1].length
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    const total = items.length;
+    const completed = items.filter(item => item?.checked).length;
+    
+    return { items, total, completed };
+  };
+
+  const { items, total, completed } = parseChecklist(content);
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const renderContent = () => {
+    return content.split('\n').map((line, index) => {
+      const checkedMatch = line.match(/^(\s*)-\s*\[x\]\s*(.+)$/i);
+      const uncheckedMatch = line.match(/^(\s*)-\s*\[\s*\]\s*(.+)$/);
+      
+      if (checkedMatch) {
+        return (
+          <div key={index} className="flex items-center space-x-2 py-1" style={{ paddingLeft: `${checkedMatch[1].length * 8}px` }}>
+            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+            <span className="text-green-700 line-through">{checkedMatch[2]}</span>
+          </div>
+        );
+      } else if (uncheckedMatch) {
+        return (
+          <div key={index} className="flex items-center space-x-2 py-1" style={{ paddingLeft: `${uncheckedMatch[1].length * 8}px` }}>
+            <Circle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <span className="text-gray-900">{uncheckedMatch[2]}</span>
+          </div>
+        );
+      } else if (line.startsWith('#')) {
+        const level = line.match(/^#{1,6}/)?.[0].length || 1;
+        const text = line.replace(/^#{1,6}\s*/, '');
+        const className = level === 1 ? 'text-2xl font-bold mb-4 text-gray-900' :
+                         level === 2 ? 'text-xl font-semibold mb-3 text-gray-800 mt-6' :
+                         'text-lg font-semibold mb-2 text-gray-700 mt-4';
+        return <div key={index} className={className}>{text}</div>;
+      } else if (line.trim() === '') {
+        return <br key={index} />;
+      } else {
+        return <p key={index} className="mb-2 leading-relaxed">{line}</p>;
+      }
+    });
+  };
+
+  return (
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-amber-50">
+        <div className="flex items-center space-x-3">
+          <CheckSquare className="h-5 w-5 text-orange-600" />
+          <div>
+            <h2 className="font-semibold text-gray-900">{selectedFile}</h2>
+            <p className="text-sm text-gray-600">BMAD Checklist</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {showStats && (
+            <div className="flex items-center space-x-3 mr-4">
+              <Badge variant={completionRate === 100 ? 'default' : 'secondary'} className="bg-green-100 text-green-800">
+                {completed}/{total} completed
+              </Badge>
+              <span className="text-sm text-gray-600">{completionRate}%</span>
+            </div>
+          )}
+          <Button variant="ghost" size="sm">
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-8">
+          <div className="space-y-2">
+            {renderContent()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

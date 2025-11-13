@@ -2,6 +2,7 @@
 Advanced Scheduler for Elia Parking Bot
 Handles dual scheduling (midnight executive, 6am regular)
 Includes Windows Task Scheduler integration
+Story 1.2 - Enhanced with cloud auth integration and timing validation
 """
 
 import asyncio
@@ -15,25 +16,29 @@ from pathlib import Path
 
 
 class ReservationScheduler:
-    """Manages scheduling for parking reservations"""
+    """Manages scheduling for parking reservations with Story 1.2 enhancements"""
     
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, bot_instance=None):
         self.config = config
         self.schedules = config.get('schedules', {})
         self.running = False
         self.last_run = {}
         
-        logger.info("⏰ ReservationScheduler initialized")
+        # Story 1.2 - Task 3.1: Cloud auth integration
+        self.bot_instance = bot_instance
+        self.cloud_auth_available = bot_instance and hasattr(bot_instance, 'cloud_auth_manager')
+        
+        logger.info("⏰ Enhanced ReservationScheduler initialized (Story 1.2)")
     
     def setup_schedules(self, reservation_callback: Callable):
         """
-        Set up all configured schedules
-        
-        Args:
-            reservation_callback: Async function to call for reservations
-                                 Should accept spot_type as parameter
+        Set up all configured schedules with cloud auth integration
+        Story 1.2 - Task 3.2: Enhanced scheduler triggers full reservation flow
         """
         schedule.clear()
+        
+        # Story 1.2 - Task 3.3: Add timing validation
+        self._validate_timing_configuration()
         
         # Executive spots schedule (midnight)
         if self.schedules.get('executive_spots', {}).get('enabled'):
@@ -41,16 +46,15 @@ class ReservationScheduler:
             exec_time = exec_config.get('time', '00:00:00')
             weekdays_only = exec_config.get('weekdays_only', True)
             
+            # Story 1.2 - Enhanced callback with cloud auth
+            enhanced_callback = self._create_enhanced_callback(reservation_callback, 'executive')
+            
             if weekdays_only:
                 for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']:
-                    getattr(schedule.every(), day).at(exec_time).do(
-                        lambda: asyncio.run(reservation_callback('executive'))
-                    ).tag('executive')
+                    getattr(schedule.every(), day).at(exec_time).do(enhanced_callback).tag('executive')
                 logger.info(f"✅ Executive spots scheduled: Weekdays at {exec_time}")
             else:
-                schedule.every().day.at(exec_time).do(
-                    lambda: asyncio.run(reservation_callback('executive'))
-                ).tag('executive')
+                schedule.every().day.at(exec_time).do(enhanced_callback).tag('executive')
                 logger.info(f"✅ Executive spots scheduled: Daily at {exec_time}")
         
         # Regular spots schedule (6am)
@@ -59,19 +63,121 @@ class ReservationScheduler:
             reg_time = reg_config.get('time', '06:00:00')
             weekdays_only = reg_config.get('weekdays_only', True)
             
+            # Story 1.2 - Enhanced callback with cloud auth
+            enhanced_callback = self._create_enhanced_callback(reservation_callback, 'regular')
+            
             if weekdays_only:
                 for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']:
-                    getattr(schedule.every(), day).at(reg_time).do(
-                        lambda: asyncio.run(reservation_callback('regular'))
-                    ).tag('regular')
+                    getattr(schedule.every(), day).at(reg_time).do(enhanced_callback).tag('regular')
                 logger.info(f"✅ Regular spots scheduled: Weekdays at {reg_time}")
             else:
-                schedule.every().day.at(reg_time).do(
-                    lambda: asyncio.run(reservation_callback('regular'))
-                ).tag('regular')
+                schedule.every().day.at(reg_time).do(enhanced_callback).tag('regular')
                 logger.info(f"✅ Regular spots scheduled: Daily at {reg_time}")
         
-        logger.success("🎯 All schedules configured")
+        logger.success("🎯 All schedules configured with Story 1.2 enhancements")
+    
+    def _create_enhanced_callback(self, original_callback: Callable, spot_type: str):
+        """
+        Create enhanced callback with cloud auth integration
+        Story 1.2 - Task 3.1: Integrate cloud auth with scheduler execution
+        """
+        def enhanced_reservation_callback():
+            """Enhanced reservation callback with cloud auth and error handling"""
+            logger.info(f"🚀 Story 1.2: Starting scheduled {spot_type} reservation...")
+            
+            try:
+                # Story 1.2 - Cloud auth validation
+                if self.cloud_auth_available and self.bot_instance.cloud_auth_manager:
+                    logger.info("☁️ Using cloud authentication for scheduled execution")
+                    # Cloud auth will be handled automatically in bot.authenticate()
+                
+                # Execute original callback with enhanced error handling
+                start_time = time.time()
+                success = asyncio.run(original_callback(spot_type))
+                execution_time = time.time() - start_time
+                
+                # Story 1.2 - Performance tracking
+                logger.info(f"📊 Scheduled {spot_type} reservation completed in {execution_time:.2f}s")
+                
+                if success:
+                    logger.success(f"✅ Scheduled {spot_type} reservation successful")
+                else:
+                    logger.error(f"❌ Scheduled {spot_type} reservation failed")
+                
+                # Update last run tracking
+                self.last_run[spot_type] = {
+                    'timestamp': datetime.now().isoformat(),
+                    'success': success,
+                    'execution_time': execution_time
+                }
+                
+            except Exception as e:
+                logger.error(f"❌ Scheduled {spot_type} reservation error: {e}")
+                self.last_run[spot_type] = {
+                    'timestamp': datetime.now().isoformat(),
+                    'success': False,
+                    'error': str(e)
+                }
+        
+        return enhanced_reservation_callback
+    
+    def _validate_timing_configuration(self):
+        """
+        Validate timing configuration for optimal execution windows
+        Story 1.2 - Task 3.3: Add timing validation for optimal execution windows
+        """
+        logger.info("🕐 Validating timing configuration...")
+        
+        for spot_type, config in self.schedules.items():
+            if not config.get('enabled'):
+                continue
+            
+            time_str = config.get('time', '')
+            try:
+                # Validate time format
+                time_obj = datetime.strptime(time_str, '%H:%M:%S')
+                
+                # Check for optimal timing windows
+                hour = time_obj.hour
+                if spot_type == 'executive_spots':
+                    if hour == 0:
+                        logger.success("✅ Executive spots scheduled at optimal midnight window")
+                    else:
+                        logger.warning(f"⚠️ Executive spots at {hour}:00 - midnight (00:00) recommended")
+                
+                elif spot_type == 'regular_spots':
+                    if 5 <= hour <= 7:
+                        logger.success(f"✅ Regular spots scheduled at optimal early morning window ({hour}:00)")
+                    else:
+                        logger.warning(f"⚠️ Regular spots at {hour}:00 - 6am (06:00) recommended")
+                
+            except ValueError:
+                logger.error(f"❌ Invalid time format for {spot_type}: {time_str}")
+        
+        logger.info("✅ Timing validation completed")
+    
+    def get_performance_metrics(self) -> dict:
+        """
+        Get performance metrics for scheduled executions
+        Story 1.2 - Task 3.4: Performance monitoring
+        """
+        metrics = {
+            'total_runs': len(self.last_run),
+            'successful_runs': sum(1 for run in self.last_run.values() if run.get('success', False)),
+            'average_execution_time': 0,
+            'last_execution': None
+        }
+        
+        if self.last_run:
+            execution_times = [run.get('execution_time', 0) for run in self.last_run.values() if 'execution_time' in run]
+            if execution_times:
+                metrics['average_execution_time'] = sum(execution_times) / len(execution_times)
+            
+            # Find most recent execution
+            last_run = max(self.last_run.values(), key=lambda x: x.get('timestamp', ''))
+            metrics['last_execution'] = last_run
+        
+        return metrics
     
     def run_forever(self):
         """Run the scheduler indefinitely"""

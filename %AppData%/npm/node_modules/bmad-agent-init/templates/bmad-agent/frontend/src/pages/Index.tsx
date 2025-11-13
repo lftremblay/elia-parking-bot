@@ -1,0 +1,44 @@
+
+import { useState } from "react";
+import { ProjectSidebar } from "../components/ProjectSidebar";
+import { ContentViewer } from "../components/ContentViewer";
+import { AppHeader } from "../components/AppHeader";
+import { cn } from "@/lib/utils";
+
+const Index = () => {
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      <AppHeader 
+        selectedProject={selectedProject}
+        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sidebarCollapsed={sidebarCollapsed}
+      />
+      
+      <div className="flex-1 flex overflow-hidden">
+        <ProjectSidebar 
+          selectedProject={selectedProject}
+          onSelectProject={setSelectedProject}
+          selectedFile={selectedFile}
+          onSelectFile={setSelectedFile}
+          collapsed={sidebarCollapsed}
+        />
+        
+        <main className={cn(
+          "flex-1 transition-all duration-300 ease-in-out",
+          sidebarCollapsed ? "ml-0" : "ml-80"
+        )}>
+          <ContentViewer 
+            selectedFile={selectedFile}
+            selectedProject={selectedProject}
+          />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Index;

@@ -1,0 +1,143 @@
+
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Copy, Layout, TrendingUp, Clock, Users, FileText } from "lucide-react";
+import { StandardMarkdownViewer } from "./StandardMarkdownViewer";
+
+interface DashboardViewerProps {
+  content: string;
+  selectedFile: string;
+}
+
+export const DashboardViewer = ({ content, selectedFile }: DashboardViewerProps) => {
+  const [viewMode, setViewMode] = useState<'dashboard' | 'markdown'>('dashboard');
+
+  // Extract key metrics from content (simplified parsing)
+  const extractMetrics = (content: string) => {
+    const lines = content.split('\n');
+    const metrics = {
+      projectName: '',
+      lastUpdated: new Date().toLocaleDateString(),
+      totalArtifacts: Math.floor(Math.random() * 15) + 10, // Mock data
+      completionRate: Math.floor(Math.random() * 40) + 60, // Mock data
+      activeEpics: Math.floor(Math.random() * 5) + 3 // Mock data
+    };
+
+    // Try to extract project name from first heading
+    const firstHeading = lines.find(line => line.startsWith('# '));
+    if (firstHeading) {
+      metrics.projectName = firstHeading.replace('# ', '').trim();
+    }
+
+    return metrics;
+  };
+
+  const metrics = extractMetrics(content);
+
+  if (viewMode === 'markdown') {
+    return <StandardMarkdownViewer content={content} selectedFile={selectedFile} />;
+  }
+
+  return (
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center space-x-3">
+          <Layout className="h-6 w-6 text-blue-600" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {metrics.projectName || 'Project Dashboard'}
+            </h1>
+            <div className="flex items-center space-x-1 text-sm text-gray-500">
+              <Clock className="h-3 w-3" />
+              <span>Last updated: {metrics.lastUpdated}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex space-x-2">
+          <Button 
+            variant={viewMode === 'dashboard' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setViewMode('dashboard')}
+          >
+            Dashboard
+          </Button>
+          <Button 
+            variant={viewMode === 'markdown' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setViewMode('markdown')}
+          >
+            Raw Markdown
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FileText className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Artifacts</p>
+                <p className="text-2xl font-bold text-gray-900">{metrics.totalArtifacts}</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Completion Rate</p>
+                <p className="text-2xl font-bold text-gray-900">{metrics.completionRate}%</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Users className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Active Epics</p>
+                <p className="text-2xl font-bold text-gray-900">{metrics.activeEpics}</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Clock className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Status</p>
+                <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Content Preview */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Project Overview</h2>
+          <div className="prose prose-sm max-w-none">
+            <StandardMarkdownViewer content={content} selectedFile={selectedFile} />
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
