@@ -76,6 +76,37 @@ class EliaParkingBot:
         
         logger.success("✅ Bot initialized")
     
+    async def _authenticate_with_cloud_manager(self) -> bool:
+        """
+        Authenticate using cloud authentication manager
+        Story 1.2 - Task 1.1: Cloud authentication integration
+        """
+        try:
+            logger.info("☁️ Attempting cloud authentication...")
+            
+            # Get credentials from cloud manager
+            if not self.cloud_auth_manager.get_credentials():
+                logger.error("☁️ Failed to retrieve cloud credentials")
+                return False
+            
+            # Use browser automation with cloud credentials
+            success = await self.browser.authenticate(
+                email=self.cloud_auth_manager.email,
+                password=self.cloud_auth_manager.password,
+                totp_secret=self.cloud_auth_manager.totp_secret
+            )
+            
+            if success:
+                logger.success("☁️ Cloud authentication successful!")
+                return True
+            else:
+                logger.error("☁️ Cloud authentication failed")
+                return False
+                
+        except Exception as e:
+            logger.error(f"☁️ Cloud authentication error: {e}")
+            return False
+    
     async def authenticate(self, force_reauth: bool = False) -> bool:
         """
         Authenticate with Elia system

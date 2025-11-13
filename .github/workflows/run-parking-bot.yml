@@ -29,8 +29,7 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        playwright install chromium
-        playwright install-deps chromium
+        playwright install chromium --force
 
     - name: Create config directory
       run: |
