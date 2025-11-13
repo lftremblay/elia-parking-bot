@@ -115,7 +115,7 @@ jobs:
         cache-dependency-path: '**/requirements.txt'
 
     - name: Cache pip packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: pip-cache
       with:
         path: |

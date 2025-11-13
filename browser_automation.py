@@ -701,68 +701,68 @@ class BrowserAutomation:
                                     return False
                     except Exception as e:
                         logger.warning(f"⚠️  Error checking MFA failure: {str(e)}")
-            
-            # Check for MFA retry prompt or other indicators
-            retry_indicators = [
-                'try another way', 'i can\'t use my authenticator app',
-                'sign in another way', 'try a different verification method',
-                'i don\'t have access to this', 'having trouble?', 'trouble signing in?'
-            ]
-            
-            # Look for retry indicators in buttons and links
-            all_elements = await self.page.query_selector_all('a, button, input[type="button"], input[type="submit"]')
-            for element in all_elements:
-                try:
-                    element_text = (await element.inner_text()).lower()
-                    if any(indicator in element_text for indicator in retry_indicators):
-                        self.logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
-                        return False
-                except:
-                    continue
-            
-            # If we're back at the email entry page, MFA failed
-            email_input = await self.page.query_selector('input[type="email"]')
-            if email_input:
-                self.logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
-                return False
-            
-            # Last resort: Check for any interactive elements that might help us proceed
-            self.logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
-            
-            # Try to find and click a "Continue" or "Next" button if present
-            possible_actions = [
-                ('continue', ['continue', 'next', 'proceed', 'ok', 'yes', 'verify', 'submit']),
+                
+                # Check for MFA retry prompt or other indicators
+                retry_indicators = [
+                    'try another way', 'i can\'t use my authenticator app',
+                    'sign in another way', 'try a different verification method',
+                    'i don\'t have access to this', 'having trouble?', 'trouble signing in?'
+                ]
+                
+                # Look for retry indicators in buttons and links
+                all_elements = await self.page.query_selector_all('a, button, input[type="button"], input[type="submit"]')
+                for element in all_elements:
+                    try:
+                        element_text = (await element.inner_text()).lower()
+                        if any(indicator in element_text for indicator in retry_indicators):
+                            self.logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
+                            return False
+                    except:
+                        continue
+                
+                # If we're back at the email entry page, MFA failed
+                email_input = await self.page.query_selector('input[type="email"]')
+                if email_input:
+                    self.logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
+                    return False
+                
+                # Last resort: Check for any interactive elements that might help us proceed
+                self.logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
+                
+                # Try to find and click a "Continue" or "Next" button if present
+                possible_actions = [
+                    ('continue', ['continue', 'next', 'proceed', 'ok', 'yes', 'verify', 'submit']),
                 ('skip', ['skip', 'maybe later', 'do this later', 'not now']),
                 ('use another method', ['use another method', 'try another way', 'other options'])
             ]
             
-            clicked = False
-            for action_name, keywords in possible_actions:
-                if clicked:
-                    break
-                    
-                for element in all_elements:
-                    try:
-                        element_text = (await element.inner_text()).lower()
-                        if any(keyword in element_text for keyword in keywords):
-                            await element.click()
-                            self.logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
-                            await asyncio.sleep(3)  # Wait for navigation
-                            clicked = True
-                            break
-                    except:
-                        continue
+                clicked = False
+                for action_name, keywords in possible_actions:
+                    if clicked:
+                        break
+                        
+                    for element in all_elements:
+                        try:
+                            element_text = (await element.inner_text()).lower()
+                            if any(keyword in element_text for keyword in keywords):
+                                await element.click()
+                                self.logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
+                                await asyncio.sleep(3)  # Wait for navigation
+                                clicked = True
+                                break
+                        except:
+                            continue
             
             # If we're still on a login page after attempting to proceed, log detailed info
-            current_url = self.page.url.lower()
-            if any(domain in current_url for domain in login_domains):
-                # Take another screenshot for debugging
-                await self.take_screenshot("post_mfa_redirect_attempt")
-                
-                # Log page title and URL for debugging
-                page_title = await self.page.title()
-                self.logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
-                self.logger.warning(f"⚠️  Current URL: {current_url}")
+                current_url = self.page.url.lower()
+                if any(domain in current_url for domain in login_domains):
+                    # Take another screenshot for debugging
+                    await self.take_screenshot("post_mfa_redirect_attempt")
+                    
+                    # Log page title and URL for debugging
+                    page_title = await self.page.title()
+                    self.logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
+                    self.logger.warning(f"⚠️  Current URL: {current_url}")
                 
                 # Log visible text (first 500 chars) for context
                 try:
@@ -774,10 +774,14 @@ class BrowserAutomation:
                     self.logger.warning("⚠️  Could not retrieve page content")
                 
                 return False
-
-        # After MFA success checks
-        logger.info("✅ MFA verification appears successful")
-        return True
+                
+                # After MFA success checks
+                logger.info("✅ MFA verification appears successful")
+                return True
+                
+            except Exception as e:
+                logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
+                await self.take_screenshot(f"error_mfa_attempt_{attempt}")
 
     async def _detect_login_loop(self, current_url: str) -> bool:
         """Detect if we're stuck in a login redirect loop."""
@@ -808,15 +812,15 @@ class BrowserAutomation:
                                 }
                             """)
                             
-                            logger.info(f"🔍 Login page analysis: {has_login_form}")
-                            
-                            # If we see a login form with email/password after MFA, we're likely in a loop
-                            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
-                                logger.error("❌ Detected login form after MFA - likely a redirect loop")
-                                
-                                # Try to get any error messages
-                                try:
-                                    error_messages = await self.page.evaluate("""
+            logger.info(f"🔍 Login page analysis: {has_login_form}")
+            
+            # If we see a login form with email/password after MFA, we're likely in a loop
+            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
+                logger.error("❌ Detected login form after MFA - likely a redirect loop")
+                
+                # Try to get any error messages
+                try:
+                    error_messages = await self.page.evaluate("""
                                         () => {
                                             const errorSelectors = [
                                                 '.error', '.alert', '.message', '.validation',
