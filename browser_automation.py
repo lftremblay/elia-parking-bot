@@ -667,37 +667,40 @@ class BrowserAutomation:
                 
                 if any(domain in current_url for domain in login_domains):
                     # Enhanced error detection
-                    error_messages = [
-                'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
-                'unable to sign in', 'sign-in was blocked', 'account is locked',
-                'temporarily disabled', 'suspicious activity', 'unusual sign-in',
-                'verify your identity', 'additional verification', 'security info',
-                'we couldn\'t sign you in', 'your account has been locked',
-                'this account has been locked', 'too many attempts'
-            ]
-            
-            # Check for error messages in the page content
-            page_content = (await self.page.content()).lower()
-            found_errors = [msg for msg in error_messages if msg in page_content]
-            
-            if found_errors:
-                self.logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
-                return False
-                
-            # Check for specific error elements
-            error_selectors = [
-                'div#error', 'div.error', 'div.alert-error', 'div.message-error',
-                'div.error-message', 'span.error', 'p.error', 'div[role="alert"]',
-                'div[class*="error"]', 'div[class*="alert"]', 'div[class*="message"]'
-            ]
-            
-            for selector in error_selectors:
-                error_element = await self.page.query_selector(selector)
-                if error_element:
-                    error_text = (await error_element.inner_text()).strip()
-                    if error_text and len(error_text) < 500:  # Sanity check for error text length
-                        self.logger.warning(f"⚠️  MFA failed - error: {error_text}")
-                        return False
+                    try:
+                        error_messages = [
+                            'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
+                            'unable to sign in', 'sign-in was blocked', 'account is locked',
+                            'temporarily disabled', 'suspicious activity', 'unusual sign-in',
+                            'verify your identity', 'additional verification', 'security info',
+                            'we couldn\'t sign you in', 'your account has been locked',
+                            'this account has been locked', 'too many attempts'
+                        ]
+                        
+                        # Check for error messages in the page content
+                        page_content = (await self.page.content()).lower()
+                        found_errors = [msg for msg in error_messages if msg in page_content]
+                        
+                        if found_errors:
+                            self.logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
+                            return False
+                            
+                        # Check for specific error elements
+                        error_selectors = [
+                            'div#error', 'div.error', 'div.alert-error', 'div.message-error',
+                            'div.error-message', 'span.error', 'p.error', 'div[role="alert"]',
+                            'div[class*="error"]', 'div[class*="alert"]', 'div[class*="message"]'
+                        ]
+                        
+                        for selector in error_selectors:
+                            error_element = await self.page.query_selector(selector)
+                            if error_element:
+                                error_text = (await error_element.inner_text()).strip()
+                                if error_text and len(error_text) < 500:  # Sanity check for error text length
+                                    self.logger.warning(f"⚠️  MFA failed - error: {error_text}")
+                                    return False
+                    except Exception as e:
+                        logger.warning(f"⚠️  Error checking MFA failure: {str(e)}")
             
             # Check for MFA retry prompt or other indicators
             retry_indicators = [
