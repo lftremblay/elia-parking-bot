@@ -726,7 +726,7 @@ class BrowserAutomation:
                         found_errors = [msg for msg in error_messages if msg in page_content]
                         
                         if found_errors:
-                            self.logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
+                            logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
                             return False
                             
                         # Check for specific error elements
@@ -759,7 +759,7 @@ class BrowserAutomation:
                     try:
                         element_text = (await element.inner_text()).lower()
                         if any(indicator in element_text for indicator in retry_indicators):
-                            self.logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
+                            logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
                             return False
                     except:
                         continue
@@ -767,11 +767,11 @@ class BrowserAutomation:
                 # If we're back at the email entry page, MFA failed
                 email_input = await self.page.query_selector('input[type="email"]')
                 if email_input:
-                    self.logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
+                    logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
                     return False
                 
                 # Last resort: Check for any interactive elements that might help us proceed
-                self.logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
+                logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
                 
                 # Try to find and click a "Continue" or "Next" button if present
                 possible_actions = [
@@ -790,7 +790,7 @@ class BrowserAutomation:
                             element_text = (await element.inner_text()).lower()
                             if any(keyword in element_text for keyword in keywords):
                                 await element.click()
-                                self.logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
+                                logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
                                 await asyncio.sleep(3)  # Wait for navigation
                                 clicked = True
                                 break
@@ -805,17 +805,17 @@ class BrowserAutomation:
                     
                     # Log page title and URL for debugging
                     page_title = await self.page.title()
-                    self.logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
-                    self.logger.warning(f"⚠️  Current URL: {current_url}")
+                    logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
+                    logger.warning(f"⚠️  Current URL: {current_url}")
                 
                 # Log visible text (first 500 chars) for context
                 try:
                     visible_text = await self.page.evaluate('''() => {
                         return document.body.innerText;
                     }''')
-                    self.logger.warning(f"⚠️  Page content preview: {visible_text[:500]}...")
+                    logger.warning(f"⚠️  Page content preview: {visible_text[:500]}...")
                 except:
-                    self.logger.warning("⚠️  Could not retrieve page content")
+                    logger.warning("⚠️  Could not retrieve page content")
                 
                 return False
                 
