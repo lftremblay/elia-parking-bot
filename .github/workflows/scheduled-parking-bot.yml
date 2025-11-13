@@ -5,7 +5,9 @@ on:
     - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
     - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
   push:
-    branches: [ 'master' ]  # Also run on pushes to master for testing
+    branches: [ 'main', 'master' ]  # Run on pushes to main/master for testing
+  pull_request:
+    branches: [ 'main', 'master' ]  # Run on pull requests for testing
 
 jobs:
   reserve-parking:
