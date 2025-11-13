@@ -741,7 +741,7 @@ class BrowserAutomation:
                             if error_element:
                                 error_text = (await error_element.inner_text()).strip()
                                 if error_text and len(error_text) < 500:  # Sanity check for error text length
-                                    self.logger.warning(f"⚠️  MFA failed - error: {error_text}")
+                                    logger.warning(f"⚠️  MFA failed - error: {error_text}")
                                     return False
                     except Exception as e:
                         logger.warning(f"⚠️  Error checking MFA failure: {str(e)}")

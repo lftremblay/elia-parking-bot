@@ -84,17 +84,8 @@ class EliaParkingBot:
         try:
             logger.info("☁️ Attempting cloud authentication...")
             
-            # Get credentials from cloud manager
-            if not self.cloud_auth_manager.get_credentials():
-                logger.error("☁️ Failed to retrieve cloud credentials")
-                return False
-            
-            # Use browser automation with cloud credentials
-            success = await self.browser.authenticate(
-                email=self.cloud_auth_manager.email,
-                password=self.cloud_auth_manager.password,
-                totp_secret=self.cloud_auth_manager.totp_secret
-            )
+            # Use cloud authentication manager directly
+            success = await self.cloud_auth_manager.authenticate_microsoft()
             
             if success:
                 logger.success("☁️ Cloud authentication successful!")
