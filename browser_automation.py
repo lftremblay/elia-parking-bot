@@ -637,435 +637,122 @@ class BrowserAutomation:
                 if not mfa_prompt_found:
                     logger.warning("⚠️  Could not detect MFA prompt, attempting to proceed...")
                 
-                # Generate and enter TOTP code
-                totp_code = self.auth_manager.get_totp_code()
-                if not totp_code:
-                    logger.error("❌ Could not generate TOTP code - authentication manager failed")
-                    return False
-                logger.info(f"🔢 Generated TOTP code: {totp_code[0:2]}****")
-                logger.info(f"🕐 TOTP code generated at: {time.strftime('%H:%M:%S')}")
-                logger.info(f"🔢 Full TOTP code for debugging: {totp_code}")
+                # Generate and enter TOTP code with enhanced cracking strategy
+                logger.info("🚀 Starting MFA cracking with enhanced TOTP...")
                 
-                # Wait a moment for the page to be fully ready
-                await asyncio.sleep(1)
+                # Get multiple TOTP codes for different time windows
+                totp_codes = self.auth_manager.get_multiple_totp_codes(count=3)
                 
-                # Generate a fresh code right before entry to ensure it's valid
-                fresh_totp_code = self.auth_manager.get_totp_code()
-                logger.info(f"🔄 Fresh TOTP code for entry: {fresh_totp_code}")
-                logger.info(f"🕐 Fresh code generated at: {time.strftime('%H:%M:%S')}")
-                
-                # Use the fresh code for entry
-                entry_code = fresh_totp_code
-                
-                # Try multiple input field selectors
-                code_input_selectors = [
-                    'input[name="otc"]',
-                    'input[name="code"]',
-                    'input[type="text"]',
-                    'input[type="tel"]',
-                    'input[autocomplete*="one"]',
-                    'input[inputmode*="numeric"]',
-                    'input[inputmode*="tel"]'
-                ]
-                
-                code_entered = False
-                for selector in code_input_selectors:
-                    try:
-                        input_field = await self.page.query_selector(selector)
-                        if input_field:
-                            await input_field.fill(entry_code)
-                            logger.info(f"✅ TOTP code entered using selector: {selector}")
-                            logger.info(f"🕐 Code entered at: {time.strftime('%H:%M:%S')}")
-                            code_entered = True
-                            break
-                    except Exception as e:
-                        logger.debug(f"Could not enter code using {selector}: {str(e)}")
-                
-                if not code_entered:
-                    # Last resort: Try to focus and type the code
-                    try:
-                        await self.page.focus('body')  # Focus on page first
-                        await self.page.keyboard.type(entry_code)
-                        logger.info("✅ TOTP code entered via keyboard typing")
-                        logger.info(f"🕐 Code entered at: {time.strftime('%H:%M:%S')}")
-                    except Exception as e:
-                        logger.error(f"❌ Failed to enter TOTP code: {str(e)}")
-                        continue
-                
-                # Try to submit the form
-                try:
-                    # Try pressing Enter first (works for most forms)
-                    await self.page.keyboard.press('Enter')
-                    logger.info("✅ Submitted MFA form via Enter key")
-                except Exception as e:
-                    logger.warning(f"⚠️  Could not submit with Enter: {str(e)}")
-                    # Try to find and click a submit button
-                    submit_buttons = await self.page.query_selector_all('button[type="submit"], input[type="submit"], button:has-text("Verify"), button:has-text("Submit"), button:has-text("Continue")')
-                    if submit_buttons:
-                        try:
-                            await submit_buttons[0].click()
-                            logger.info("✅ Submitted MFA form via button click")
-                        except Exception as e:
-                            logger.warning(f"⚠️  Could not click submit button: {str(e)}")
-                
-                # After MFA submission, wait for navigation and handle potential redirects
-                logger.info("⏳ Waiting for MFA verification and potential redirects...")
-                
-                # Wait for navigation with a longer timeout
-                try:
-                    await asyncio.wait_for(self.page.wait_for_load_state('networkidle'), timeout=20.0)
-                    await asyncio.sleep(2)  # Additional wait for any client-side redirects
-                except Exception as e:
-                    logger.warning(f"⚠️  Navigation wait timed out: {str(e)}")
-                
-                # Take a screenshot for debugging
-                await self.take_screenshot("post_mfa_submission")
-                
-                # Check if we're back at the login page after MFA (failed MFA or redirect loop)
-                current_url = self.page.url.lower()
-                login_domains = ['login.microsoftonline.com', 'login.live.com', 'account.live.com']
-                
-                if any(domain in current_url for domain in login_domains):
-                    # Enhanced error detection
-                    try:
-                        error_messages = [
-                            'error', 'incorrect', 'invalid', 'try again', 'something went wrong',
-                            'unable to sign in', 'sign-in was blocked', 'account is locked',
-                            'temporarily disabled', 'suspicious activity', 'unusual sign-in',
-                            'verify your identity', 'additional verification', 'security info',
-                            'we couldn\'t sign you in', 'your account has been locked',
-                            'this account has been locked', 'too many attempts'
-                        ]
-                        
-                        # Check for error messages in the page content
-                        page_content = (await self.page.content()).lower()
-                        found_errors = [msg for msg in error_messages if msg in page_content]
-                        
-                        if found_errors:
-                            logger.warning(f"⚠️  MFA failed - detected error messages: {', '.join(found_errors)[:100]}...")
-                            return False
-                            
-                        # Check for specific error elements
-                        error_selectors = [
-                            'div#error', 'div.error', 'div.alert-error', 'div.message-error',
-                            'div.error-message', 'span.error', 'p.error', 'div[role="alert"]',
-                            'div[class*="error"]', 'div[class*="alert"]', 'div[class*="message"]'
-                        ]
-                        
-                        for selector in error_selectors:
-                            error_element = await self.page.query_selector(selector)
-                            if error_element:
-                                error_text = (await error_element.inner_text()).strip()
-                                if error_text and len(error_text) < 500:  # Sanity check for error text length
-                                    logger.warning(f"⚠️  MFA failed - error: {error_text}")
-                                    return False
-                    except Exception as e:
-                        logger.warning(f"⚠️  Error checking MFA failure: {str(e)}")
-                
-                # Check for MFA retry prompt or other indicators
-                retry_indicators = [
-                    'try another way', 'i can\'t use my authenticator app',
-                    'sign in another way', 'try a different verification method',
-                    'i don\'t have access to this', 'having trouble?', 'trouble signing in?'
-                ]
-                
-                # Look for retry indicators in buttons and links
-                all_elements = await self.page.query_selector_all('a, button, input[type="button"], input[type="submit"]')
-                for element in all_elements:
-                    try:
-                        element_text = (await element.inner_text()).lower()
-                        if any(indicator in element_text for indicator in retry_indicators):
-                            logger.warning(f"⚠️  MFA failed - retry prompt detected: {element_text}")
-                            return False
-                    except:
-                        continue
-                
-                # If we're back at the email entry page, MFA failed
-                email_input = await self.page.query_selector('input[type="email"]')
-                if email_input:
-                    logger.warning("⚠️  Redirected back to email entry - MFA likely failed")
+                if not totp_codes:
+                    logger.error("❌ Could not generate TOTP codes - authentication manager failed")
                     return False
                 
-                # Last resort: Check for any interactive elements that might help us proceed
-                logger.warning("⚠️  Possible redirect loop after MFA - attempting to find a way forward...")
+                logger.info(f"🔄 Generated {len(totp_codes)} TOTP codes for cracking attempts")
                 
-                # Try to find and click a "Continue" or "Next" button if present
-                possible_actions = [
-                    ('continue', ['continue', 'next', 'proceed', 'ok', 'yes', 'verify', 'submit']),
-                ('skip', ['skip', 'maybe later', 'do this later', 'not now']),
-                ('use another method', ['use another method', 'try another way', 'other options'])
-            ]
-            
-                clicked = False
-                for action_name, keywords in possible_actions:
-                    if clicked:
-                        break
-                        
-                    for element in all_elements:
-                        try:
-                            element_text = (await element.inner_text()).lower()
-                            if any(keyword in element_text for keyword in keywords):
-                                await element.click()
-                                logger.info(f"✅ Clicked '{element_text.strip()}' button to {action_name}")
-                                await asyncio.sleep(3)  # Wait for navigation
-                                clicked = True
-                                break
-                        except:
-                            continue
-            
-            # If we're still on a login page after attempting to proceed, log detailed info
-                current_url = self.page.url.lower()
-                if any(domain in current_url for domain in login_domains):
-                    # Take another screenshot for debugging
-                    await self.take_screenshot("post_mfa_redirect_attempt")
+                # Try each TOTP code until one works
+                for attempt_index, (time_offset, totp_code) in enumerate(totp_codes):
+                    logger.info(f"🎯 MFA cracking attempt {attempt_index + 1}/{len(totp_codes)}")
+                    logger.info(f"🔢 Using TOTP code with {time_offset}s offset: {totp_code[0:2]}****")
                     
-                    # Log page title and URL for debugging
-                    page_title = await self.page.title()
-                    logger.warning(f"⚠️  Still on login page after MFA - Title: {page_title}")
-                    logger.warning(f"⚠️  Current URL: {current_url}")
+                    # Try to enter this code
+                    code_entered = False
+                    
+                    # Try multiple input field selectors
+                    code_input_selectors = [
+                        'input[name="otc"]',
+                        'input[name="code"]',
+                        'input[type="text"]',
+                        'input[type="tel"]',
+                        'input[autocomplete*="one"]',
+                        'input[inputmode*="numeric"]',
+                        'input[inputmode*="tel"]'
+                    ]
+                    
+                    for selector in code_input_selectors:
+                        try:
+                            input_field = await self.page.query_selector(selector)
+                            if input_field:
+                                await input_field.clear()
+                                await input_field.fill(totp_code)
+                                logger.info(f"✅ TOTP code entered using selector: {selector}")
+                                code_entered = True
+                                break
+                        except Exception as e:
+                            logger.debug(f"Could not enter code using {selector}: {str(e)}")
+                    
+                    if not code_entered:
+                        try:
+                            await self.page.focus('body')
+                            await self.page.keyboard.type(totp_code)
+                            logger.info("✅ TOTP code entered via keyboard typing")
+                        except Exception as e:
+                            logger.error(f"❌ Failed to enter TOTP code: {str(e)}")
+                            continue
+                    
+                    # Submit the form
+                    try:
+                        await self.page.keyboard.press('Enter')
+                        logger.info("✅ Submitted MFA form via Enter key")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error submitting MFA form: {e}")
+                    
+                    # Wait for verification
+                    logger.info("⏳ Waiting for MFA verification...")
+                    await asyncio.sleep(3)
+                    
+                    # Check if successful
+                    try:
+                        current_url = self.page.url.lower()
+                        page_title = (await self.page.title()).lower()
+                        
+                        success_indicators = [
+                            'dashboard', 'home', 'welcome', 'overview', 'parking', 'reservation',
+                            'app.elia.io', 'elia.io', 'success', 'authenticated'
+                        ]
+                        
+                        if any(indicator in current_url or indicator in page_title for indicator in success_indicators):
+                            logger.success(f"🎉 MFA cracking successful with {time_offset}s offset!")
+                            return True
+                        
+                        # Check for error messages
+                        error_indicators = ['error', 'invalid', 'incorrect', 'failed', 'try again']
+                        page_content = (await self.page.content()).lower()
+                        
+                        if any(indicator in page_content for indicator in error_indicators):
+                            logger.warning(f"⚠️ MFA attempt {attempt_index + 1} failed")
+                            if attempt_index < len(totp_codes) - 1:
+                                logger.info("⏳ Waiting 2 seconds before next attempt...")
+                                await asyncio.sleep(2)
+                            continue
+                        else:
+                            # Wait a bit more and check again
+                            await asyncio.sleep(2)
+                            current_url = self.page.url.lower()
+                            if any(indicator in current_url or indicator in page_title for indicator in success_indicators):
+                                logger.success(f"🎉 MFA successful with {time_offset}s offset (delayed)!")
+                                return True
+                    
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error checking MFA success: {e}")
+                        continue
                 
-                # Log visible text (first 500 chars) for context
-                try:
-                    visible_text = await self.page.evaluate('''() => {
-                        return document.body.innerText;
-                    }''')
-                    logger.warning(f"⚠️  Page content preview: {visible_text[:500]}...")
-                except:
-                    logger.warning("⚠️  Could not retrieve page content")
-                
+                # If all attempts failed
+                logger.error("❌ All MFA cracking attempts failed")
                 return False
-                
-                # After MFA success checks
-                logger.info("✅ MFA verification appears successful")
-                return True
                 
             except Exception as e:
                 logger.warning(f"⚠️ MFA attempt {attempt} failed: {e}")
                 await self.take_screenshot(f"error_mfa_attempt_{attempt}")
-
-    async def _detect_login_loop(self, current_url: str) -> bool:
-        """Detect if we're stuck in a login redirect loop."""
-        login_indicators = ['login', 'auth', 'signin', 'microsoftonline']
-        
-        # If we're on a login page but have already authenticated, this might be a redirect loop
-        if any(indicator in current_url.lower() for indicator in login_indicators):
-            logger.warning("⚠️ Detected potential redirect loop back to login page")
-            
-            # Try to detect if we're in a login form
-            has_login_form = await self.page.evaluate("""
-                () => {
-                    const formElements = [
-                                        document.querySelector('input[type="password"]'),
-                                        document.querySelector('input[name*="pass"]'),
-                                        document.querySelector('button[type="submit"]'),
-                                        document.querySelector('input[type="submit"]')
-                                    ].filter(el => el !== null);
-                                    
-                                    return {
-                                        hasLoginForm: formElements.length > 0,
-                                        formElementCount: formElements.length,
-                                        pageTitle: document.title,
-                                        formAction: document.querySelector('form')?.action || 'none',
-                                        hasEmailField: document.querySelector('input[type="email"], input[name*="email"]') !== null,
-                                        hasPasswordField: document.querySelector('input[type="password"], input[name*="pass"]') !== null
-                                    };
-                                }
-                            """)
-                            
-            logger.info(f"🔍 Login page analysis: {has_login_form}")
-            
-            # If we see a login form with email/password after MFA, we're likely in a loop
-            if has_login_form.get('hasLoginForm') and has_login_form.get('hasEmailField'):
-                logger.error("❌ Detected login form after MFA - likely a redirect loop")
                 
-                # Try to get any error messages
-                try:
-                    error_messages = await self.page.evaluate("""
-                                        () => {
-                                            const errorSelectors = [
-                                                '.error', '.alert', '.message', '.validation',
-                                                '[role="alert"]', '[aria-live="assertive"]',
-                                                '.error-message', '.alert-message', '.message-error'
-                                            ];
-                                            
-                                            const errors = [];
-                                            errorSelectors.forEach(selector => {
-                                                document.querySelectorAll(selector).forEach(el => {
-                                                    const text = el.textContent.trim();
-                                                    if (text && !errors.includes(text)) {
-                                                        errors.push(text);
-                                                    }
-                                                });
-                                            });
-                                            
-                                            return errors;
-                                        }
-                                    """)
-                    
-                    if error_messages:
-                        logger.error(f"❌ Error messages on login page: {error_messages}")
-                    
-                except Exception as e:
-                    logger.debug(f"Could not extract error messages: {e}")
-                
-                return False
-            
-            # Check for MFA input elements
-            mfa_still_present = await self._is_selector_present([
-                'input[name="otc"]',
-                'input[name="code"]',
-                '#idTxtBx_SAOTCC_OTC',
-                'button:has-text("Verify")',
-                'button:has-text("Submit")',
-                'button:has-text("Continue")',
-                'button:has-text("Next")',
-                'button:has-text("Sign in")',
-                'button:has-text("Approve")',
-                'button:has-text("Allow")',
-                'button:has-text("Confirm")',
-                'button:has-text("Done")',
-                'button:has-text("Finish")',
-                'button:has-text("Close")',
-                'button:has-text("OK")',
-                'button:has-text("Got it")',
-                'button:has-text("I understand")',
-                'button:has-text("I agree")',
-                'button:has-text("I accept")',
-                'button:has-text("I confirm")',
-                'button:has-text("I acknowledge")'
-            ])
-            
-            # If MFA input is gone and we've been redirected
-            if not mfa_still_present and elapsed > 5:
-                current_url = self.page.url.lower()
-                login_indicators = ['login', 'auth', 'signin', 'microsoftonline']
-                
-                if not any(indicator in current_url for indicator in login_indicators):
-                    logger.info(f"✅ MFA input cleared and not on login page, assuming success. Current URL: {self.page.url}")
-                    await asyncio.sleep(2)  # Wait for any final redirects
-                    return True
+                if attempt < max_retries:
+                    logger.info(f"⏳ Retrying in 10 seconds...")
+                    await asyncio.sleep(10)
                 else:
-                    logger.info(f"⚠️ MFA input cleared but still on login page. Current URL: {self.page.url}")
-                
-                # Try to find and click any continue/next buttons
-                continue_buttons = [
-                    'button:has-text("Continue")',
-                    'button:has-text("Next")',
-                    'button:has-text("Sign in")',
-                    'button:has-text("Approve")',
-                    'button:has-text("Allow")',
-                    'button:has-text("Confirm")',
-                    'button:has-text("Done")',
-                    'button:has-text("Finish")',
-                    'button:has-text("Close")',
-                    'button:has-text("OK")',
-                    'button:has-text("Got it")',
-                    'button:has-text("I understand")',
-                    'button:has-text("I agree")',
-                    'button:has-text("I accept")',
-                    'button:has-text("I confirm")',
-                    'button:has-text("I acknowledge")',
-                    'input[type="submit"]',
-                    'button[type="submit"]',
-                    'button:has-text("Submit")',
-                    'button:has-text("Continue")',
-                    'button:has-text("Next")',
-                    'button:has-text("Sign in")',
-                    'button:has-text("Approve")',
-                    'button:has-text("Allow")',
-                    'button:has-text("Confirm")',
-                    'button:has-text("Done")',
-                    'button:has-text("Finish")',
-                    'button:has-text("Close")',
-                    'button:has-text("OK")',
-                    'button:has-text("Got it")',
-                    'button:has-text("I understand")',
-                    'button:has-text("I agree")',
-                    'button:has-text("I accept")',
-                    'button:has-text("I confirm")',
-                    'button:has-text("I acknowledge")'
-                ]
-                
-                for button_sel in continue_buttons:
-                    try:
-                        if await self.page.is_visible(button_sel, timeout=1000):
-                            await self.page.click(button_sel)
-                            logger.info(f"✅ Clicked button: {button_sel}")
-                            await asyncio.sleep(2)  # Wait for any redirects
-                            return True
-                    except Exception as e:
-                        continue
-                
-                # Take periodic screenshots for debugging
-                if elapsed % 10 == 0:  # Every 10 seconds
-                    await self.take_screenshot(f"mfa_wait_{elapsed}s")
-                
-                # Try to get page title and URL for debugging
-                try:
-                    page_title = await self.page.title()
-                    page_url = self.page.url
-                    logger.info(f"🔄 Waiting for MFA... Title: {page_title}, URL: {page_url}")
-                    
-                    # Check for any visible text that might indicate the current state
-                    try:
-                        visible_text = await self.page.evaluate("""
-                                        () => {
-                                            const allText = [];
-                                            const walker = document.createTreeWalker(
-                                                document.body,
-                                                NodeFilter.SHOW_TEXT,
-                                                null,
-                                                false
-                                            );
-                                            
-                                            let node;
-                                            while (node = walker.nextNode()) {
-                                                const text = node.textContent.trim();
-                                                if (text.length > 10 && text.length < 100) {
-                                                    allText.push(text);
-                                                }
-                                                if (allText.length > 10) break; // Limit to first 10 visible texts
-                                            }
-                                            return allText.join(' | ');
-                                        }
-                                    """)
-                        
-                        if visible_text:
-                            logger.info(f"📄 Page content: {visible_text[:200]}...")
-                    except Exception as e:
-                        logger.debug(f"Could not get page text: {e}")
-                    
-                except Exception as e:
-                    logger.debug(f"Could not get page title/URL: {e}")
-                
-                await asyncio.sleep(check_interval)
-                elapsed += check_interval
-        
-        # Timeout - log detailed information before failing
-        logger.warning("⚠️ MFA verification timeout - gathering diagnostic information...")
-        
-        try:
-            # Get final page state
-            final_url = self.page.url
-            final_title = await self.page.title()
-            logger.warning(f"🔍 Final URL: {final_url}")
-            logger.warning(f"🔍 Page title: {final_title}")
-            
-            # Take a screenshot
-            screenshot_path = await self.take_screenshot("mfa_timeout_final")
-            logger.warning(f"📸 Screenshot saved to: {screenshot_path}")
-            
-            # Log page content for debugging
-            try:
-                page_content = await self.page.content()
-                logger.debug(f"📄 Page content (first 1000 chars): {page_content[:1000]}...")
-            except Exception as e:
-                logger.debug(f"Could not get page content: {e}")
-            
-        except Exception as e:
-            logger.error(f"❌ Error gathering diagnostic information: {e}")
+                    logger.error("❌ Maximum MFA attempts reached")
+                    return False
         
         return False
+    
     async def wait_for_dashboard(self, timeout: int = 60000) -> bool:
         """Wait for successful login and dashboard load with flexible detection"""
         try:
