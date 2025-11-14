@@ -684,7 +684,30 @@ class BrowserAutomation:
                             logger.warning("⚠️ Kinde authentication: Still on email page after submission")
                             logger.info("🔍 Kinde might require different authentication approach")
                             
-                            # CRITICAL FIX: DISABLE alternative flow to prevent infinite loop
+                            # CRITICAL FIX: Try clicking primary Continue button before breaking out
+                            # This should proceed to Microsoft MFA instead of restarting authentication
+                            logger.info("🎯 KINDE-SPECIFIC: Attempting primary Continue button click to proceed to MFA")
+                            try:
+                                primary_continue_selectors = [
+                                    'button:has-text("Continue")',
+                                    'button.kinde-button-variant-primary',
+                                    'button[type="submit"]'
+                                ]
+                                
+                                for selector in primary_continue_selectors:
+                                    if await self._is_selector_present(selector):
+                                        logger.info(f"✅ KINDE: Found primary Continue button: {selector}")
+                                        await self.page.click(selector)
+                                        logger.info("✅ KINDE: Clicked primary Continue button - should proceed to Microsoft MFA")
+                                        await self.page.wait_for_timeout(3000)  # Wait for redirect
+                                        break
+                                else:
+                                    logger.warning("⚠️ KINDE: Primary Continue button not found")
+                                    
+                            except Exception as e:
+                                logger.error(f"❌ KINDE: Failed to click primary Continue button: {e}")
+                            
+                            # DISABLE alternative flow to prevent infinite loop
                             # The alternative flow clicks "Quebecor" button which restarts authentication
                             logger.error("🚫 KINDE-SPECIFIC: Alternative flow disabled to prevent infinite loop")
                             logger.error("🚫 KINDE-SPECIFIC: Breaking out of authentication attempt")
