@@ -12,7 +12,7 @@ on:
 jobs:
   reserve-parking:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 8  # Reduced from 30 minutes for faster failure detection
 
     steps:
     - uses: actions/checkout@v4
@@ -143,8 +143,17 @@ jobs:
           echo "Defaulting to regular spot"
         fi
 
-        # Run the bot
-        python main.py --reserve $spot_type
+        # Run the bot with timeout for faster failure detection
+        echo "🚀 Starting parking bot with 6-minute timeout..."
+        timeout 360s python main.py --reserve $spot_type --headless || {
+          echo "⏰ Bot timeout reached - capturing logs for debugging"
+          echo "📸 Taking immediate screenshot for timeout debugging..."
+          mkdir -p screenshots
+          ls -la screenshots/ || echo "No screenshots directory found"
+          echo "🔍 Current working directory contents:"
+          ls -la || echo "Cannot list directory"
+          exit 1
+        }
 
     - name: Upload logs and screenshots on failure
       if: failure()

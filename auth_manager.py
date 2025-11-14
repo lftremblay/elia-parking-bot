@@ -517,14 +517,25 @@ class AuthenticationManager:
                 'myaccount.microsoft.com',
                 'account.microsoft.com',
                 'office.com',
-                'login.microsoftonline.com/common/oauth2'
+                'login.microsoftonline.com/common/oauth2',
+                'app.elia.io',           # ELIA dashboard - CRITICAL!
+                'elia.io',               # ELIA domain - CRITICAL!
+                'dashboard',             # Dashboard indicators
+                'home',                  # Home page indicators
+                'parking',               # Parking system indicators
             ]
             
             current_url = page.url
+            logger.info(f"🔍 DEBUG: Checking authentication success for URL: {current_url}")
+            logger.info(f"🔍 DEBUG: Success indicators to check: {success_indicators}")
+            
             for indicator in success_indicators:
                 if indicator in current_url:
-                    logger.info(f"✅ Cloud authentication successful (redirected to: {current_url})")
+                    logger.info(f"✅ Cloud authentication successful (found '{indicator}' in: {current_url})")
                     return True
+            
+            logger.warning(f"⚠️ No success indicators found in URL: {current_url}")
+            logger.info(f"🔍 DEBUG: Checking page content for additional indicators...")
             
             # Check for error messages
             error_indicators = ['error', 'failed', 'incorrect', 'invalid']
