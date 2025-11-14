@@ -26,7 +26,13 @@
   },
   "retry": {
     "max_attempts": 5,
-    "backoff_seconds": [5, 10, 30, 60, 120],
+    "backoff_seconds": [
+      5,
+      10,
+      30,
+      60,
+      120
+    ],
     "aggressive_refresh": true
   },
   "notifications": {
@@ -48,5 +54,8 @@
     "screenshot_on_error": true,
     "ai_spot_detection": true,
     "use_api_when_possible": true
+  },
+  "mfa": {
+    "totp_secret": "vjjncwlnls77kzxn"
   }
 }
