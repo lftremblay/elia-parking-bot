@@ -445,32 +445,64 @@ class BrowserAutomation:
                         await self.page.type(email_selector, email, delay=75)  # Slightly slower typing
                         logger.info(f"✅ Email entered using selector: {email_selector}")
 
+                        # Get current URL BEFORE submit for Kinde detection
+                        pre_submit_url = self.page.url
+                        
                         submit_selector = await self._wait_for_first_selector(submit_selectors, timeout=3000, state='visible')
                         if submit_selector:
-                            # KINDE-SPECIFIC: Avoid "Continue with quebecor" button at all costs!
-                            if 'kinde' in current_url.lower():
-                                logger.info(f"🔧 KINDE-SPECIFIC: Found submit button: {submit_selector}")
+                            # KINDE-SPECIFIC: Intelligent button selection BEFORE clicking
+                            if 'kinde' in pre_submit_url.lower():
+                                logger.info(f"🔧 KINDE-SPECIFIC: Pre-submit button analysis: {submit_selector}")
                                 
-                                # Explicitly avoid organization-specific buttons after email entry
-                                forbidden_selectors = [
-                                    'button:has-text("Continue with quebecor")',
-                                    'button:has-text("Continue with Quebecor")',
-                                    'button.kinde-button.kinde-button-variant-secondary'
-                                ]
-                                
-                                if submit_selector in forbidden_selectors:
-                                    logger.warning(f"⚠️ KINDE: Avoiding organization button: {submit_selector}")
-                                    # Try to find the primary "Continue" button instead
-                                    primary_continue = await self._is_selector_present([
-                                        'button.kinde-button.kinde-button-variant-primary:has-text("Continue")',
-                                        'button:has-text("Continue")'
-                                    ])
-                                    if primary_continue:
-                                        submit_selector = primary_continue
-                                        logger.info(f"✅ KINDE: Using primary continue button: {submit_selector}")
+                                # Get all available buttons to make smart selection
+                                try:
+                                    available_buttons = await self.page.evaluate("""
+                                        () => {
+                                            const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"]');
+                                            const buttonInfo = [];
+                                            for (let btn of buttons) {
+                                                if (btn.offsetParent !== null) {
+                                                    const text = btn.textContent?.trim() || btn.value?.trim() || '';
+                                                    const type = btn.type || 'button';
+                                                    const className = btn.className || '';
+                                                    if (text.length > 0) {
+                                                        buttonInfo.push({
+                                                            text: text,
+                                                            type: type,
+                                                            className: className,
+                                                            selector: btn.tagName.toLowerCase() + (btn.id ? '#' + btn.id : '') + (btn.className ? '.' + btn.className.split(' ').join('.') : '')
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                            return buttonInfo;
+                                        }
+                                    """)
+                                    
+                                    # PREFER primary "Continue" button over "Continue with quebecor"
+                                    preferred_button = None
+                                    for button in available_buttons:
+                                        button_text = button.get('text', '').lower()
+                                        button_class = button.get('className', '').lower()
+                                        
+                                        # Priority 1: Primary continue button
+                                        if 'continue' in button_text and 'quebecor' not in button_text and 'primary' in button_class:
+                                            preferred_button = f'button:has-text("{button.get("text")}")'
+                                            logger.info(f"✅ KINDE: Selected primary continue button: {button.get('text')}")
+                                            break
+                                        # Priority 2: Any continue button without organization
+                                        elif 'continue' in button_text and 'quebecor' not in button_text:
+                                            preferred_button = f'button:has-text("{button.get("text")}")'
+                                            logger.info(f"✅ KINDE: Selected continue button: {button.get('text')}")
+                                            break
+                                    
+                                    if preferred_button:
+                                        submit_selector = preferred_button
                                     else:
-                                        logger.error("❌ KINDE: No suitable continue button found")
-                                        continue
+                                        logger.warning(f"⚠️ KINDE: Using fallback button: {submit_selector}")
+                                        
+                                except Exception as e:
+                                    logger.warning(f"⚠️ KINDE: Button analysis failed: {e}")
                             
                             await self.page.click(submit_selector)
                             logger.info(f"✅ Submit clicked using selector: {submit_selector}")
@@ -485,6 +517,15 @@ class BrowserAutomation:
                         # DEBUG: Check current URL and page content
                         current_url = self.page.url
                         logger.info(f"🔍 Current URL after email submission: {current_url}")
+                        
+                        # KINDE-SPECIFIC: Check if we need to handle button selection differently
+                        # Note: This check happens AFTER we know the current URL
+                        if 'kinde' in current_url.lower():
+                            logger.info("🔧 KINDE-SPECIFIC: Post-submit analysis for Kinde flow")
+                            # This is for diagnostic purposes - the actual button selection 
+                            # will be improved in the next iteration
+                        else:
+                            logger.info("✅ Non-Kinde flow detected")
                         
                         # DEBUG: Check page title and content for better diagnostics
                         try:
