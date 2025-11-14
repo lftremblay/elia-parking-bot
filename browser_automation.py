@@ -486,55 +486,40 @@ class BrowserAutomation:
                             if 'kinde' in pre_submit_url.lower():
                                 logger.info(f"🔧 KINDE-SPECIFIC: Pre-submit button analysis: {submit_selector}")
                                 
-                                # Get all available buttons to make smart selection
+                                # Get all available buttons to make smart selection (SIMPLIFIED to prevent EPIPE)
                                 try:
-                                    available_buttons = await self.page.evaluate("""
-                                        () => {
-                                            const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"]');
-                                            const buttonInfo = [];
-                                            for (let btn of buttons) {
-                                                if (btn.offsetParent !== null) {
-                                                    const text = btn.textContent?.trim() || btn.value?.trim() || '';
-                                                    const type = btn.type || 'button';
-                                                    const className = btn.className || '';
-                                                    if (text.length > 0) {
-                                                        buttonInfo.push({
-                                                            text: text,
-                                                            type: type,
-                                                            className: className,
-                                                            selector: btn.tagName.toLowerCase() + (btn.id ? '#' + btn.id : '') + (btn.className ? '.' + btn.className.split(' ').join('.') : '')
-                                                        });
-                                                    }
-                                                }
-                                            }
-                                            return buttonInfo;
-                                        }
-                                    """)
+                                    logger.info("🔧 KINDE-SPECIFIC: Simplified button analysis to prevent EPIPE")
+                                    # SIMPLIFIED: Just look for primary continue button directly
+                                    primary_button_found = False
+                                    try:
+                                        # Quick check for primary continue button
+                                        primary_continue = await self.page.query_selector('button:has-text("Continue")')
+                                        if primary_continue:
+                                            # Check if it's the primary variant
+                                            is_primary = await self.page.evaluate("""(btn) => {
+                                                return btn.className.includes('kinde-button-variant-primary');
+                                            }""", primary_continue)
+                                            if is_primary:
+                                                logger.info("✅ KINDE: Found primary continue button (simplified detection)")
+                                                primary_button_found = True
+                                    except Exception as js_error:
+                                        logger.warning(f"⚠️ KINDE: Simplified button detection failed: {js_error}")
+                                        # Fall back to basic approach
+                                        primary_button_found = True  # Assume primary exists
                                     
-                                    # PREFER primary "Continue" button over "Continue with quebecor"
-                                    preferred_button = None
-                                    for button in available_buttons:
-                                        button_text = button.get('text', '').lower()
-                                        button_class = button.get('className', '').lower()
-                                        
-                                        # Priority 1: Primary continue button
-                                        if 'continue' in button_text and 'quebecor' not in button_text and 'primary' in button_class:
-                                            preferred_button = f'button:has-text("{button.get("text")}")'
-                                            logger.info(f"✅ KINDE: Selected primary continue button: {button.get('text')}")
-                                            break
-                                        # Priority 2: Any continue button without organization
-                                        elif 'continue' in button_text and 'quebecor' not in button_text:
-                                            preferred_button = f'button:has-text("{button.get("text")}")'
-                                            logger.info(f"✅ KINDE: Selected continue button: {button.get('text')}")
-                                            break
+                                    logger.info(f"🔘 Available buttons: [SIMPLIFIED DETECTION - Primary found: {primary_button_found}]")
                                     
-                                    if preferred_button:
-                                        submit_selector = preferred_button
+                                    # SIMPLIFIED: Use primary continue button if found
+                                    if primary_button_found:
+                                        submit_selector = 'button:has-text("Continue")'
+                                        logger.info(f"✅ KINDE: Selected primary continue button: Continue")
                                     else:
-                                        logger.warning(f"⚠️ KINDE: Using fallback button: {submit_selector}")
-                                        
+                                        logger.warning("⚠️ KINDE: Primary button not found, using default selector")
+                                    
                                 except Exception as e:
-                                    logger.warning(f"⚠️ KINDE: Button analysis failed: {e}")
+                                    logger.error(f"❌ KINDE: Button analysis failed: {e}")
+                                    # Fall back to default behavior
+                                    pass
                             
                             await self.page.click(submit_selector)
                             logger.info(f"✅ Submit clicked using selector: {submit_selector}")
