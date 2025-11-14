@@ -390,10 +390,13 @@ class BrowserAutomation:
                     'input[type="email"]',
                     'input[name="loginfmt"]',
                     'input[name="username"]',
+                    'input[name="p_email"]',  # KINDE-SPECIFIC: The actual email field name
                     'input[id*="email"]',
                     'input[id*="user"]',
+                    'input[id*="sign_up_sign_in_credentials_p_email"]',  # KINDE-SPECIFIC: Full ID
                     '#i0116',
                     '#email',
+                    '#sign_up_sign_in_credentials_p_email',  # KINDE-SPECIFIC: Exact ID
                     'input[placeholder*="email"]',
                     'input[placeholder*="user"]'
                 ]
@@ -406,7 +409,9 @@ class BrowserAutomation:
                     'input[value="Sign in"]',
                     'button:has-text("Next")',
                     'button:has-text("Sign in")',
-                    'button:has-text("Continue")'
+                    'button:has-text("Continue")',
+                    'button.kinde-button.kinde-button-variant-primary:has-text("Continue")',  # Kinde primary continue button
+                    'button:has-text("Continue")'  # Generic continue button
                 ]
 
                 error_selectors = [
@@ -442,6 +447,31 @@ class BrowserAutomation:
 
                         submit_selector = await self._wait_for_first_selector(submit_selectors, timeout=3000, state='visible')
                         if submit_selector:
+                            # KINDE-SPECIFIC: Avoid "Continue with quebecor" button at all costs!
+                            if 'kinde' in current_url.lower():
+                                logger.info(f"🔧 KINDE-SPECIFIC: Found submit button: {submit_selector}")
+                                
+                                # Explicitly avoid organization-specific buttons after email entry
+                                forbidden_selectors = [
+                                    'button:has-text("Continue with quebecor")',
+                                    'button:has-text("Continue with Quebecor")',
+                                    'button.kinde-button.kinde-button-variant-secondary'
+                                ]
+                                
+                                if submit_selector in forbidden_selectors:
+                                    logger.warning(f"⚠️ KINDE: Avoiding organization button: {submit_selector}")
+                                    # Try to find the primary "Continue" button instead
+                                    primary_continue = await self._is_selector_present([
+                                        'button.kinde-button.kinde-button-variant-primary:has-text("Continue")',
+                                        'button:has-text("Continue")'
+                                    ])
+                                    if primary_continue:
+                                        submit_selector = primary_continue
+                                        logger.info(f"✅ KINDE: Using primary continue button: {submit_selector}")
+                                    else:
+                                        logger.error("❌ KINDE: No suitable continue button found")
+                                        continue
+                            
                             await self.page.click(submit_selector)
                             logger.info(f"✅ Submit clicked using selector: {submit_selector}")
                         else:
