@@ -440,10 +440,28 @@ class BrowserAutomation:
                     email_selector = await self._wait_for_first_selector(email_selectors, timeout=5000)  # Increased timeout
                     if email_selector:
                         logger.info(f"✅ Found email input: {email_selector}")
+                        
+                        # KINDE-SPECIFIC: Don't clear the field first, just type directly
                         await self.page.click(email_selector)
-                        await self.page.fill(email_selector, "")
-                        await self.page.type(email_selector, email, delay=75)  # Slightly slower typing
+                        await self.page.type(email_selector, email, delay=100)  # Slower, more deliberate typing
                         logger.info(f"✅ Email entered using selector: {email_selector}")
+                        
+                        # KINDE-SPECIFIC: Verify email was actually entered
+                        try:
+                            entered_value = await self.page.input_value(email_selector)
+                            logger.info(f"🔍 Email field value after entry: '{entered_value}'")
+                            if not entered_value or entered_value.strip() == '':
+                                logger.warning("⚠️ KINDE: Email field is empty after typing, trying alternative approach")
+                                # Try filling directly without clearing first
+                                await self.page.fill(email_selector, email)
+                                entered_value = await self.page.input_value(email_selector)
+                                logger.info(f"🔍 Email field value after fill: '{entered_value}'")
+                        except Exception as e:
+                            logger.debug(f"Could not verify email entry: {e}")
+                        
+                        # KINDE-SPECIFIC: Wait for email field to stabilize before submission
+                        logger.info("⏳ KINDE-SPECIFIC: Waiting for email field to stabilize...")
+                        await asyncio.sleep(2)
 
                         # Get current URL BEFORE submit for Kinde detection
                         pre_submit_url = self.page.url
