@@ -329,6 +329,7 @@ class BrowserAutomation:
         logger.info(f"🔍 DEBUG: handle_sso received email: '{email}'")
         logger.info(f"🔍 DEBUG: email type: {type(email)}")
         logger.info(f"🔍 DEBUG: email length: {len(email) if email else 'None'}")
+        logger.info(f"🔍 DEBUG: email hash: {hash(email) if email else 'None'}")
         
         if not email:
             logger.error("❌ CRITICAL: handle_sso received empty email!")

@@ -134,6 +134,8 @@ class EliaParkingBot:
         # CRITICAL DEBUGGING: Check if email is loaded properly
         logger.info(f"🔍 DEBUG: Organization from config: {organization}")
         logger.info(f"🔍 DEBUG: Email from config: {email}")
+        logger.info(f"🔍 DEBUG: Email length: {len(email) if email else 0}")
+        logger.info(f"🔍 DEBUG: Email hash: {hash(email) if email else 'None'}")
         logger.info(f"🔍 DEBUG: Full elia_config: {elia_config}")
         
         if not email:
