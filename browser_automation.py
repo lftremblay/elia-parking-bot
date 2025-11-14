@@ -456,8 +456,13 @@ class BrowserAutomation:
                     if email_selector:
                         logger.info(f"✅ Found email input: {email_selector}")
                         
-                        # KINDE-SPECIFIC: Don't clear the field first, just type directly
+                        # CRITICAL FIX: CLEAR THE FIELD FIRST to prevent accumulation
                         await self.page.click(email_selector)
+                        await self.page.keyboard.press('Control+a')  # Select all text
+                        await self.page.keyboard.press('Delete')     # Clear the field
+                        await asyncio.sleep(0.5)  # Brief pause to ensure clearing
+                        
+                        # Now type the email cleanly
                         await self.page.type(email_selector, email, delay=100)  # Slower, more deliberate typing
                         logger.info(f"✅ Email entered using selector: {email_selector}")
                         
