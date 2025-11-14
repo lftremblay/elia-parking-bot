@@ -186,8 +186,13 @@ class AuthenticationManager:
             load_dotenv()
             totp_secret = os.getenv('TOTP_SECRET')
         
+        # CRITICAL DEBUGGING: Show TOTP secret status during actual generation
+        logger.info(f"🔍 DEBUG: TOTP secret status during generation: {'FOUND' if totp_secret else 'MISSING'}")
+        logger.info(f"🔍 DEBUG: TOTP secret length during generation: {len(totp_secret) if totp_secret else 0}")
+        logger.info(f"🔍 DEBUG: TOTP secret hash during generation: {hash(totp_secret) if totp_secret else 'None'}")
+        
         if not totp_secret:
-            logger.warning("⚠️  No TOTP secret configured (check config.json or .env)")
+            logger.error("❌ CRITICAL: No TOTP secret configured (check config.json or .env)")
             return None
         
         try:
@@ -201,9 +206,20 @@ class AuthenticationManager:
             if time_offset != 0:
                 current_time = time.time()
                 adjusted_time = current_time + time_offset
+                current_datetime = datetime.fromtimestamp(current_time)
+                adjusted_datetime = datetime.fromtimestamp(adjusted_time)
+                
+                logger.info(f"🕐 DEBUG: Current time: {current_datetime.strftime('%H:%M:%S')}")
+                logger.info(f"🕐 DEBUG: Time offset: {time_offset}s")
+                logger.info(f"🕐 DEBUG: Adjusted time: {adjusted_datetime.strftime('%H:%M:%S')}")
+                
                 code = totp.at(adjusted_time)
                 logger.info(f"🔢 Generated TOTP code with {time_offset}s offset: {code[:2]}****")
             else:
+                current_time = time.time()
+                current_datetime = datetime.fromtimestamp(current_time)
+                logger.info(f"🕐 DEBUG: Current time: {current_datetime.strftime('%H:%M:%S')} (no offset)")
+                
                 code = totp.now()
                 logger.info(f"🔢 Generated TOTP code: {code[:2]}****")
             
