@@ -250,6 +250,22 @@ class AuthenticationManager:
         Returns:
             List of (offset, code) tuples covering -90s to +90s range
         """
+        # CRITICAL DEBUGGING: Check if TOTP secret is loaded correctly
+        totp_secret = self.config.get('mfa', {}).get('totp_secret')
+        if not totp_secret:
+            import os
+            from dotenv import load_dotenv
+            load_dotenv()
+            totp_secret = os.getenv('TOTP_SECRET')
+        
+        logger.info(f"🔍 DEBUG: TOTP secret loaded: {'YES' if totp_secret else 'NO'}")
+        logger.info(f"🔍 DEBUG: TOTP secret length: {len(totp_secret) if totp_secret else 0}")
+        logger.info(f"🔍 DEBUG: TOTP secret hash: {hash(totp_secret) if totp_secret else 'None'}")
+        
+        if not totp_secret:
+            logger.error("❌ CRITICAL: No TOTP secret available for Microsoft optimization!")
+            return []
+        
         logger.info("🚀 ENHANCED Microsoft MFA cracking: Extended 4-minute validation window strategy")
         
         # ENHANCED: More granular offsets for better timing coverage

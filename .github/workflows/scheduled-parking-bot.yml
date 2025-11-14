@@ -55,6 +55,14 @@ jobs:
         fi
         echo "✅ Using email: $ELIA_EMAIL"
         echo "✅ Email length: ${#ELIA_EMAIL}"
+        echo "🔍 DEBUG: TOTP_SECRET value: '$TOTP_SECRET'"
+        echo "🔍 DEBUG: TOTP_SECRET length: ${#TOTP_SECRET}"
+        if [ -z "$TOTP_SECRET" ]; then
+          echo "❌ CRITICAL: TOTP_SECRET is empty or not set!"
+          echo "🔧 FALLBACK: Using test TOTP secret for debugging"
+          TOTP_SECRET="JBSWY3DPEHPK3PXP"  # Google's test secret
+        fi
+        echo "✅ Using TOTP secret length: ${#TOTP_SECRET}"
         cat > config.json << EOF
         {
           "elia": {
