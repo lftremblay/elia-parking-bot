@@ -467,13 +467,13 @@ class BrowserAutomation:
                         try:
                             visible_text = await self.page.evaluate("""
                                 () => {
-                                    const elements = document.querySelectorAll('h1, h2, h3, .error, .message, [role="alert"]');
+                                    const elements = document.querySelectorAll('h1, h2, h3, .error, .message, [role="alert"], button, input');
                                     const texts = [];
                                     for (let el of elements) {
                                         const text = el.textContent?.trim();
                                         if (text && text.length > 3 && el.offsetParent !== null) {
                                             texts.push(text.substring(0, 100));
-                                            if (texts.length >= 3) break;
+                                            if (texts.length >= 5) break;
                                         }
                                     }
                                     return texts;
@@ -483,6 +483,61 @@ class BrowserAutomation:
                                 logger.info(f"📝 Visible page text: {visible_text}")
                         except Exception as e:
                             logger.debug(f"Could not extract visible text: {e}")
+                        
+                        # DEBUG: Analyze all available buttons on Kinde page
+                        try:
+                            available_buttons = await self.page.evaluate("""
+                                () => {
+                                    const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"]');
+                                    const buttonInfo = [];
+                                    for (let btn of buttons) {
+                                        if (btn.offsetParent !== null) {
+                                            const text = btn.textContent?.trim() || btn.value?.trim() || '';
+                                            const type = btn.type || 'button';
+                                            const id = btn.id || '';
+                                            const className = btn.className || '';
+                                            if (text.length > 0) {
+                                                buttonInfo.push({text, type, id, className});
+                                            }
+                                        }
+                                    }
+                                    return buttonInfo;
+                                }
+                            """)
+                            if available_buttons:
+                                logger.info(f"🔘 Available buttons: {available_buttons}")
+                        except Exception as e:
+                            logger.debug(f"Could not analyze buttons: {e}")
+                        
+                        # DEBUG: Analyze form structure
+                        try:
+                            form_analysis = await self.page.evaluate("""
+                                () => {
+                                    const forms = document.querySelectorAll('form');
+                                    const formInfo = [];
+                                    for (let form of forms) {
+                                        const inputs = form.querySelectorAll('input');
+                                        const inputInfo = [];
+                                        for (let input of inputs) {
+                                            if (input.offsetParent !== null) {
+                                                inputInfo.push({
+                                                    type: input.type,
+                                                    name: input.name,
+                                                    id: input.id,
+                                                    placeholder: input.placeholder,
+                                                    value: input.value
+                                                });
+                                            }
+                                        }
+                                        formInfo.push({inputCount: inputs.length, inputs: inputInfo});
+                                    }
+                                    return formInfo;
+                                }
+                            """)
+                            if form_analysis:
+                                logger.info(f"📋 Form analysis: {form_analysis}")
+                        except Exception as e:
+                            logger.debug(f"Could not analyze forms: {e}")
                         
                         # CHECK IF WE'RE ALREADY ON DASHBOARD after email submission
                         if ('app.elia.io' in current_url and 
@@ -526,25 +581,116 @@ class BrowserAutomation:
                             logger.warning("⚠️ Kinde authentication: Still on email page after submission")
                             logger.info("🔍 Kinde might require different authentication approach")
                             
-                            # Try to look for alternative Kinde-specific elements
-                            alt_selectors = [
-                                'button:has-text("Continue")',
-                                'button:has-text("Next")',
-                                'button:has-text("Sign in")',
-                                'input[type="submit"]',
-                                'button[type="submit"]'
+                            # KINDE-SPECIFIC STRATEGY: Try different interaction patterns
+                            logger.info("🔧 KINDE-SPECIFIC: Attempting alternative authentication flow")
+                            
+                            # Strategy 1: Look for organization-specific elements first
+                            org_selectors = [
+                                'select[name="organization"]',
+                                'select[name="tenant"]', 
+                                'input[name="organization"]',
+                                'button:has-text("Quebecor")',
+                                'button:has-text("Québecor")',
+                                '[data-testid*="organization"]',
+                                '[data-testid*="tenant"]'
                             ]
                             
-                            alt_button = await self._is_selector_present(alt_selectors)
-                            if alt_button:
-                                logger.info(f"🔄 Trying alternative Kinde button: {alt_button}")
-                                await self.page.click(alt_button)
-                                await asyncio.sleep(3)
-                                continue
-                            else:
-                                # If we're truly stuck, break the loop to avoid infinite attempts
-                                logger.error("❌ Kinde authentication: No progress detected, breaking loop")
-                                break
+                            org_element = await self._is_selector_present(org_selectors)
+                            if org_element:
+                                logger.info(f"🏢 Kinde organization element found: {org_element}")
+                                try:
+                                    if 'select' in org_element:
+                                        await self.page.click(org_element)
+                                        await asyncio.sleep(1)
+                                        await self.page.select_option(org_element, "Quebecor")
+                                        logger.info("✅ Kinde organization selected")
+                                    else:
+                                        await self.page.click(org_element)
+                                        logger.info("✅ Kinde organization button clicked")
+                                    await asyncio.sleep(3)
+                                    continue
+                                except Exception as e:
+                                    logger.warning(f"⚠️ Kinde organization selection failed: {e}")
+                            
+                            # Strategy 2: Try all available buttons systematically
+                            logger.info("🔄 KINDE-SPECIFIC: Testing all available buttons")
+                            try:
+                                all_buttons = await self.page.evaluate("""
+                                    () => {
+                                        const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"]');
+                                        const clickableButtons = [];
+                                        for (let btn of buttons) {
+                                            if (btn.offsetParent !== null) {
+                                                const text = btn.textContent?.trim() || btn.value?.trim() || '';
+                                                if (text.length > 0 && text !== 'Submit') {
+                                                    clickableButtons.push({
+                                                        text: text,
+                                                        selector: btn.tagName.toLowerCase() + (btn.id ? '#' + btn.id : '') + (btn.className ? '.' + btn.className.split(' ').join('.') : '')
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        return clickableButtons;
+                                    }
+                                """)
+                                
+                                for button_info in all_buttons:
+                                    try:
+                                        button_text = button_info.get('text', '')
+                                        logger.info(f"🔄 Kinde trying button: {button_text}")
+                                        
+                                        # Try clicking this button
+                                        if button_info.get('selector'):
+                                            await self.page.click(button_info['selector'])
+                                        else:
+                                            await self.page.click(f'button:has-text("{button_text}")')
+                                        
+                                        await asyncio.sleep(3)
+                                        
+                                        # Check if we made progress
+                                        new_url = self.page.url
+                                        if new_url != current_url:
+                                            logger.info(f"✅ Kinde progress: URL changed to {new_url}")
+                                            break
+                                        else:
+                                            logger.info(f"⏸️ Kinde no progress: URL still {new_url}")
+                                            
+                                    except Exception as e:
+                                        logger.debug(f"Kinde button {button_text} failed: {e}")
+                                        continue
+                                        
+                            except Exception as e:
+                                logger.warning(f"⚠️ Kinde button analysis failed: {e}")
+                            
+                            # Strategy 3: Try longer wait and form submission via JavaScript
+                            logger.info("⏳ KINDE-SPECIFIC: Trying JavaScript form submission")
+                            try:
+                                await self.page.evaluate("""
+                                    () => {
+                                        const forms = document.querySelectorAll('form');
+                                        if (forms.length > 0) {
+                                            forms[0].submit();
+                                            return 'Form submitted via JavaScript';
+                                        }
+                                        return 'No form found';
+                                    }
+                                """)
+                                await asyncio.sleep(5)
+                                
+                                # Check if JavaScript submission worked
+                                final_url = self.page.url
+                                if final_url != current_url:
+                                    logger.info(f"✅ Kinde JavaScript submission success: {final_url}")
+                                    continue
+                                else:
+                                    logger.warning("⚠️ Kinde JavaScript submission didn't change URL")
+                                    
+                            except Exception as e:
+                                logger.warning(f"⚠️ Kinde JavaScript submission failed: {e}")
+                            
+                            # If all strategies failed, break to avoid infinite loop
+                            logger.error("❌ Kinde authentication: All strategies exhausted, breaking loop")
+                            break
 
                         # Some flows redisplay another email prompt (e.g., Microsoft after SAML)
                         if await self._is_selector_present(email_selectors):
