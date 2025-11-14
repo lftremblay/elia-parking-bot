@@ -354,17 +354,10 @@ class BrowserAutomation:
                     'a[id*="continue"]'
                 ]
 
-                # Look for "Continue with Quebecor" button first
-                org_button_found = await self._is_selector_present(org_continue_selectors)
-                if org_button_found:
-                    logger.info(f"🏢 Found organization continue button: {org_button_found}")
-                    await self.page.click(org_button_found)
-                    logger.info("✅ Clicked 'Continue with Quebecor'")
-                    await asyncio.sleep(2)
-
-                    # Wait for redirect to Microsoft
-                    await self.page.wait_for_load_state('networkidle', timeout=10000)
-                    logger.info("🔄 Redirected after organization selection")
+                # CRITICAL FIX: DISABLE organization button to prevent infinite loop
+                # The "Continue with Quebecor" button restarts authentication - NEVER click it!
+                logger.info("🚫 KINDE-SPECIFIC: Skipping organization button to prevent infinite loop")
+                logger.info("✅ KINDE-SPECIFIC: Will use primary Continue button only")
 
                 login_hosts = [
                     '**/login.microsoftonline.com/**',
@@ -691,8 +684,11 @@ class BrowserAutomation:
                             logger.warning("⚠️ Kinde authentication: Still on email page after submission")
                             logger.info("🔍 Kinde might require different authentication approach")
                             
-                            # KINDE-SPECIFIC STRATEGY: Try different interaction patterns
-                            logger.info("🔧 KINDE-SPECIFIC: Attempting alternative authentication flow")
+                            # CRITICAL FIX: DISABLE alternative flow to prevent infinite loop
+                            # The alternative flow clicks "Quebecor" button which restarts authentication
+                            logger.error("🚫 KINDE-SPECIFIC: Alternative flow disabled to prevent infinite loop")
+                            logger.error("🚫 KINDE-SPECIFIC: Breaking out of authentication attempt")
+                            break  # Exit the retry loop to prevent infinite clicking
                             
                             # Strategy 1: Look for organization-specific elements first
                             org_selectors = [
