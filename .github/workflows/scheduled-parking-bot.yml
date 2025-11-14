@@ -43,6 +43,12 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
+        echo "🔍 DEBUG: ELIA_EMAIL value: '$ELIA_EMAIL'"
+        echo "🔍 DEBUG: ELIA_EMAIL length: ${#ELIA_EMAIL}"
+        if [ -z "$ELIA_EMAIL" ]; then
+          echo "❌ CRITICAL: ELIA_EMAIL is empty or not set!"
+          exit 1
+        fi
         cat > config.json << EOF
         {
           "elia": {
@@ -95,6 +101,8 @@ jobs:
         EOF
 
         echo "Created config.json"
+        echo "🔍 DEBUG: Verifying config.json content:"
+        cat config.json | grep -A 5 -B 5 email
 
     - name: Run Parking Reservation
       env:
