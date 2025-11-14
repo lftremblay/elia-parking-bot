@@ -154,15 +154,15 @@ class EliaParkingBot:
                     self.auth_manager.save_session()
                     return True
                 
-                # If we're on Microsoft login page, handle SSO
-                if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
+                # If we're on Microsoft/Kinde login page, handle SSO
+                if 'microsoft' in current_url.lower() or 'login' in current_url.lower() or 'kinde' in current_url.lower():
                     logger.info("🔐 Authentication required...")
                     
-                    # Handle Microsoft SSO
+                    # Handle SSO (Microsoft/Kinde)
                     password = self._get_password()
-                    sso_success = await self.browser.handle_microsoft_sso(email, password, max_retries=3)
+                    sso_success = await self.browser.handle_sso(email, password, max_retries=3)
                     if not sso_success:
-                        raise Exception("Microsoft SSO failed")
+                        raise Exception("SSO failed")
                     
                     # CHECK IF SSO TOOK US DIRECTLY TO DASHBOARD (skip MFA)
                     current_url = self.browser.page.url

@@ -293,8 +293,8 @@ class BrowserAutomation:
             
             # Check if we got redirected to Microsoft SSO
             current_url = self.page.url
-            if 'microsoft' in current_url.lower() or 'login' in current_url.lower():
-                logger.info("🔐 Redirected to Microsoft SSO")
+            if 'microsoft' in current_url.lower() or 'login' in current_url.lower() or 'kinde' in current_url.lower():
+                logger.info("🔐 Redirected to SSO (Microsoft/Kinde)")
                 return True  # Let the auth flow handle SSO
             
             # Check if email input is required (before Microsoft SSO)
@@ -322,11 +322,11 @@ class BrowserAutomation:
             await self.take_screenshot("error_navigate")
             return False
     
-    async def handle_microsoft_sso(self, email: str, password: str, max_retries: int = 3) -> bool:
-        """Handle Microsoft SSO authentication with robust retry logic"""
+    async def handle_sso(self, email: str, password: str, max_retries: int = 3) -> bool:
+        """Handle SSO authentication (Microsoft/Kinde) with robust retry logic"""
         for attempt in range(1, max_retries + 1):
             try:
-                logger.info(f"🔐 Handling Microsoft SSO (attempt {attempt}/{max_retries})...")
+                logger.info(f"🔐 Handling SSO authentication (attempt {attempt}/{max_retries})...")
 
                 # Check for initial SSO choice page (Auth0)
                 org_continue_selectors = [
@@ -356,7 +356,10 @@ class BrowserAutomation:
                     '**/login.live.com/**',
                     '**/account.microsoft.com/**',
                     '**/.auth0.com/**',
-                    '**/login.microsoftonline.com/**'  # SAML endpoint
+                    '**/login.microsoftonline.com/**',  # SAML endpoint
+                    '**/elia.kinde.com/**',  # NEW: Kinde authentication provider
+                    '**/*.kinde.com/**',  # Kinde subdomains
+                    '**/auth.kinde.com/**'  # Kinde auth endpoints
                 ]
 
                 login_page_found = False
@@ -372,7 +375,7 @@ class BrowserAutomation:
                 if not login_page_found:
                     logger.warning("⚠️ Login page pattern not matched, inspecting current URL...")
                     current_url = self.page.url
-                    if any(token in current_url.lower() for token in ['microsoft', 'login', 'auth0', 'saml']):
+                    if any(token in current_url.lower() for token in ['microsoft', 'login', 'auth0', 'saml', 'kinde']):
                         logger.info(f"📧 On login flow page: {current_url}")
                         # Wait for page to stabilize after potential SAML redirect
                         await asyncio.sleep(2)
@@ -532,7 +535,7 @@ class BrowserAutomation:
                     await self.page.keyboard.press('Enter')
                     logger.info("✅ Password submit via Enter key")
 
-                logger.info("✅ Microsoft SSO basic auth completed")
+                logger.info("✅ SSO basic auth completed")
                 return True
 
             except Exception as e:

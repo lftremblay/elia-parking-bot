@@ -51,13 +51,13 @@ class MockBrowserAutomation:
         print("🔐 Redirected to Microsoft SSO")
         return True
 
-    async def handle_microsoft_sso(self, email, password, max_retries=3):
-        print(f"🔐 Handling Microsoft SSO for: {email}")
+    async def handle_sso(self, email, password, max_retries=3):
+        print(f"🔐 Handling SSO authentication for: {email}")
         await asyncio.sleep(2)
         print("✅ Email entered")
         await asyncio.sleep(1)
         print("✅ Password entered")
-        print("✅ Microsoft SSO basic auth completed")
+        print("✅ SSO basic auth completed")
         return True
 
     async def handle_mfa(self, method="authenticator", max_retries=3):
@@ -135,7 +135,7 @@ class MockEliaParkingBot:
         print("🔐 Starting authentication process...")
         success = await self.browser.navigate_to_elia("quebecor")
         if success:
-            success = await self.browser.handle_microsoft_sso("test@example.com", "password")
+            success = await self.browser.handle_sso("test@example.com", "password")
             if success:
                 success = await self.browser.handle_mfa("authenticator")
                 if success:
