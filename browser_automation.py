@@ -324,6 +324,21 @@ class BrowserAutomation:
     
     async def handle_sso(self, email: str, password: str, max_retries: int = 3) -> bool:
         """Handle SSO authentication (Microsoft/Kinde) with robust retry logic"""
+        
+        # CRITICAL DEBUGGING: Check email parameter
+        logger.info(f"🔍 DEBUG: handle_sso received email: '{email}'")
+        logger.info(f"🔍 DEBUG: email type: {type(email)}")
+        logger.info(f"🔍 DEBUG: email length: {len(email) if email else 'None'}")
+        
+        if not email:
+            logger.error("❌ CRITICAL: handle_sso received empty email!")
+            return False
+        if email.strip() == "":
+            logger.error("❌ CRITICAL: handle_sso received empty string email!")
+            return False
+        if "$" in email:
+            logger.error(f"❌ CRITICAL: handle_sso received unexpanded env var: {email}")
+            return False
         for attempt in range(1, max_retries + 1):
             try:
                 logger.info(f"🔐 Handling SSO authentication (attempt {attempt}/{max_retries})...")

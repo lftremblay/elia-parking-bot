@@ -131,6 +131,18 @@ class EliaParkingBot:
         organization = elia_config.get('organization')
         email = elia_config.get('credentials', {}).get('email')
         
+        # CRITICAL DEBUGGING: Check if email is loaded properly
+        logger.info(f"🔍 DEBUG: Organization from config: {organization}")
+        logger.info(f"🔍 DEBUG: Email from config: {email}")
+        logger.info(f"🔍 DEBUG: Full elia_config: {elia_config}")
+        
+        if not email:
+            logger.error("❌ CRITICAL: Email is empty or None in config!")
+            raise Exception("Email configuration is missing or empty")
+        if email.strip() == "":
+            logger.error("❌ CRITICAL: Email is empty string in config!")
+            raise Exception("Email configuration is empty string")
+        
         # Try authentication with retries
         max_attempts = self.retry_config.get('max_attempts', 3)
         
