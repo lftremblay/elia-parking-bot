@@ -1,13 +1,17 @@
-name: Scheduled Parking Bot
+# DISABLED - This workflow conflicts with scheduled-parking-bot.yml
+# Use scheduled-parking-bot.yml instead - it has proper email fallback
+name: [DISABLED] Scheduled Parking Bot
 
 on:
-  schedule:
-    - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
-    - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
-  push:
-    branches: [ 'main', 'master' ]  # Run on pushes to main/master for testing
-  pull_request:
-    branches: [ 'main', 'master' ]  # Run on pull requests for testing
+  # DISABLED - No triggers to prevent conflicts
+  # schedule:
+  #   - cron: '0 0 * * 1-5'  # Midnight weekdays (executive spots)
+  #   - cron: '0 6 * * 1-5'  # 6 AM weekdays (regular spots)
+  # push:
+  #   branches: [ 'main', 'master' ]  # Run on pushes to main/master for testing
+  # pull_request:
+  #   branches: [ 'main', 'master' ]  # Run on pull requests for testing
+  workflow_dispatch:  # Allow manual triggering if needed
 
 jobs:
   reserve-parking:
