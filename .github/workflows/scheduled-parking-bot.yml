@@ -43,6 +43,9 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       run: |
+        echo "🔧 CRITICAL: Removing any existing config.json to ensure fresh creation"
+        rm -f config.json
+        
         echo "🔍 DEBUG: ELIA_EMAIL value: '$ELIA_EMAIL'"
         echo "🔍 DEBUG: ELIA_EMAIL length: ${#ELIA_EMAIL}"
         if [ -z "$ELIA_EMAIL" ]; then
@@ -51,6 +54,7 @@ jobs:
           ELIA_EMAIL="louis-felix.tremblay@videotron.com"
         fi
         echo "✅ Using email: $ELIA_EMAIL"
+        echo "✅ Email length: ${#ELIA_EMAIL}"
         cat > config.json << EOF
         {
           "elia": {
@@ -102,7 +106,11 @@ jobs:
         }
         EOF
 
-        echo "Created config.json"
+        echo "✅ Created config.json"
+        echo "🔍 DEBUG: Verifying config.json content..."
+        echo "🔍 DEBUG: Email in config.json:"
+        grep -A 2 '"email"' config.json || echo "❌ EMAIL NOT FOUND IN CONFIG!"
+        echo "🔍 DEBUG: Config file size: $(wc -c < config.json) bytes"
         echo "🔍 DEBUG: Verifying config.json content:"
         cat config.json | grep -A 5 -B 5 email
 
