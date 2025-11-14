@@ -452,8 +452,39 @@ class BrowserAutomation:
                         logger.info("⏳ Waiting for redirect after email submission...")
                         await asyncio.sleep(3)
 
-                        # CHECK IF WE'RE ALREADY ON DASHBOARD after email submission
+                        # DEBUG: Check current URL and page content
                         current_url = self.page.url
+                        logger.info(f"🔍 Current URL after email submission: {current_url}")
+                        
+                        # DEBUG: Check page title and content for better diagnostics
+                        try:
+                            page_title = await self.page.title()
+                            logger.info(f"📄 Page title: {page_title}")
+                        except Exception:
+                            logger.debug("Could not get page title")
+                        
+                        # DEBUG: Look for any visible text that might indicate what's happening
+                        try:
+                            visible_text = await self.page.evaluate("""
+                                () => {
+                                    const elements = document.querySelectorAll('h1, h2, h3, .error, .message, [role="alert"]');
+                                    const texts = [];
+                                    for (let el of elements) {
+                                        const text = el.textContent?.trim();
+                                        if (text && text.length > 3 && el.offsetParent !== null) {
+                                            texts.push(text.substring(0, 100));
+                                            if (texts.length >= 3) break;
+                                        }
+                                    }
+                                    return texts;
+                                }
+                            """)
+                            if visible_text:
+                                logger.info(f"📝 Visible page text: {visible_text}")
+                        except Exception as e:
+                            logger.debug(f"Could not extract visible text: {e}")
+                        
+                        # CHECK IF WE'RE ALREADY ON DASHBOARD after email submission
                         if ('app.elia.io' in current_url and 
                             'login' not in current_url.lower() and
                             'auth' not in current_url.lower()):
@@ -464,6 +495,18 @@ class BrowserAutomation:
                         if await self._is_selector_present(password_selectors):
                             logger.info("📫 Password prompt detected after email submission")
                             break
+
+                        # Check for MFA prompt (Kinde might go directly to MFA)
+                        mfa_selectors = [
+                            'input[name="otc"]',
+                            'input[name="code"]', 
+                            'input[placeholder*="code"]',
+                            'input[placeholder*="verification"]',
+                            '#idTxtBx_SAOTCC_OTC'
+                        ]
+                        if await self._is_selector_present(mfa_selectors):
+                            logger.info("🔢 MFA prompt detected directly after email submission")
+                            return True  # Let MFA handler take over
 
                         # Check for email validation errors
                         error_selector = await self._is_selector_present(error_selectors)
@@ -476,6 +519,32 @@ class BrowserAutomation:
                             logger.warning(f"⚠️ Email validation message: {error_text}")
                             email_attempts += 1
                             continue
+
+                        # Kinde-specific: Check if we're stuck on the same email page
+                        # If the URL hasn't changed and we still see email input, we might be in a loop
+                        if 'kinde' in current_url.lower() and await self._is_selector_present(email_selectors):
+                            logger.warning("⚠️ Kinde authentication: Still on email page after submission")
+                            logger.info("🔍 Kinde might require different authentication approach")
+                            
+                            # Try to look for alternative Kinde-specific elements
+                            alt_selectors = [
+                                'button:has-text("Continue")',
+                                'button:has-text("Next")',
+                                'button:has-text("Sign in")',
+                                'input[type="submit"]',
+                                'button[type="submit"]'
+                            ]
+                            
+                            alt_button = await self._is_selector_present(alt_selectors)
+                            if alt_button:
+                                logger.info(f"🔄 Trying alternative Kinde button: {alt_button}")
+                                await self.page.click(alt_button)
+                                await asyncio.sleep(3)
+                                continue
+                            else:
+                                # If we're truly stuck, break the loop to avoid infinite attempts
+                                logger.error("❌ Kinde authentication: No progress detected, breaking loop")
+                                break
 
                         # Some flows redisplay another email prompt (e.g., Microsoft after SAML)
                         if await self._is_selector_present(email_selectors):
