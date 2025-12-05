@@ -696,7 +696,8 @@ class BrowserAutomation:
                                         logger.info(f"✅ KINDE: Found 'Continue with quebecor' button: {selector}")
                                         await self.page.click(selector, timeout=10000)
                                         logger.success("✅ KINDE: Clicked 'Continue with quebecor' - proceeding to Microsoft SSO")
-                                        await self.page.wait_for_timeout(3000)  # Wait for redirect
+                                        # Wait longer for redirect to Microsoft
+                                        await self.page.wait_for_timeout(5000)
                                         clicked = True
                                         break
                                 
@@ -704,13 +705,15 @@ class BrowserAutomation:
                                     logger.warning("⚠️ KINDE: 'Continue with quebecor' button not found")
                                     logger.info("🔄 Falling back to primary Continue button")
                                     await self.page.click('button:has-text("Continue")', timeout=10000)
+                                    await self.page.wait_for_timeout(5000)
                                     
                             except Exception as e:
                                 logger.error(f"❌ KINDE: Failed to click button: {e}")
                             
-                            # Don't break - let the flow continue to check if we progressed
-                            # If we're still stuck after this, the next iteration will catch it
-                            continue  # Continue to next iteration to check progress
+                            # CRITICAL: Break out of email entry loop after clicking quebecor button
+                            # This prevents infinite loop of re-entering email
+                            logger.info("🚀 KINDE: Breaking out of email loop to proceed with SSO flow")
+                            break  # Exit email entry loop and proceed to password/MFA
                             
                             # Strategy 1: Look for organization-specific elements first
                             org_selectors = [
