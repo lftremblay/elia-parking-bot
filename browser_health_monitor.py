@@ -147,6 +147,36 @@ class EnhancedBrowserAutomation:
         self.health_monitor = BrowserHealthMonitor()
         self.monitoring_task = None
     
+    # Forward all missing attributes to the base automation
+    def __getattr__(self, name):
+        """Forward attribute access to base automation"""
+        return getattr(self.base, name)
+    
+    # Forward all missing methods to the base automation
+    def __setattr__(self, name, value):
+        """Forward attribute setting to base automation for non-internal attributes"""
+        if name in ['base', 'health_monitor', 'monitoring_task']:
+            super().__setattr__(name, value)
+        else:
+            setattr(self.base, name, value)
+    
+    async def initialize(self, headless: bool = True):
+        """Initialize browser with health monitoring"""
+        try:
+            # Initialize base browser
+            await self.base.initialize(headless=headless)
+            
+            # Start health monitoring if page is available
+            if hasattr(self.base, 'page') and self.base.page:
+                self.monitoring_task = await self.health_monitor.start_health_monitoring(self.base)
+            
+            logger.info("✅ Enhanced browser initialization completed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Enhanced browser initialization failed: {e}")
+            raise  # Re-raise the exception to maintain original behavior
+    
     async def navigate_with_health_check(self, url: str, timeout: int = 45000):
         """Navigate with health monitoring"""
         try:
@@ -225,6 +255,10 @@ class EnhancedBrowserAutomation:
             
         except Exception as e:
             logger.error(f"❌ Enhanced cleanup failed: {e}")
+    
+    async def close(self):
+        """Close method - forward to base with health monitoring cleanup"""
+        await self.cleanup_with_health_monitor()
 
 # Integration function
 def add_health_monitoring(browser_automation_instance):
