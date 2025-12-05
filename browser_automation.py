@@ -521,8 +521,16 @@ class BrowserAutomation:
                                     # Fall back to default behavior
                                     pass
                             
-                            await self.page.click(submit_selector)
-                            logger.info(f"✅ Submit clicked using selector: {submit_selector}")
+                            # Click with explicit timeout and error handling
+                            try:
+                                logger.info(f"🔘 Attempting to click button: {submit_selector}")
+                                await self.page.click(submit_selector, timeout=15000)  # 15s timeout
+                                logger.info(f"✅ Submit clicked using selector: {submit_selector}")
+                            except Exception as click_error:
+                                logger.error(f"❌ Button click failed: {click_error}")
+                                logger.info("🔄 Trying Enter key as fallback...")
+                                await self.page.keyboard.press('Enter')
+                                logger.info("✅ Submit via Enter key (fallback)")
                         else:
                             await self.page.keyboard.press('Enter')
                             logger.info("✅ Submit via Enter key")
