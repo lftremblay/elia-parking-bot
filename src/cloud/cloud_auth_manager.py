@@ -114,23 +114,23 @@ class CloudAuthenticationManager:
                 self.context = await self.browser.new_context()
                 self.page = await self.context.new_page()
 
-                # Navigate to Microsoft login
-                await self.page.goto("https://login.microsoft.com/")
-                await self.page.wait_for_load_state("networkidle")
+                # Navigate to Microsoft login with improved timeout
+                await self.page.goto("https://login.microsoft.com/", timeout=45000)  # Increased from default to 45s
+                await self.page.wait_for_load_state("networkidle", timeout=45000)  # Increased timeout for load state
 
                 # Enter username
                 await self.page.fill(
                     'input[type="email"]', self.credentials["microsoft_username"]
                 )
                 await self.page.click('input[type="submit"]')
-                await self.page.wait_for_load_state("networkidle")
+                await self.page.wait_for_load_state("networkidle", timeout=45000)  # Increased timeout for load state
 
                 # Enter password
                 await self.page.fill(
                     'input[type="password"]', self.credentials["elia_password"]
                 )
                 await self.page.click('input[type="submit"]')
-                await self.page.wait_for_load_state("networkidle")
+                await self.page.wait_for_load_state("networkidle", timeout=45000)  # Increased timeout for load state
 
                 # Handle MFA
                 mfa_success = await self._handle_mfa_cloud()
@@ -196,7 +196,7 @@ class CloudAuthenticationManager:
                 totp_code,
             )
             await self.page.click('input[type="submit"]')
-            await self.page.wait_for_load_state("networkidle")
+            await self.page.wait_for_load_state("networkidle", timeout=45000)  # Increased timeout for MFA submission
 
             # Check if authentication succeeded
             success = await self._check_authentication_success()
@@ -232,7 +232,7 @@ class CloudAuthenticationManager:
                 mfa_code,
             )
             await self.page.click('input[type="submit"]')
-            await self.page.wait_for_load_state("networkidle")
+            await self.page.wait_for_load_state("networkidle", timeout=45000)  # Increased timeout for email MFA submission
 
             # Check if authentication succeeded
             success = await self._check_authentication_success()
