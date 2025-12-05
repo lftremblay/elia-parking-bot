@@ -83,23 +83,27 @@ class EliaParkingBot:
         """
         Authenticate using cloud authentication manager
         Story 1.2 - Task 1.1: Cloud authentication integration
+        
+        DISABLED: Cloud auth manager tries to go directly to login.microsoft.com
+        but the actual auth flow goes through Kinde (elia.kinde.com) first.
+        The local auth path handles Kinde correctly, so we use that instead.
         """
-        try:
-            logger.info("☁️ Attempting cloud authentication...")
-            
-            # Use cloud authentication manager directly
-            success = await self.cloud_auth_manager.authenticate_microsoft()
-            
-            if success:
-                logger.success("☁️ Cloud authentication successful!")
-                return True
-            else:
-                logger.error("☁️ Cloud authentication failed")
-                return False
-                
-        except Exception as e:
-            logger.error(f"☁️ Cloud authentication error: {e}")
-            return False
+        logger.info("☁️ Cloud auth disabled - using local auth path (handles Kinde correctly)")
+        return False  # Force fallback to working local auth
+        
+        # Original broken code (kept for reference):
+        # try:
+        #     logger.info("☁️ Attempting cloud authentication...")
+        #     success = await self.cloud_auth_manager.authenticate_microsoft()
+        #     if success:
+        #         logger.success("☁️ Cloud authentication successful!")
+        #         return True
+        #     else:
+        #         logger.error("☁️ Cloud authentication failed")
+        #         return False
+        # except Exception as e:
+        #     logger.error(f"☁️ Cloud authentication error: {e}")
+        #     return False
     
     async def authenticate(self, force_reauth: bool = False) -> bool:
         """
