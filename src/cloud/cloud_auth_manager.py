@@ -113,6 +113,11 @@ class CloudAuthenticationManager:
                 self.browser = await p.chromium.launch(**browser_options)
                 self.context = await self.browser.new_context()
                 self.page = await self.context.new_page()
+                
+                # Set default timeout for all Playwright operations to 45s
+                self.page.set_default_timeout(45000)
+                self.page.set_default_navigation_timeout(45000)
+                logger.info("⏱️ Set Playwright default timeouts to 45s for cloud auth")
 
                 # Navigate to Microsoft login with improved timeout
                 await self.page.goto("https://login.microsoft.com/", timeout=45000)  # Increased from default to 45s
