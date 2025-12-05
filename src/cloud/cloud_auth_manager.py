@@ -180,10 +180,10 @@ class CloudAuthenticationManager:
     async def _handle_totp_mfa(self) -> bool:
         """Handle TOTP MFA authentication"""
         try:
-            # Wait for MFA input field
+            # Wait for MFA input field with improved timeout
             await self.page.wait_for_selector(
                 'input[placeholder*="code"], input[placeholder*="Code"], input[name="otc"]',
-                timeout=10000,
+                timeout=15000,  # Increased from 10s to 15s for better reliability
             )
 
             # Generate current TOTP code

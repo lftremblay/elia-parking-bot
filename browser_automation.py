@@ -237,7 +237,7 @@ class BrowserAutomation:
         """Navigate to Elia and handle organization input only if needed"""
         try:
             logger.info("📍 Navigating to Elia...")
-            await self.page.goto('https://app.elia.io/', wait_until='networkidle', timeout=30000)
+            await self.page.goto('https://app.elia.io/', wait_until='networkidle', timeout=45000)  # Increased from 30s to 45s for SSO reliability
             
             # Wait a bit for the page to stabilize
             await asyncio.sleep(2)
@@ -278,7 +278,7 @@ class BrowserAutomation:
             logger.info("🏢 Need to enter organization - not logged in")
             
             # Wait for organization input (should be visible now)
-            await self.page.wait_for_selector('input[type="text"]', timeout=10000)
+            await self.page.wait_for_selector('input[type="text"]', timeout=15000)  # Increased from 10s to 15s
             
             # Enter organization name
             logger.info(f"🏢 Entering organization: {organization}")
@@ -299,7 +299,7 @@ class BrowserAutomation:
             
             # Check if email input is required (before Microsoft SSO)
             try:
-                email_input = await self.page.wait_for_selector('input[type="email"], input[type="text"]', timeout=5000)
+                email_input = await self.page.wait_for_selector('input[type="email"], input[type="text"]', timeout=15000)  # Increased from 5s to 15s
                 if email_input:
                     # Get email from config
                     email = self.config.get('elia', {}).get('credentials', {}).get('email', '')

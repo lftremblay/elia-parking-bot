@@ -12,6 +12,7 @@ from loguru import logger
 
 from auth_manager import AuthenticationManager
 from browser_automation import BrowserAutomation
+from browser_health_monitor import add_health_monitoring
 from spot_detector import SpotDetector
 from notifier import Notifier
 
@@ -49,6 +50,8 @@ class EliaParkingBot:
                 logger.warning(f"⚠️ Failed to initialize cloud auth manager: {e}")
         
         self.browser = BrowserAutomation(self.config, self.auth_manager)
+        # Add health monitoring to browser automation
+        self.browser = add_health_monitoring(self.browser)
         self.spot_detector = SpotDetector(self.config)
         self.notifier = Notifier(self.config)
         
@@ -353,9 +356,16 @@ class EliaParkingBot:
         await self.cleanup()
     
     async def cleanup(self):
-        """Cleanup resources"""
+        """Cleanup resources with enhanced health monitoring"""
         logger.info("🧹 Cleaning up...")
-        await self.browser.close()
+        
+        # Use enhanced cleanup with health monitoring
+        if hasattr(self.browser, 'cleanup_with_health_monitor'):
+            await self.browser.cleanup_with_health_monitor()
+        else:
+            # Fallback to regular cleanup
+            await self.browser.close()
+        
         logger.info("✅ Cleanup complete")
         return False
     
