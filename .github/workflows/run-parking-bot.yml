@@ -33,6 +33,10 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
+        # Fix for Ubuntu 24.04 - install correct libasound2 package
+        sudo apt-get update
+        sudo apt-get install -y libasound2t64
+        # Install Playwright browsers with force flag
         playwright install chromium --force
 
     - name: Create config directory
