@@ -116,12 +116,14 @@ class EmailNotifier:
             logger.info(f"📧 Connecting to SMTP server...")
             server = smtplib.SMTP(self.smtp_host, self.smtp_port)
             
+            # Videotron internal SMTP doesn't use TLS or authentication
             if self.smtp_host != 'smtp-int.int.videotron.com':
                 logger.info(f"📧 Starting TLS encryption...")
                 server.starttls()
-            
-            logger.info(f"📧 Authenticating with {self.email_address}...")
-            server.login(self.email_address, self.smtp_password)
+                logger.info(f"📧 Authenticating with {self.email_address}...")
+                server.login(self.email_address, self.smtp_password)
+            else:
+                logger.info(f"📧 Using Videotron internal SMTP (no auth required)")
             
             logger.info(f"📧 Sending message...")
             server.send_message(msg)

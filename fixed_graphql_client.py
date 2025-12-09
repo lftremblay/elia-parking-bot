@@ -319,22 +319,28 @@ class FixedEliaGraphQLClient:
         
         return False
     
-    async def _execute_query(self, query: str, variables: Dict, operation_name: str) -> Optional[Dict]:
-        """Execute a GraphQL query"""
+    async def _execute_query(self, query: str, variables: dict = None, operation_name: str = None):
+        """Execute a GraphQL query with proper error handling"""
+        return await self.execute_query(query, variables, operation_name)
+    
+    async def execute_query(self, query: str, variables: dict = None, operation_name: str = None):
+        """Execute a GraphQL query with proper error handling"""
         try:
-            if not self.access_token:
-                raise Exception("No access token available")
-            
+            # Prepare the request payload
             payload = {
-                'query': query,
-                'variables': variables,
-                'operationName': operation_name
+                "query": query,
+                "variables": variables or {}
             }
             
+            if operation_name:
+                payload["operationName"] = operation_name
+            
+            # Add authorization header if we have a token
             headers = {
                 'Authorization': f'Bearer {self.access_token}'
             }
             
+            # Execute the query
             response = await self.session.post(
                 self.base_url,
                 json=payload,
