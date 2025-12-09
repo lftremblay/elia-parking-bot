@@ -601,22 +601,23 @@ class ProductionEliaBot:
         Returns:
             Tuple of (start_time, end_time) in UTC format
         """
-        # Montreal Winter Time (EST): UTC-5
-        # 6 AM Montreal = 11 AM UTC (6 + 5 = 11)
-        # 6 PM Montreal = 11 PM UTC (18 + 5 = 23)
+        # Montreal might be in EDT (UTC-4) depending on the date
+        # Let's try UTC-4 to get 6 AM - 6 PM Montreal:
+        # 6 AM Montreal = 10:00 UTC (6 + 4 = 10)
+        # 6 PM Montreal = 22:00 UTC (18 + 4 = 22)
         
         if hours >= 12:
-            # Full 12-hour day: 6 AM - 6 PM Montreal
-            start_time = "11:00:00.000Z"  # 6 AM Montreal (EST) = 11 AM UTC
-            end_time = "23:00:00.000Z"    # 6 PM Montreal (EST) = 11 PM UTC
+            # Full 12-hour day: 6 AM - 6 PM Montreal time
+            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
+            end_time = "22:00:00.000Z"    # 6 PM Montreal (EDT) = 10 PM UTC
         elif hours >= 6:
-            # Minimum 6-hour booking
-            start_time = "11:00:00.000Z"  # 6 AM Montreal = 11 AM UTC
-            end_time = f"{11 + hours:02d}:00:00.000Z"  # 6 AM Montreal + hours
+            # Minimum 6-hour booking from 6 AM Montreal
+            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
+            end_time = f"{10 + hours:02d}:00:00.000Z"  # 6 AM Montreal + hours in UTC
         else:
             # Less than 6 hours (shouldn't happen due to policy)
-            start_time = "11:00:00.000Z"
-            end_time = "17:00:00.000Z"  # 6 hours minimum (6 AM Montreal + 6h = 12 PM Montreal = 17 UTC)
+            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
+            end_time = "16:00:00.000Z"    # 6 hours = 12 PM Montreal = 16 UTC
         
         return start_time, end_time
     
