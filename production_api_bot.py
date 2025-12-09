@@ -52,12 +52,21 @@ class EmailNotifier:
         """Send email notification"""
         if not self.enabled:
             logger.info("📧 Email notification skipped - not configured")
+            logger.info(f"📧 Email Status Check:")
+            logger.info(f"   - Enabled: {self.enabled}")
+            logger.info(f"   - Email Address: {self.email_address}")
+            logger.info(f"   - SMTP Password Set: {'Yes' if self.smtp_password else 'No'}")
+            logger.info(f"   - SMTP Host: {self.smtp_host}")
+            logger.info(f"   - SMTP Port: {self.smtp_port}")
             
             # Try alternative notifications
             await self._send_alternative_notifications(subject, body, is_success)
             return False
         
         try:
+            logger.info(f"📧 Attempting to send email to {self.email_address}")
+            logger.info(f"📧 Using SMTP server: {self.smtp_host}:{self.smtp_port}")
+            
             # Create message
             msg = MIMEMultipart()
             msg['From'] = self.email_address
@@ -94,12 +103,17 @@ class EmailNotifier:
             msg.attach(MIMEText(html_body, 'html'))
             
             # Send email
+            logger.info(f"📧 Connecting to SMTP server...")
             server = smtplib.SMTP(self.smtp_host, self.smtp_port)
             
             if self.smtp_host != 'smtp-int.int.videotron.com':
+                logger.info(f"📧 Starting TLS encryption...")
                 server.starttls()
             
+            logger.info(f"📧 Authenticating with {self.email_address}...")
             server.login(self.email_address, self.smtp_password)
+            
+            logger.info(f"📧 Sending message...")
             server.send_message(msg)
             server.quit()
             
@@ -108,8 +122,34 @@ class EmailNotifier:
             
         except Exception as e:
             logger.error(f"❌ Failed to send email: {e}")
+            logger.error(f"❌ Email error details: {type(e).__name__}: {str(e)}")
             # Try alternatives if email fails
             await self._send_alternative_notifications(subject, body, is_success)
+            return False
+    
+    async def test_email_configuration(self):
+        """Test email configuration with a simple test email"""
+        logger.info("📧 Testing email configuration...")
+        
+        if not self.enabled:
+            logger.error("❌ Email not configured - cannot test")
+            return False
+        
+        try:
+            test_subject = "🧪 Email Configuration Test"
+            test_body = f"This is a test email from your Elia Parking Bot.\n\nSent at: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}\n\nIf you receive this, email notifications are working correctly!"
+            
+            result = await self.send_notification(test_subject, test_body, True)
+            
+            if result:
+                logger.success("✅ Email configuration test passed!")
+            else:
+                logger.error("❌ Email configuration test failed!")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Email test failed: {e}")
             return False
     
     async def _send_alternative_notifications(self, subject: str, body: str, is_success: bool = True):
@@ -257,6 +297,13 @@ class ProductionEliaBot:
             start_time, end_time = self._calculate_booking_times(booking_window_hours)
             
             logger.info(f"⏰ Booking window: {start_time} to {end_time} ({booking_window_hours} hours)")
+            logger.info(f"🌍 Expected Montreal display: 6:00 AM to 6:00 PM (adjusted for timezone)")
+            
+            # Debug time conversion
+            logger.debug(f"🔧 Time Debug:")
+            logger.debug(f"   - Start UTC: {start_time}")
+            logger.debug(f"   - End UTC: {end_time}")
+            logger.debug(f"   - Target date: {date}")
             
             # Try to reserve the first available spot
             target_spot = available_spots[0]
@@ -412,19 +459,17 @@ class ProductionEliaBot:
             logger.debug(f"  🔍 Checking if user has booking for {date}")
             
             # Method 1: Direct GraphQL API query for user's bookings
+            # Use the correct Elia API schema
             query = """
-            query GetUserBookings($date: String!) {
-                userBookings(date: $date) {
+            query GetUserBookings($date: String!, $floorId: String!) {
+                floorPlanBookings(floorId: $floorId, date: $date) {
                     id
                     date
                     status
                     space {
                         id
                         name
-                        floor {
-                            id
-                            name
-                        }
+                        type
                     }
                     user {
                         id
@@ -435,13 +480,13 @@ class ProductionEliaBot:
             }
             """
             
-            variables = {"date": date}
+            variables = {"date": date, "floorId": self.floor_id}
             
             try:
                 result = await self.client.execute_query(query, variables)
                 
-                if result and "userBookings" in result:
-                    bookings = result["userBookings"]
+                if result and "floorPlanBookings" in result:
+                    bookings = result["floorPlanBookings"]
                     
                     if bookings and len(bookings) > 0:
                         # User has bookings for this date
@@ -464,6 +509,7 @@ class ProductionEliaBot:
                     
             except Exception as api_error:
                 logger.warning(f"  ⚠️ GraphQL booking check failed for {date}: {api_error}")
+                logger.info(f"  🔍 Falling back to alternative detection methods")
                 
                 # Fallback to Method 2: Check booking history file
                 history_file = Path("booking_history.json")
@@ -949,13 +995,19 @@ async def main():
                        help="Check parking availability status")
     parser.add_argument("--hours", type=int, default=8,
                        help="Booking window duration in hours")
+    parser.add_argument("--test-email", action="store_true",
+                       help="Test email configuration")
     
     args = parser.parse_args()
     
     bot = ProductionEliaBot()
     
     try:
-        if args.status:
+        if args.test_email:
+            success = await bot.email_notifier.test_email_configuration()
+            print(f"Email test {'passed' if success else 'failed'}")
+        
+        elif args.status:
             status = await bot.check_parking_status(args.reserve_date)
             print(json.dumps(status, indent=2))
         
