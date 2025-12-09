@@ -289,25 +289,47 @@ class ProductionEliaBot:
         try:
             vacation_dates = set()
             
-            # Method 1: Check environment variable
+            # Method 1: Check environment variable (for testing/backup)
             vacation_str = os.getenv('VACATION_DATES', '')
             if vacation_str:
                 env_dates = set(date.strip() for date in vacation_str.split(',') if date.strip())
                 vacation_dates.update(env_dates)
                 logger.info(f"🏖️ Found {len(env_dates)} vacation dates from environment: {env_dates}")
             
-            # Method 2: Always add Dec 24, 2025 as vacation (user explicitly requested this)
-            dec_24_2025 = "2025-12-24"
-            vacation_dates.add(dec_24_2025)
-            logger.info(f"🏖️ Added vacation date {dec_24_2025} (user requested suppression)")
+            # Method 2: Read from Chrome extension storage
+            # This is the primary method - extension should save vacation dates
+            try:
+                # Look for extension data file that might contain vacation dates
+                extension_file = Path("vacation_dates.txt")
+                if extension_file.exists():
+                    with open(extension_file, 'r') as f:
+                        file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                        vacation_dates.update(file_dates)
+                        logger.info(f"🏖️ Found {len(file_dates)} vacation dates from extension file: {file_dates}")
+                else:
+                    logger.debug("🏖️ No extension vacation file found")
+            except Exception as e:
+                logger.debug(f"🏖️ Could not read extension file: {e}")
             
-            # Method 3: Future - read from Chrome extension storage
-            # This would require additional implementation
+            # Method 3: Check for common vacation file names
+            common_files = ["vacation.txt", "skip_dates.txt", "blocked_dates.txt"]
+            for filename in common_files:
+                try:
+                    file_path = Path(filename)
+                    if file_path.exists():
+                        with open(file_path, 'r') as f:
+                            file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                            vacation_dates.update(file_dates)
+                            logger.info(f"🏖️ Found {len(file_dates)} vacation dates from {filename}: {file_dates}")
+                            break
+                except Exception as e:
+                    logger.debug(f"🏖️ Could not read {filename}: {e}")
             
             if vacation_dates:
                 logger.info(f"🏖️ Total vacation dates that will be skipped: {vacation_dates}")
             else:
-                logger.info("🏖️ No vacation dates configured")
+                logger.warning("🏖️ No vacation dates found - bot will book all weekdays")
+                logger.info("💡 To set vacation dates, use VACATION_DATES environment variable or create vacation_dates.txt file")
             
             return vacation_dates
             
