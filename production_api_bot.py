@@ -198,6 +198,47 @@ class ProductionEliaBot:
             # On error, assume we should skip to be safe
             return True
     
+    async def get_vacation_dates(self) -> Set[str]:
+        """
+        Get vacation dates from extension storage
+        
+        Returns:
+            Set of vacation dates in YYYY-MM-DD format
+        """
+        try:
+            # For now, check environment variable
+            # In future, this could read from Chrome extension storage
+            vacation_str = os.getenv('VACATION_DATES', '')
+            
+            if vacation_str:
+                vacation_dates = set(date.strip() for date in vacation_str.split(','))
+                logger.info(f"🏖️ Found {len(vacation_dates)} vacation dates: {vacation_dates}")
+                return vacation_dates
+            
+            return set()
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to get vacation dates: {e}")
+            return set()
+    
+    async def should_skip_date(self, date: str) -> bool:
+        """
+        Check if a date should be skipped due to vacation
+        
+        Args:
+            date: Date in YYYY-MM-DD format
+        
+        Returns:
+            True if date should be skipped
+        """
+        vacation_dates = await self.get_vacation_dates()
+        
+        if date in vacation_dates:
+            logger.info(f"  🏖️ Skipping {date} - Vacation day")
+            return True
+        
+        return False
+    
     async def smart_weekday_booking(self) -> Dict[str, any]:
         """
         Smart booking strategy:
@@ -226,8 +267,11 @@ class ProductionEliaBot:
             tomorrow_str = tomorrow.strftime('%Y-%m-%d')
             logger.info(f"\n📅 STEP 1: Executive spot for tomorrow ({tomorrow_str})")
             
+            # Check if vacation day
+            if await self.should_skip_date(tomorrow_str):
+                results["skipped"].append(f"{tomorrow_str} (vacation)")
             # Check if already booked
-            if await self.has_booking_for_date(tomorrow_str):
+            elif await self.has_booking_for_date(tomorrow_str):
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
@@ -256,8 +300,11 @@ class ProductionEliaBot:
                 future_date_str = future_date.strftime('%Y-%m-%d')
                 logger.info(f"\n📅 Checking {future_date_str} ({future_date.strftime('%A')})")
                 
+                # Check if vacation day
+                if await self.should_skip_date(future_date_str):
+                    results["skipped"].append(f"{future_date_str} (vacation)")
                 # Check if already booked
-                if await self.has_booking_for_date(future_date_str):
+                elif await self.has_booking_for_date(future_date_str):
                     logger.info(f"⏭️ Skipping {future_date_str} - already booked")
                     results["skipped"].append(future_date_str)
                 else:
