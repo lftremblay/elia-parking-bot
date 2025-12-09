@@ -1,18 +1,21 @@
-name: Daily Parking Bot
+name: Smart Weekday Parking Bot
 
 on:
   schedule:
-    # Run every day at midnight Montreal Winter Time (5:00 AM UTC) - 6 hours before 6 AM reservation
-    - cron: '0 5 * * *'
-    # Also run 30 minutes later as backup (5:30 AM UTC)
-    - cron: '30 5 * * *'
+    # Run Monday-Friday at midnight Montreal Winter Time (5:00 AM UTC)
+    # 6 hours before 6 AM reservation (executive spots)
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:  # Allow manual triggering
     inputs:
-      test_mode:
-        description: 'Run in test mode (books for today instead of tomorrow)'
+      booking_mode:
+        description: 'Booking mode'
         required: false
-        default: 'false'
-        type: boolean
+        default: 'smart'
+        type: choice
+        options:
+          - smart
+          - reserve
+          - status
 
 jobs:
   park-car:
@@ -37,9 +40,11 @@ jobs:
         echo "ELIA_GRAPHQL_TOKEN=${{ secrets.ELIA_GRAPHQL_TOKEN }}" > .env
         echo "BOT_ENV=production" >> .env
         
-    - name: Run parking bot (API version)
+    - name: Run smart parking bot
       run: |
-        python production_api_bot.py --reserve --hours 12
+        # Smart mode: Books executive for tomorrow + regular 14-15 days ahead
+        # Automatically skips weekends and prevents double-booking
+        python production_api_bot.py --smart
         
     - name: Upload logs
       if: always()
@@ -52,9 +57,12 @@ jobs:
     - name: Notify on success
       if: success()
       run: |
-        echo "🎉 Parking bot completed successfully!"
+        echo "🎉 Smart parking bot completed successfully!"
+        echo "✅ Executive spot booked for tomorrow"
+        echo "✅ Regular spots booked 14-15 days ahead"
         
     - name: Notify on failure
       if: failure()
       run: |
-        echo "❌ Parking bot failed - check logs!"
+        echo "❌ Smart parking bot failed - check logs!"
+        echo "💡 Token may need refresh or spots unavailable"

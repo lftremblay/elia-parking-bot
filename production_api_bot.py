@@ -125,9 +125,183 @@ class ProductionEliaBot:
             logger.error(f"❌ Production reservation failed: {e}")
             return False
     
+    async def get_my_bookings(self, start_date: str, end_date: str) -> List[Dict]:
+        """
+        Get user's existing bookings for a date range
+        
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+        
+        Returns:
+            List of existing bookings
+        """
+        try:
+            query = """
+            query GetMyBookings($startDate: Date!, $endDate: Date!) {
+                me {
+                    bookings(startDate: $startDate, endDate: $endDate) {
+                        id
+                        startTime
+                        endTime
+                        space {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+            """
+            
+            variables = {
+                "startDate": start_date,
+                "endDate": end_date
+            }
+            
+            result = await self.client._execute_query(query, variables, "GetMyBookings")
+            
+            if result and "me" in result and "bookings" in result["me"]:
+                bookings = result["me"]["bookings"]
+                logger.info(f"📋 Found {len(bookings)} existing bookings")
+                return bookings
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to get bookings: {e}")
+            return []
+    
+    async def has_booking_for_date(self, date: str) -> bool:
+        """
+        Check if user already has a booking for a specific date
+        
+        Args:
+            date: Date in YYYY-MM-DD format
+        
+        Returns:
+            True if booking exists
+        """
+        bookings = await self.get_my_bookings(date, date)
+        
+        if bookings:
+            for booking in bookings:
+                logger.info(f"  ✅ Existing booking: {booking['space']['name']} on {date}")
+            return True
+        
+        return False
+    
+    async def smart_weekday_booking(self) -> Dict[str, any]:
+        """
+        Smart booking strategy:
+        1. Book executive spot for tomorrow (6h policy)
+        2. Book regular spots 14-15 days ahead
+        3. Skip weekends
+        4. Prevent double-booking
+        
+        Returns:
+            Dictionary with booking results and summary
+        """
+        logger.info("🎯 Starting smart weekday booking strategy")
+        
+        results = {
+            "executive_today": None,
+            "regular_ahead": {},
+            "skipped": [],
+            "errors": []
+        }
+        
+        today = datetime.now()
+        tomorrow = today + timedelta(days=1)
+        
+        # STEP 1: Book executive spot for tomorrow (6h policy)
+        if tomorrow.weekday() < 5:  # Weekday check
+            tomorrow_str = tomorrow.strftime('%Y-%m-%d')
+            logger.info(f"\n📅 STEP 1: Executive spot for tomorrow ({tomorrow_str})")
+            
+            # Check if already booked
+            if await self.has_booking_for_date(tomorrow_str):
+                logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
+                results["skipped"].append(tomorrow_str)
+            else:
+                # Try to book executive spot
+                success = await self.reserve_parking_spot(
+                    date=tomorrow_str,
+                    spot_type="executive",
+                    booking_window_hours=12
+                )
+                results["executive_today"] = {
+                    "date": tomorrow_str,
+                    "success": success,
+                    "type": "executive"
+                }
+        else:
+            logger.info(f"⏭️ Tomorrow is {tomorrow.strftime('%A')} - skipping")
+        
+        # STEP 2: Book regular spots 14-15 days ahead
+        logger.info(f"\n📅 STEP 2: Regular spots 14-15 days ahead")
+        
+        for days_ahead in [14, 15]:
+            future_date = today + timedelta(days=days_ahead)
+            
+            # Only book weekdays
+            if future_date.weekday() < 5:
+                future_date_str = future_date.strftime('%Y-%m-%d')
+                logger.info(f"\n📅 Checking {future_date_str} ({future_date.strftime('%A')})")
+                
+                # Check if already booked
+                if await self.has_booking_for_date(future_date_str):
+                    logger.info(f"⏭️ Skipping {future_date_str} - already booked")
+                    results["skipped"].append(future_date_str)
+                else:
+                    # Try to book regular spot
+                    success = await self.reserve_parking_spot(
+                        date=future_date_str,
+                        spot_type="regular",
+                        booking_window_hours=12
+                    )
+                    results["regular_ahead"][future_date_str] = {
+                        "success": success,
+                        "type": "regular",
+                        "days_ahead": days_ahead
+                    }
+                    
+                    # Small delay between bookings
+                    await asyncio.sleep(2)
+            else:
+                logger.info(f"⏭️ {future_date.strftime('%Y-%m-%d')} is {future_date.strftime('%A')} - skipping")
+        
+        # STEP 3: Summary
+        logger.info("\n" + "="*50)
+        logger.success("📊 SMART BOOKING SUMMARY")
+        logger.info("="*50)
+        
+        # Executive booking
+        if results["executive_today"]:
+            exec_result = results["executive_today"]
+            status = "✅ SUCCESS" if exec_result["success"] else "❌ FAILED"
+            logger.info(f"Executive (tomorrow): {status} - {exec_result['date']}")
+        
+        # Regular bookings
+        if results["regular_ahead"]:
+            logger.info(f"\nRegular spots (14-15 days ahead):")
+            for date_str, result in results["regular_ahead"].items():
+                status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
+                logger.info(f"  {status} - {date_str} ({result['days_ahead']} days ahead)")
+        
+        # Skipped dates
+        if results["skipped"]:
+            logger.info(f"\nSkipped (already booked): {len(results['skipped'])} dates")
+            for date_str in results["skipped"]:
+                logger.info(f"  ⏭️ {date_str}")
+        
+        logger.info("="*50)
+        
+        return results
+    
     async def reserve_weekday_spots(self, days_ahead: int = 14) -> Dict[str, bool]:
         """
         Reserve parking spots for all weekdays in the next N days
+        (Legacy method - use smart_weekday_booking for new logic)
         
         Args:
             days_ahead: Number of days to look ahead
@@ -148,6 +322,12 @@ class ProductionEliaBot:
                 date_str = date.strftime('%Y-%m-%d')
                 logger.info(f"📅 Processing {date_str} ({date.strftime('%A')})")
                 
+                # Check if already booked
+                if await self.has_booking_for_date(date_str):
+                    logger.info(f"⏭️ Skipping {date_str} - already booked")
+                    results[date_str] = "skipped"
+                    continue
+                
                 success = await self.reserve_parking_spot(date_str)
                 results[date_str] = success
                 
@@ -155,13 +335,19 @@ class ProductionEliaBot:
                 await asyncio.sleep(2)
         
         # Summary
-        successful = sum(1 for success in results.values() if success)
+        successful = sum(1 for v in results.values() if v == True)
+        skipped = sum(1 for v in results.values() if v == "skipped")
         total = len(results)
         
-        logger.success(f"📊 Weekday reservation summary: {successful}/{total} successful")
+        logger.success(f"📊 Weekday reservation summary: {successful}/{total} successful, {skipped} skipped")
         
-        for date_str, success in results.items():
-            status = "✅" if success else "❌"
+        for date_str, result in results.items():
+            if result == "skipped":
+                status = "⏭️"
+            elif result:
+                status = "✅"
+            else:
+                status = "❌"
             logger.info(f"  {status} {date_str}")
         
         return results
@@ -277,6 +463,10 @@ async def main():
                        default="executive", help="Type of spot to reserve")
     parser.add_argument("--weekdays", action="store_true",
                        help="Reserve for all weekdays in next 14 days")
+    parser.add_argument("--smart", action="store_true",
+                       help="Smart booking: executive tomorrow + regular 14-15 days ahead")
+    parser.add_argument("--check-bookings", action="store_true",
+                       help="Check existing bookings for next 30 days")
     parser.add_argument("--status", action="store_true",
                        help="Check parking availability status")
     parser.add_argument("--hours", type=int, default=8,
@@ -299,16 +489,30 @@ async def main():
             )
             print(f"Reservation {'successful' if success else 'failed'}")
         
+        elif args.smart:
+            results = await bot.smart_weekday_booking()
+            print(json.dumps(results, indent=2, default=str))
+        
         elif args.weekdays:
             results = await bot.reserve_weekday_spots()
             print(json.dumps(results, indent=2))
+        
+        elif args.check_bookings:
+            today = datetime.now()
+            end_date = today + timedelta(days=30)
+            bookings = await bot.get_my_bookings(
+                today.strftime('%Y-%m-%d'),
+                end_date.strftime('%Y-%m-%d')
+            )
+            print(json.dumps(bookings, indent=2))
         
         else:
             print("No action specified. Use --help for options.")
             print("\nQuick examples:")
             print("  python production_api_bot.py --status")
             print("  python production_api_bot.py --reserve")
-            print("  python production_api_bot.py --reserve --spot-type executive")
+            print("  python production_api_bot.py --smart  # Recommended!")
+            print("  python production_api_bot.py --check-bookings")
             print("  python production_api_bot.py --weekdays")
     
     finally:
