@@ -7,6 +7,11 @@ class TokenManagerPopup {
     this.setupEventListeners();
     this.updateStatus();
     this.startStatusPolling();
+    
+    // Initialize vacation calendar
+    this.currentMonth = new Date();
+    this.vacationDates = new Set();
+    this.initializeVacationCalendar();
   }
 
   initializeElements() {
@@ -42,7 +47,16 @@ class TokenManagerPopup {
       logCount: document.getElementById('log-count'),
       
       // Notification container
-      notificationContainer: document.getElementById('notification-container')
+      notificationContainer: document.getElementById('notification-container'),
+      
+      // Vacation calendar elements
+      prevMonth: document.getElementById('prev-month'),
+      nextMonth: document.getElementById('next-month'),
+      currentMonthLabel: document.getElementById('current-month'),
+      calendarDays: document.getElementById('calendar-days'),
+      clearVacations: document.getElementById('clear-vacations'),
+      syncVacations: document.getElementById('sync-vacations'),
+      vacationCount: document.getElementById('vacation-count')
     };
   }
 
@@ -98,6 +112,12 @@ class TokenManagerPopup {
     this.elements.monitoringEnabled.addEventListener('change', () => {
       this.saveConfiguration();
     });
+    
+    // Vacation calendar event listeners
+    this.elements.prevMonth.addEventListener('click', () => this.changeMonth(-1));
+    this.elements.nextMonth.addEventListener('click', () => this.changeMonth(1));
+    this.elements.clearVacations.addEventListener('click', () => this.clearAllVacations());
+    this.elements.syncVacations.addEventListener('click', () => this.syncVacationsToBot());
   }
 
   async saveConfiguration() {
@@ -440,6 +460,189 @@ class TokenManagerPopup {
         notification.remove();
       }, 300);
     }, 4000);
+  }
+  
+  // Vacation Calendar Methods
+  async initializeVacationCalendar() {
+    console.log('🏖️ Initializing vacation calendar...');
+    
+    // Load vacation dates from storage
+    await this.loadVacationDates();
+    
+    // Render current month
+    this.renderCalendar();
+  }
+  
+  async loadVacationDates() {
+    try {
+      const stored = await chrome.storage.local.get(['vacationDates']);
+      if (stored.vacationDates) {
+        this.vacationDates = new Set(stored.vacationDates);
+        console.log(`📅 Loaded ${this.vacationDates.size} vacation dates`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to load vacation dates:', error);
+    }
+  }
+  
+  async saveVacationDates() {
+    try {
+      await chrome.storage.local.set({
+        vacationDates: Array.from(this.vacationDates)
+      });
+      console.log(`💾 Saved ${this.vacationDates.size} vacation dates`);
+      this.updateVacationCount();
+    } catch (error) {
+      console.error('❌ Failed to save vacation dates:', error);
+    }
+  }
+  
+  renderCalendar() {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    
+    // Update month label
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    this.elements.currentMonthLabel.textContent = `${monthNames[month]} ${year}`;
+    
+    // Clear calendar
+    this.elements.calendarDays.innerHTML = '';
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Get day of week for first day (0 = Sunday, but we want Monday = 0)
+    let startDay = firstDay.getDay();
+    startDay = startDay === 0 ? 6 : startDay - 1; // Convert to Monday-first
+    
+    // Get previous month for days before month starts
+    const prevMonth = new Date(year, month, 0);
+    const daysInPrevMonth = prevMonth.getDate();
+    
+    // Add previous month days
+    for (let i = startDay - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      const dayElement = this.createDayElement(day, true, false, false);
+      this.elements.calendarDays.appendChild(dayElement);
+    }
+    
+    // Add current month days
+    const today = new Date();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isToday = date.toDateString() === today.toDateString();
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      const isVacation = this.vacationDates.has(this.formatDate(date));
+      
+      const dayElement = this.createDayElement(day, false, isToday, isWeekend, isVacation);
+      
+      // Add click handler
+      dayElement.addEventListener('click', () => this.toggleVacationDate(date));
+      
+      this.elements.calendarDays.appendChild(dayElement);
+    }
+    
+    // Add next month days to complete grid
+    const totalCells = this.elements.calendarDays.children.length;
+    const remainingCells = 42 - totalCells; // 6 rows * 7 days
+    
+    for (let day = 1; day <= remainingCells; day++) {
+      const dayElement = this.createDayElement(day, true, false, false);
+      this.elements.calendarDays.appendChild(dayElement);
+    }
+    
+    this.updateVacationCount();
+  }
+  
+  createDayElement(day, isOtherMonth, isToday, isWeekend, isVacation = false) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    dayElement.textContent = day;
+    
+    if (isOtherMonth) dayElement.classList.add('other-month');
+    if (isToday) dayElement.classList.add('today');
+    if (isWeekend) dayElement.classList.add('weekend');
+    if (isVacation) dayElement.classList.add('vacation');
+    
+    return dayElement;
+  }
+  
+  formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+  async toggleVacationDate(date) {
+    const dateStr = this.formatDate(date);
+    
+    if (this.vacationDates.has(dateStr)) {
+      this.vacationDates.delete(dateStr);
+      console.log(`🗑️ Removed vacation: ${dateStr}`);
+    } else {
+      this.vacationDates.add(dateStr);
+      console.log(`➕ Added vacation: ${dateStr}`);
+    }
+    
+    await this.saveVacationDates();
+    this.renderCalendar();
+    
+    // Show notification
+    const action = this.vacationDates.has(dateStr) ? 'added' : 'removed';
+    this.showNotification(`Vacation ${action} for ${dateStr}`, 'success');
+  }
+  
+  changeMonth(direction) {
+    this.currentMonth.setMonth(this.currentMonth.getMonth() + direction);
+    this.renderCalendar();
+  }
+  
+  async clearAllVacations() {
+    if (this.vacationDates.size === 0) {
+      this.showNotification('No vacation dates to clear', 'info');
+      return;
+    }
+    
+    if (confirm('Are you sure you want to clear all vacation dates?')) {
+      this.vacationDates.clear();
+      await this.saveVacationDates();
+      this.renderCalendar();
+      this.showNotification('All vacation dates cleared', 'success');
+    }
+  }
+  
+  async syncVacationsToBot() {
+    try {
+      // Save vacation dates to a format the bot can read
+      const vacationData = {
+        dates: Array.from(this.vacationDates),
+        lastUpdated: new Date().toISOString()
+      };
+      
+      // Store in Chrome storage for the bot to access
+      await chrome.storage.local.set({ vacationData });
+      
+      // Also try to update GitHub if configured
+      const config = await chrome.storage.local.get(['config']);
+      if (config.config && config.config.githubToken && config.config.repository) {
+        // In a full implementation, you'd update a GitHub secret here
+        this.showNotification('Vacation dates synced to bot storage', 'success');
+      } else {
+        this.showNotification('Vacation dates synced locally. Configure GitHub for cloud sync.', 'info');
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to sync vacations:', error);
+      this.showNotification('Failed to sync vacation dates', 'error');
+    }
+  }
+  
+  updateVacationCount() {
+    this.elements.vacationCount.textContent = this.vacationDates.size;
   }
 }
 

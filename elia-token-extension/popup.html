@@ -135,6 +135,48 @@
       </div>
     </div>
 
+    <!-- Vacation Section -->
+    <div class="vacation">
+      <h2>🏖️ Vacation Days</h2>
+      
+      <div class="vacation-controls">
+        <button id="prev-month" class="btn-small">←</button>
+        <span id="current-month" class="month-label">December 2025</span>
+        <button id="next-month" class="btn-small">→</button>
+      </div>
+      
+      <div class="calendar-container">
+        <div class="calendar-weekdays">
+          <div class="weekday">Mon</div>
+          <div class="weekday">Tue</div>
+          <div class="weekday">Wed</div>
+          <div class="weekday">Thu</div>
+          <div class="weekday">Fri</div>
+          <div class="weekday">Sat</div>
+          <div class="weekday">Sun</div>
+        </div>
+        <div class="calendar-days" id="calendar-days">
+          <!-- Days will be populated by JavaScript -->
+        </div>
+      </div>
+      
+      <div class="vacation-actions">
+        <button id="clear-vacations" class="btn btn-outline">
+          <span class="btn-icon">🗑️</span>
+          Clear All Vacations
+        </button>
+        <button id="sync-vacations" class="btn btn-secondary">
+          <span class="btn-icon">🔄</span>
+          Sync to Bot
+        </button>
+      </div>
+      
+      <div class="vacation-info">
+        <p><strong>📅 Active Vacations:</strong> <span id="vacation-count">0</span> days</p>
+        <p><strong>💡 Click dates to toggle vacation status</strong></p>
+      </div>
+    </div>
+
     <!-- Logs Section -->
     <div class="logs" id="logs" style="display: none;">
       <div class="logs-header">

@@ -597,3 +597,134 @@ body {
 .fade-in {
   animation: fadeIn 0.3s ease;
 }
+
+/* Vacation Calendar Styles */
+.vacation {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.vacation h2 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+
+.vacation-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.month-label {
+  font-weight: 600;
+  color: var(--text-color);
+  min-width: 120px;
+  text-align: center;
+}
+
+.calendar-container {
+  background: var(--bg-color);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 5px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 5px;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.calendar-day:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: scale(1.05);
+}
+
+.calendar-day.other-month {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border-color);
+}
+
+.calendar-day.weekend {
+  background: #f8f9fa;
+  color: var(--text-muted);
+}
+
+.calendar-day.today {
+  border: 2px solid var(--primary-color);
+  font-weight: 600;
+}
+
+.calendar-day.vacation {
+  background: var(--error-color);
+  color: white;
+  border-color: var(--error-color);
+}
+
+.calendar-day.vacation:hover {
+  background: #c82333;
+}
+
+.vacation-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.vacation-actions .btn {
+  flex: 1;
+}
+
+.vacation-info {
+  background: var(--bg-color);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.vacation-info p {
+  margin: 0 0 5px 0;
+}
+
+.vacation-info strong {
+  color: var(--text-color);
+}
+
+#vacation-count {
+  color: var(--error-color);
+  font-weight: 600;
+}
