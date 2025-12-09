@@ -43,7 +43,7 @@ jobs:
         
     - name: Upload logs
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: parking-bot-logs
         path: parking_bot.log
