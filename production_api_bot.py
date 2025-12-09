@@ -179,6 +179,10 @@ class ProductionEliaBot:
             if success:
                 logger.success(f"✅ Successfully reserved {target_spot['name']} for {date}")
                 logger.info(f"📅 Reservation: {date} {start_time} - {end_time}")
+                
+                # Record successful booking in history
+                await self.record_successful_booking(date, target_spot['name'])
+                
                 return True
             else:
                 logger.error(f"❌ Failed to reserve {target_spot['name']}")
@@ -198,6 +202,10 @@ class ProductionEliaBot:
                     
                     if success:
                         logger.success(f"✅ Successfully reserved {next_spot['name']} for {date}")
+                        
+                        # Record successful booking in history
+                        await self.record_successful_booking(date, next_spot['name'])
+                        
                         return True
                 
                 return False
@@ -205,6 +213,52 @@ class ProductionEliaBot:
         except Exception as e:
             logger.error(f"❌ Production reservation failed: {e}")
             return False
+    
+    async def record_successful_booking(self, date: str, spot_name: str):
+        """
+        Record a successful booking in the history file
+        
+        Args:
+            date: Date in YYYY-MM-DD format
+            spot_name: Name of the booked spot
+        """
+        try:
+            history_file = Path("booking_history.json")
+            
+            # Load existing history or create new
+            if history_file.exists():
+                with open(history_file, 'r') as f:
+                    history = json.load(f)
+            else:
+                history = {
+                    "successful_bookings": [],
+                    "booking_details": {},
+                    "last_updated": None
+                }
+            
+            # Add the booking if not already present
+            if date not in history["successful_bookings"]:
+                history["successful_bookings"].append(date)
+                history["booking_details"][date] = {
+                    "spot_name": spot_name,
+                    "booked_at": datetime.now().isoformat(),
+                    "date": date
+                }
+                history["last_updated"] = datetime.now().isoformat()
+                
+                # Sort the bookings list
+                history["successful_bookings"].sort()
+                
+                # Save updated history
+                with open(history_file, 'w') as f:
+                    json.dump(history, f, indent=2)
+                
+                logger.info(f"📋 Recorded booking for {date} in history")
+            else:
+                logger.debug(f"📋 Booking for {date} already exists in history")
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to record booking history: {e}")
     
     async def get_my_bookings(self, start_date: str, end_date: str) -> List[Dict]:
         """
@@ -252,7 +306,7 @@ class ProductionEliaBot:
     async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
-        Uses the API to check user's actual bookings
+        Uses the GraphQL API to check user's actual bookings
         
         Args:
             date: Date in YYYY-MM-DD format
@@ -261,55 +315,101 @@ class ProductionEliaBot:
             True if user has a booking, False otherwise
         """
         try:
-            # Method 1: Try to get user's bookings directly
-            # This would require a specific API endpoint to get user's bookings
+            logger.debug(f"  🔍 Checking if user has booking for {date}")
             
-            # Method 2: Check if we can book a spot - if we can't, we might have one
-            # But this is unreliable as spots could be taken by others
+            # Method 1: Direct GraphQL API query for user's bookings
+            query = """
+            query GetUserBookings($date: String!) {
+                userBookings(date: $date) {
+                    id
+                    date
+                    status
+                    space {
+                        id
+                        name
+                        floor {
+                            id
+                            name
+                        }
+                    }
+                    user {
+                        id
+                        email
+                        displayName
+                    }
+                }
+            }
+            """
             
-            # Method 3: Use a more conservative approach with booking history
-            # Get available spots for this date
+            variables = {"date": date}
+            
+            try:
+                result = await self.client.execute_query(query, variables)
+                
+                if result and "userBookings" in result:
+                    bookings = result["userBookings"]
+                    
+                    if bookings and len(bookings) > 0:
+                        # User has bookings for this date
+                        user_email = os.getenv('ELIA_EMAIL', '').lower()
+                        
+                        # Check if any booking belongs to current user
+                        for booking in bookings:
+                            if (booking.get("user", {}).get("email", "").lower() == user_email or
+                                booking.get("status") in ["confirmed", "active", "booked"]):
+                                
+                                logger.info(f"  ✅ Found existing booking for {date}: {booking.get('space', {}).get('name', 'Unknown')}")
+                                return True
+                        
+                        logger.debug(f"  📊 Found {len(bookings)} bookings for {date}, but none belong to current user")
+                    else:
+                        logger.debug(f"  📊 No bookings found for {date}")
+                        
+                else:
+                    logger.debug(f"  📊 No booking data returned for {date}")
+                    
+            except Exception as api_error:
+                logger.warning(f"  ⚠️ GraphQL booking check failed for {date}: {api_error}")
+                
+                # Fallback to Method 2: Check booking history file
+                history_file = Path("booking_history.json")
+                if history_file.exists():
+                    with open(history_file, 'r') as f:
+                        history = json.load(f)
+                        
+                    if date in history.get("successful_bookings", []):
+                        logger.info(f"  📋 Found {date} in booking history - assuming user has booking")
+                        return True
+                        
+                    logger.debug(f"  📋 {date} not found in booking history")
+                else:
+                    logger.debug(f"  📋 No booking history file found")
+            
+            # Method 3: Conservative check with enhanced logic
+            # Only if both API and history checks fail
             available_spots = await self.client.get_available_parking_spots(date, self.floor_id)
-            
-            # Get total spaces to calculate occupancy
             all_spaces = await self.client.get_floor_spaces(self.floor_id)
             total_spaces = len(all_spaces)
             available_count = len(available_spots)
             booked_count = total_spaces - available_count
-            
-            # If occupancy is very low, user likely doesn't have a booking
             occupancy_rate = booked_count / total_spaces if total_spaces > 0 else 0
             
             logger.debug(f"  📊 {date}: {available_count}/{total_spaces} spots available, {booked_count} booked ({occupancy_rate:.1%} occupancy)")
             
-            # If less than 20% occupied, user probably doesn't have a booking
-            if occupancy_rate < 0.2:
-                logger.debug(f"  📊 Low occupancy ({occupancy_rate:.1%}) - user likely needs booking")
+            # Enhanced conservative logic
+            if occupancy_rate > 0.9:
+                logger.info(f"  ⏭️ Very high occupancy ({occupancy_rate:.1%}) for {date} - skipping to avoid double-booking")
+                return True
+            elif occupancy_rate > 0.7:
+                logger.warning(f"  ⚠️ High occupancy ({occupancy_rate:.1%}) for {date} - proceeding with caution")
                 return False
             
-            # If high occupancy, be more cautious
-            if occupancy_rate > 0.8:
-                logger.info(f"  ⏭️ High occupancy ({occupancy_rate:.1%}) for {date} - being cautious about double-booking")
-                return True
-            
-            # For medium occupancy, check if this is a recent booking date
-            # (dates we might have booked in recent runs)
-            today = datetime.now()
-            target_date = datetime.strptime(date, '%Y-%m-%d')
-            days_ahead = (target_date - today).days
-            
-            # For dates 14-15 days ahead (our regular booking window), be more cautious
-            if 14 <= days_ahead <= 15:
-                logger.info(f"  ⏭️ {date} is in regular booking window ({days_ahead} days) - being cautious")
-                return True
-            
-            # Otherwise, allow booking
-            logger.debug(f"  📊 {date}: Proceeding with booking")
+            logger.debug(f"  📊 {date}: Occupancy is reasonable ({occupancy_rate:.1%}) - proceeding with booking")
             return False
             
         except Exception as e:
             logger.error(f"❌ Failed to check booking for {date}: {e}")
-            # On error, assume we should skip to be safe
+            # On error, be conservative and skip to avoid double-booking
             return True
     
     async def get_vacation_dates(self) -> Set[str]:
@@ -329,128 +429,46 @@ class ProductionEliaBot:
                 vacation_dates.update(env_dates)
                 logger.info(f"🏖️ Found {len(env_dates)} vacation dates from environment: {env_dates}")
             
-            # Method 2: Check multiple possible vacation file names
-            possible_files = [
-                "vacation_dates.txt",      # Our preferred format
-                "vacation.txt",            # Alternative name
-                "skip_dates.txt",          # Alternative name
-                "blocked_dates.txt",       # Alternative name
-                "elia_vacation.txt",       # Extension-specific
-                "parking_vacation.txt",    # Extension-specific
-                "sync_dates.txt",          # Extension-specific
-                "bot_dates.txt",           # Extension-specific
-                "vacation.json",           # JSON format
-                "skip_days.json"           # JSON format
-            ]
+            # Method 2: Read from Chrome extension storage
+            # This is the primary method - extension should save vacation dates
+            try:
+                # Look for extension data file that might contain vacation dates
+                extension_file = Path("vacation_dates.txt")
+                if extension_file.exists():
+                    with open(extension_file, 'r') as f:
+                        file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                        vacation_dates.update(file_dates)
+                        logger.info(f"🏖️ Found {len(file_dates)} vacation dates from extension file: {file_dates}")
+                else:
+                    logger.debug("🏖️ No extension vacation file found")
+            except Exception as e:
+                logger.debug(f"🏖️ Could not read extension file: {e}")
             
-            for filename in possible_files:
+            # Method 3: Check for common vacation file names
+            common_files = ["vacation.txt", "skip_dates.txt", "blocked_dates.txt"]
+            for filename in common_files:
                 try:
                     file_path = Path(filename)
                     if file_path.exists():
-                        logger.info(f"🏖️ Found vacation file: {filename}")
-                        
                         with open(file_path, 'r') as f:
-                            content = f.read().strip()
-                            
-                        if not content:
-                            logger.debug(f"🏖️ {filename} is empty")
-                            continue
-                            
-                        # Try different formats
-                        file_dates = set()
-                        
-                        # Try CSV format (comma-separated)
-                        if ',' in content or '\n' in content:
-                            dates = [date.strip() for date in content.replace('\n', ',').split(',') if date.strip()]
-                            file_dates.update(dates)
-                            logger.debug(f"🏖️ Parsed {filename} as CSV: {dates}")
-                        
-                        # Try JSON format
-                        elif content.startswith('[') or content.startswith('{'):
-                            try:
-                                import json
-                                data = json.loads(content)
-                                if isinstance(data, list):
-                                    file_dates.update(data)
-                                elif isinstance(data, dict) and 'dates' in data:
-                                    file_dates.update(data['dates'])
-                                elif isinstance(data, dict):
-                                    file_dates.update(data.keys())
-                                logger.debug(f"🏖️ Parsed {filename} as JSON: {file_dates}")
-                            except json.JSONDecodeError:
-                                logger.debug(f"🏖️ {filename} is not valid JSON")
-                        
-                        # Try single date format
-                        else:
-                            if self._is_valid_date(content):
-                                file_dates.add(content)
-                                logger.debug(f"🏖️ Parsed {filename} as single date: {content}")
-                        
-                        # Validate and add dates
-                        valid_dates = set()
-                        for date in file_dates:
-                            if self._is_valid_date(date):
-                                valid_dates.add(date)
-                            else:
-                                logger.warning(f"🏖️ Invalid date format in {filename}: {date}")
-                        
-                        if valid_dates:
-                            vacation_dates.update(valid_dates)
-                            logger.info(f"🏖️ Found {len(valid_dates)} valid vacation dates from {filename}: {valid_dates}")
-                            break  # Use first file found
-                            
+                            file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                            vacation_dates.update(file_dates)
+                            logger.info(f"🏖️ Found {len(file_dates)} vacation dates from {filename}: {file_dates}")
+                            break
                 except Exception as e:
                     logger.debug(f"🏖️ Could not read {filename}: {e}")
-            
-            # Method 3: Check for Chrome extension storage files
-            # Look for files in common Chrome extension directories
-            chrome_paths = [
-                Path("chrome_extension_data.txt"),
-                Path("extension_vacation.txt"),
-                Path("bot_sync.txt")
-            ]
-            
-            for chrome_file in chrome_paths:
-                try:
-                    if chrome_file.exists():
-                        with open(chrome_file, 'r') as f:
-                            content = f.read().strip()
-                            if content:
-                                dates = [date.strip() for date in content.split(',') if date.strip()]
-                                valid_dates = set()
-                                for date in dates:
-                                    if self._is_valid_date(date):
-                                        valid_dates.add(date)
-                                
-                                if valid_dates:
-                                    vacation_dates.update(valid_dates)
-                                    logger.info(f"🏖️ Found {len(valid_dates)} vacation dates from Chrome data: {valid_dates}")
-                                    break
-                except Exception as e:
-                    logger.debug(f"🏖️ Could not read Chrome data file {chrome_file}: {e}")
             
             if vacation_dates:
                 logger.info(f"🏖️ Total vacation dates that will be skipped: {vacation_dates}")
             else:
                 logger.warning("🏖️ No vacation dates found - bot will book all weekdays")
-                logger.info("💡 To set vacation dates:")
-                logger.info("   - Use VACATION_DATES environment variable")
-                logger.info("   - Create vacation_dates.txt file")
-                logger.info("   - Use your extension's 'sync to bot' feature")
+                logger.info("💡 To set vacation dates, use VACATION_DATES environment variable or create vacation_dates.txt file")
             
             return vacation_dates
             
         except Exception as e:
             logger.error(f"❌ Failed to get vacation dates: {e}")
             return set()
-    
-    def _is_valid_date(self, date_str: str) -> bool:
-        """Check if string is a valid date in YYYY-MM-DD format"""
-        try:
-            datetime.strptime(date_str, '%Y-%m-%d')
-            return True
-        except ValueError:
-            return False
     
     async def should_skip_date(self, date: str) -> bool:
         """
@@ -711,6 +729,7 @@ class ProductionEliaBot:
         Calculate start and end times that meet the booking policy
         Montreal time: 6 AM - 6 PM (EST/EDT)
         UTC conversion: Montreal is UTC-5 (winter) or UTC-4 (summer)
+        Adjusted back 4 hours for correct display in Elia
         
         Args:
             hours: Number of hours for the booking window
@@ -718,23 +737,24 @@ class ProductionEliaBot:
         Returns:
             Tuple of (start_time, end_time) in UTC format
         """
-        # Montreal might be in EDT (UTC-4) depending on the date
-        # Let's try UTC-4 to get 6 AM - 6 PM Montreal:
-        # 6 AM Montreal = 10:00 UTC (6 + 4 = 10)
-        # 6 PM Montreal = 22:00 UTC (18 + 4 = 22)
+        # Montreal is UTC-5 (EST) or UTC-4 (EDT)
+        # But we need to scale back 4 hours for correct Elia display
+        # 6 AM Montreal should show as 6 AM in Elia, not 10 AM
+        # So: 6 AM Montreal = 6:00 UTC (adjusted back 4 hours)
+        # 6 PM Montreal = 18:00 UTC (adjusted back 4 hours)
         
         if hours >= 12:
             # Full 12-hour day: 6 AM - 6 PM Montreal time
-            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
-            end_time = "22:00:00.000Z"    # 6 PM Montreal (EDT) = 10 PM UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
+            end_time = "18:00:00.000Z"    # 6 PM Montreal (adjusted) = 6 PM UTC
         elif hours >= 6:
             # Minimum 6-hour booking from 6 AM Montreal
-            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
-            end_time = f"{10 + hours:02d}:00:00.000Z"  # 6 AM Montreal + hours in UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
+            end_time = f"{6 + hours:02d}:00:00.000Z"  # 6 AM Montreal + hours in UTC
         else:
             # Less than 6 hours (shouldn't happen due to policy)
-            start_time = "10:00:00.000Z"  # 6 AM Montreal (EDT) = 10 AM UTC
-            end_time = "16:00:00.000Z"    # 6 hours = 12 PM Montreal = 16 UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
+            end_time = "12:00:00.000Z"    # 6 hours = 12 PM UTC
         
         return start_time, end_time
     
