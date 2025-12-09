@@ -22,7 +22,7 @@ class FixedEliaGraphQLClient:
     """
     
     def __init__(self):
-        self.base_url = "https://api.elia.io/graphql"
+        self.base_url = "https://api.elia.one/graphql"
         self.access_token = os.getenv('ELIA_GRAPHQL_TOKEN')
         
         # Session management
