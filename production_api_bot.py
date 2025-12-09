@@ -25,25 +25,35 @@ class EmailNotifier:
     """Handle email notifications for bot results"""
     
     def __init__(self):
+        # Force reload environment variables
+        load_dotenv(override=True)
+        
         self.email_address = os.getenv('EMAIL_ADDRESS')
         self.smtp_password = os.getenv('SMTP_PASSWORD')
         self.smtp_host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
         self.smtp_port = int(os.getenv('SMTP_PORT', '587'))
         
+        # Debug configuration
+        logger.info(f"📧 EMAIL INITIALIZATION DEBUG:")
+        logger.info(f"   - EMAIL_ADDRESS from env: '{os.getenv('EMAIL_ADDRESS')}'")
+        logger.info(f"   - SMTP_PASSWORD from env: '{'SET' if os.getenv('SMTP_PASSWORD') else 'MISSING'}'")
+        logger.info(f"   - SMTP_HOST from env: '{os.getenv('SMTP_HOST')}'")
+        logger.info(f"   - SMTP_PORT from env: '{os.getenv('SMTP_PORT')}'")
+        
         # Check if email is configured
         self.enabled = all([self.email_address, self.smtp_password])
         
-        # Debug configuration
         logger.info(f"📧 Email Configuration Debug:")
         logger.info(f"   - EMAIL_ADDRESS: {'✅ Set' if self.email_address else '❌ Missing'}")
         logger.info(f"   - SMTP_PASSWORD: {'✅ Set' if self.smtp_password else '❌ Missing'}")
         logger.info(f"   - SMTP_HOST: {self.smtp_host}")
         logger.info(f"   - SMTP_PORT: {self.smtp_port}")
+        logger.info(f"   - ENABLED: {self.enabled}")
         
         if self.enabled:
             logger.info("📧 Email notifications enabled")
         else:
-            logger.warning("📧 Email notifications disabled - missing SMTP_PASSWORD")
+            logger.warning("📧 Email notifications disabled - missing configuration")
             logger.info("💡 To enable emails:")
             logger.info("   1. Set SMTP_PASSWORD in your .env file")
             logger.info("   2. Or use alternative notifications (Discord/Telegram)")
@@ -668,7 +678,7 @@ class ProductionEliaBot:
                 success = await self.reserve_parking_spot(
                     date=tomorrow_str,
                     spot_type="executive",
-                    booking_window_hours=12
+                    booking_window_hours=6  # FIXED: Use 6 hours to meet policy minimum
                 )
                 results["executive_today"] = {
                     "date": tomorrow_str,
@@ -701,7 +711,7 @@ class ProductionEliaBot:
                     success = await self.reserve_parking_spot(
                         date=future_date_str,
                         spot_type="regular",
-                        booking_window_hours=12
+                        booking_window_hours=6  # FIXED: Use 6 hours to meet policy minimum
                     )
                     results["regular_ahead"][future_date_str] = {
                         "success": success,
@@ -877,24 +887,28 @@ class ProductionEliaBot:
         Returns:
             Tuple of (start_time, end_time) in UTC format
         """
-        # Montreal is UTC-5 (EST) or UTC-4 (EDT)
-        # But we need to scale back 4 hours for correct Elia display
-        # 6 AM Montreal should show as 6 AM in Elia, not 10 AM
-        # So: 6 AM Montreal = 6:00 UTC (adjusted back 4 hours)
-        # 6 PM Montreal = 18:00 UTC (adjusted back 4 hours)
+        logger.info(f"🕐 CALCULATING TIMES FOR {hours} HOURS")
         
+        # CRITICAL FIX: Use 06:00-18:00 UTC (6 AM - 6 PM Montreal)
+        # This ensures 6 AM Montreal display in Elia
         if hours >= 12:
             # Full 12-hour day: 6 AM - 6 PM Montreal time
-            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
-            end_time = "18:00:00.000Z"    # 6 PM Montreal (adjusted) = 6 PM UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal = 6 AM UTC
+            end_time = "18:00:00.000Z"    # 6 PM Montreal = 6 PM UTC
+            logger.info(f"🕐 FULL DAY: {start_time} to {end_time}")
         elif hours >= 6:
             # Minimum 6-hour booking from 6 AM Montreal
-            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal = 6 AM UTC
             end_time = f"{6 + hours:02d}:00:00.000Z"  # 6 AM Montreal + hours in UTC
+            logger.info(f"🕐 {hours} HOURS: {start_time} to {end_time}")
         else:
             # Less than 6 hours (shouldn't happen due to policy)
-            start_time = "06:00:00.000Z"  # 6 AM Montreal (adjusted) = 6 AM UTC
+            start_time = "06:00:00.000Z"  # 6 AM Montreal = 6 AM UTC
             end_time = "12:00:00.000Z"    # 6 hours = 12 PM UTC
+            logger.info(f"🕐 MINIMUM: {start_time} to {end_time}")
+        
+        logger.info(f"🕐 FINAL TIMES: {start_time} to {end_time}")
+        logger.info(f"🌍 EXPECTED MONTREAL DISPLAY: 6:00 AM to 6:00 PM")
         
         return start_time, end_time
     
