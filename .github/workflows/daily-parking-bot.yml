@@ -39,7 +39,7 @@ jobs:
         
     - name: Run parking bot (API version)
       run: |
-        python production_api_bot.py
+        python production_api_bot.py --reserve --hours 12
         
     - name: Upload logs
       if: always()
