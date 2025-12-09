@@ -33,15 +33,28 @@ class EmailNotifier:
         # Check if email is configured
         self.enabled = all([self.email_address, self.smtp_password])
         
+        # Debug configuration
+        logger.info(f"📧 Email Configuration Debug:")
+        logger.info(f"   - EMAIL_ADDRESS: {'✅ Set' if self.email_address else '❌ Missing'}")
+        logger.info(f"   - SMTP_PASSWORD: {'✅ Set' if self.smtp_password else '❌ Missing'}")
+        logger.info(f"   - SMTP_HOST: {self.smtp_host}")
+        logger.info(f"   - SMTP_PORT: {self.smtp_port}")
+        
         if self.enabled:
             logger.info("📧 Email notifications enabled")
         else:
-            logger.warning("📧 Email notifications disabled - missing configuration")
+            logger.warning("📧 Email notifications disabled - missing SMTP_PASSWORD")
+            logger.info("💡 To enable emails:")
+            logger.info("   1. Set SMTP_PASSWORD in your .env file")
+            logger.info("   2. Or use alternative notifications (Discord/Telegram)")
     
     async def send_notification(self, subject: str, body: str, is_success: bool = True):
         """Send email notification"""
         if not self.enabled:
             logger.info("📧 Email notification skipped - not configured")
+            
+            # Try alternative notifications
+            await self._send_alternative_notifications(subject, body, is_success)
             return False
         
         try:
@@ -71,12 +84,8 @@ class EmailNotifier:
                     <pre style="white-space: pre-wrap; font-family: monospace; font-size: 14px; margin: 0;">{body}</pre>
                 </div>
                 
-                <div style="text-align: center; margin: 30px 0; color: #6c757d;">
-                    <p style="margin: 0;">
-                        <small>Sent by Elia Parking Bot<br>
-                        <a href="https://github.com/lftremblay/elia-parking-bot/actions">View Logs</a>
-                        </small>
-                    </p>
+                <div style="text-align: center; margin: 20px 0; color: #6c757d; font-size: 12px;">
+                    <p>Sent by Elia Parking Bot</p>
                 </div>
             </body>
             </html>
@@ -85,17 +94,102 @@ class EmailNotifier:
             msg.attach(MIMEText(html_body, 'html'))
             
             # Send email
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls()
-                server.login(self.email_address, self.smtp_password)
-                server.send_message(msg)
+            server = smtplib.SMTP(self.smtp_host, self.smtp_port)
             
-            logger.info(f"📧 Email sent: {subject}")
+            if self.smtp_host != 'smtp-int.int.videotron.com':
+                server.starttls()
+            
+            server.login(self.email_address, self.smtp_password)
+            server.send_message(msg)
+            server.quit()
+            
+            logger.success("📧 Email notification sent successfully")
             return True
             
         except Exception as e:
-            logger.error(f"📧 Failed to send email: {e}")
+            logger.error(f"❌ Failed to send email: {e}")
+            # Try alternatives if email fails
+            await self._send_alternative_notifications(subject, body, is_success)
             return False
+    
+    async def _send_alternative_notifications(self, subject: str, body: str, is_success: bool = True):
+        """Send Discord or Telegram notifications as alternatives"""
+        
+        # Try Discord notification
+        discord_webhook = os.getenv('DISCORD_WEBHOOK_URL')
+        if discord_webhook:
+            try:
+                await self._send_discord_notification(subject, body, is_success)
+            except Exception as e:
+                logger.error(f"❌ Discord notification failed: {e}")
+        
+        # Try Telegram notification
+        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+        telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+        if telegram_token and telegram_chat_id:
+            try:
+                await self._send_telegram_notification(subject, body, is_success)
+            except Exception as e:
+                logger.error(f"❌ Telegram notification failed: {e}")
+        
+        # If no alternatives are configured, show helpful message
+        if not discord_webhook and not (telegram_token and telegram_chat_id):
+            logger.info("💡 Configure alternative notifications:")
+            logger.info("   - Discord: Set DISCORD_WEBHOOK_URL in .env")
+            logger.info("   - Telegram: Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env")
+    
+    async def _send_discord_notification(self, subject: str, body: str, is_success: bool = True):
+        """Send Discord webhook notification"""
+        import httpx
+        
+        emoji = "✅" if is_success else "❌"
+        color = 0x28a745 if is_success else 0xdc3545
+        
+        # Truncate body if too long for Discord
+        body_truncated = body[:1500] + "..." if len(body) > 1500 else body
+        
+        payload = {
+            "embeds": [{
+                "title": f"{emoji} {subject}",
+                "description": f"```\n{body_truncated}\n```",
+                "color": color,
+                "timestamp": datetime.now().isoformat(),
+                "footer": {
+                    "text": "Elia Parking Bot"
+                }
+            }]
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(os.getenv('DISCORD_WEBHOOK_URL'), json=payload)
+            response.raise_for_status()
+        
+        logger.success("📱 Discord notification sent successfully")
+    
+    async def _send_telegram_notification(self, subject: str, body: str, is_success: bool = True):
+        """Send Telegram bot notification"""
+        import httpx
+        
+        emoji = "✅" if is_success else "❌"
+        
+        # Format message for Telegram
+        message = f"{emoji} *{subject}*\n\n"
+        message += f"```\n{body}\n```"
+        message += f"\n\n📅 {datetime.now().strftime('%B %d, %Y at %I:%M %p')}"
+        
+        url = f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendMessage"
+        
+        payload = {
+            "chat_id": os.getenv('TELEGRAM_CHAT_ID'),
+            "text": message,
+            "parse_mode": "Markdown"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+        
+        logger.success("📱 Telegram notification sent successfully")
 
 class ProductionEliaBot:
     """
