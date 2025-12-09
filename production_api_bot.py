@@ -6,6 +6,10 @@ Complete solution with proper booking timing and error handling
 import asyncio
 import json
 import os
+import httpx
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 from loguru import logger
@@ -17,6 +21,82 @@ from fixed_graphql_client import FixedEliaGraphQLClient
 load_dotenv()
 
 
+class EmailNotifier:
+    """Handle email notifications for bot results"""
+    
+    def __init__(self):
+        self.email_address = os.getenv('EMAIL_ADDRESS')
+        self.smtp_password = os.getenv('SMTP_PASSWORD')
+        self.smtp_host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
+        self.smtp_port = int(os.getenv('SMTP_PORT', '587'))
+        
+        # Check if email is configured
+        self.enabled = all([self.email_address, self.smtp_password])
+        
+        if self.enabled:
+            logger.info("📧 Email notifications enabled")
+        else:
+            logger.warning("📧 Email notifications disabled - missing configuration")
+    
+    async def send_notification(self, subject: str, body: str, is_success: bool = True):
+        """Send email notification"""
+        if not self.enabled:
+            logger.info("📧 Email notification skipped - not configured")
+            return False
+        
+        try:
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = self.email_address
+            msg['To'] = self.email_address
+            msg['Subject'] = f"🤖 Parking Bot: {subject}"
+            
+            # Add emoji based on success/failure
+            emoji = "✅" if is_success else "❌"
+            
+            # Create HTML body
+            html_body = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: {'#d4edda' if is_success else '#f8d7da'}; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h2 style="color: {'#155724' if is_success else '#721c24'}; margin: 0;">
+                        {emoji} {subject}
+                    </h2>
+                    <p style="margin: 10px 0 0 0; color: {'#155724' if is_success else '#721c24'};">
+                        {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+                    </p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <pre style="white-space: pre-wrap; font-family: monospace; font-size: 14px; margin: 0;">{body}</pre>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0; color: #6c757d;">
+                    <p style="margin: 0;">
+                        <small>Sent by Elia Parking Bot<br>
+                        <a href="https://github.com/lftremblay/elia-parking-bot/actions">View Logs</a>
+                        </small>
+                    </p>
+                </div>
+            </body>
+            </html>
+            """
+            
+            msg.attach(MIMEText(html_body, 'html'))
+            
+            # Send email
+            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.email_address, self.smtp_password)
+                server.send_message(msg)
+            
+            logger.info(f"📧 Email sent: {subject}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"📧 Failed to send email: {e}")
+            return False
+
 class ProductionEliaBot:
     """
     Production-ready parking bot using Elia GraphQL API
@@ -26,6 +106,7 @@ class ProductionEliaBot:
     def __init__(self):
         self.client = FixedEliaGraphQLClient()
         self.floor_id = "sp_Mkddt7JNKkLPhqTc"  # Default parking floor
+        self.email_notifier = EmailNotifier()  # Email notifications
         
         logger.info("🤖 ProductionEliaBot initialized")
     
@@ -351,7 +432,75 @@ class ProductionEliaBot:
         
         logger.info("="*50)
         
+        # Send email notification
+        await self.send_booking_email_notification(results)
+        
         return results
+    
+    async def send_booking_email_notification(self, results: Dict[str, any]):
+        """Send email notification with booking results"""
+        try:
+            # Determine overall success
+            exec_success = results.get("executive_today", {}).get("success", False)
+            regular_successes = sum(1 for r in results.get("regular_ahead", {}).values() if r.get("success", False))
+            total_bookings = len(results.get("regular_ahead", {})) + (1 if results.get("executive_today") else 0)
+            
+            is_success = exec_success or regular_successes > 0
+            
+            # Create subject
+            if is_success:
+                subject = f"✅ Parking Booked Successfully ({regular_successes + (1 if exec_success else 0)} spots)"
+            else:
+                subject = "❌ Parking Booking Failed"
+            
+            # Create email body
+            body_lines = []
+            body_lines.append("🤖 Elia Parking Bot - Smart Booking Results")
+            body_lines.append("=" * 50)
+            body_lines.append(f"📅 Run Date: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}")
+            body_lines.append("")
+            
+            # Executive results
+            if results.get("executive_today"):
+                exec_result = results["executive_today"]
+                status = "✅ SUCCESS" if exec_result["success"] else "❌ FAILED"
+                body_lines.append(f"🎯 Executive Spot (Tomorrow):")
+                body_lines.append(f"   {status} - {exec_result['date']}")
+                body_lines.append("")
+            
+            # Regular results
+            if results.get("regular_ahead"):
+                body_lines.append(f"📅 Regular Spots (14-15 Days Ahead):")
+                for date_str, result in results["regular_ahead"].items():
+                    status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
+                    body_lines.append(f"   {status} - {date_str} ({result['days_ahead']} days ahead)")
+                body_lines.append("")
+            
+            # Skipped dates
+            if results.get("skipped"):
+                body_lines.append(f"⏭️ Skipped Dates ({len(results['skipped'])} total):")
+                for date_str in results["skipped"]:
+                    if "vacation" in date_str:
+                        body_lines.append(f"   🏖️ {date_str}")
+                    else:
+                        body_lines.append(f"   ⏭️ {date_str}")
+                body_lines.append("")
+            
+            # Summary
+            body_lines.append("📊 SUMMARY:")
+            body_lines.append(f"   Executive booked: {'✅ Yes' if exec_success else '❌ No'}")
+            body_lines.append(f"   Regular spots booked: {regular_successes}/{len(results.get('regular_ahead', {}))}")
+            body_lines.append(f"   Total skipped: {len(results.get('skipped', []))}")
+            body_lines.append("")
+            body_lines.append("🔗 View detailed logs: https://github.com/lftremblay/elia-parking-bot/actions")
+            
+            body = "\n".join(body_lines)
+            
+            # Send email
+            await self.email_notifier.send_notification(subject, body, is_success)
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to send booking notification email: {e}")
     
     async def reserve_weekday_spots(self, days_ahead: int = 14) -> Dict[str, bool]:
         """
