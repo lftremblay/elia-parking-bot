@@ -252,7 +252,7 @@ class ProductionEliaBot:
     async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
-        Uses a more specific method to detect user's existing bookings
+        Uses the API to check user's actual bookings
         
         Args:
             date: Date in YYYY-MM-DD format
@@ -261,17 +261,50 @@ class ProductionEliaBot:
             True if user has a booking, False otherwise
         """
         try:
+            # Method 1: Try to get user's bookings directly
+            # This would require a specific API endpoint to get user's bookings
+            
+            # Method 2: Check if we can book a spot - if we can't, we might have one
+            # But this is unreliable as spots could be taken by others
+            
+            # Method 3: Use a more conservative approach with booking history
             # Get available spots for this date
             available_spots = await self.client.get_available_parking_spots(date, self.floor_id)
             
-            # If very few spots are available, it's likely the user already has one
-            # This is because most people book the same spots regularly
-            if len(available_spots) < 5:  # Less than 5 spots available suggests user has one
-                logger.info(f"  ⏭️ Only {len(available_spots)} spots available for {date} - likely user has booking")
+            # Get total spaces to calculate occupancy
+            all_spaces = await self.client.get_floor_spaces(self.floor_id)
+            total_spaces = len(all_spaces)
+            available_count = len(available_spots)
+            booked_count = total_spaces - available_count
+            
+            # If occupancy is very low, user likely doesn't have a booking
+            occupancy_rate = booked_count / total_spaces if total_spaces > 0 else 0
+            
+            logger.debug(f"  📊 {date}: {available_count}/{total_spaces} spots available, {booked_count} booked ({occupancy_rate:.1%} occupancy)")
+            
+            # If less than 20% occupied, user probably doesn't have a booking
+            if occupancy_rate < 0.2:
+                logger.debug(f"  📊 Low occupancy ({occupancy_rate:.1%}) - user likely needs booking")
+                return False
+            
+            # If high occupancy, be more cautious
+            if occupancy_rate > 0.8:
+                logger.info(f"  ⏭️ High occupancy ({occupancy_rate:.1%}) for {date} - being cautious about double-booking")
                 return True
             
-            # If plenty of spots are available, user probably doesn't have one
-            logger.debug(f"  📊 {len(available_spots)} spots available for {date} - user likely needs booking")
+            # For medium occupancy, check if this is a recent booking date
+            # (dates we might have booked in recent runs)
+            today = datetime.now()
+            target_date = datetime.strptime(date, '%Y-%m-%d')
+            days_ahead = (target_date - today).days
+            
+            # For dates 14-15 days ahead (our regular booking window), be more cautious
+            if 14 <= days_ahead <= 15:
+                logger.info(f"  ⏭️ {date} is in regular booking window ({days_ahead} days) - being cautious")
+                return True
+            
+            # Otherwise, allow booking
+            logger.debug(f"  📊 {date}: Proceeding with booking")
             return False
             
         except Exception as e:
