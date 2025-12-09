@@ -363,6 +363,8 @@ class ProductionEliaBot:
     def _calculate_booking_times(self, hours: int) -> tuple:
         """
         Calculate start and end times that meet the booking policy
+        Montreal time: 6 AM - 6 PM (EST/EDT)
+        UTC conversion: Montreal is UTC-5 (winter) or UTC-4 (summer)
         
         Args:
             hours: Number of hours for the booking window
@@ -370,15 +372,22 @@ class ProductionEliaBot:
         Returns:
             Tuple of (start_time, end_time) in UTC format
         """
-        # Use business hours to meet 6-hour minimum policy
-        if hours >= 6:
-            # Full day booking
-            start_time = "08:00:00.000Z"  # 8 AM UTC = 3 AM EST
-            end_time = f"{18 + (hours - 10):02d}:00:00.000Z"  # Adjust end time
+        # Montreal Winter Time (EST): UTC-5
+        # 6 AM Montreal = 11 AM UTC
+        # 6 PM Montreal = 11 PM UTC (23:00)
+        
+        if hours >= 12:
+            # Full 12-hour day: 6 AM - 6 PM Montreal
+            start_time = "11:00:00.000Z"  # 6 AM Montreal (EST)
+            end_time = "23:00:00.000Z"    # 6 PM Montreal (EST)
+        elif hours >= 6:
+            # Minimum 6-hour booking
+            start_time = "11:00:00.000Z"  # 6 AM Montreal
+            end_time = f"{11 + hours:02d}:00:00.000Z"  # 6 AM + hours
         else:
-            # Minimum policy booking
-            start_time = "09:00:00.000Z"  # 9 AM UTC = 4 AM EST  
-            end_time = f"{15 + hours:02d}:00:00.000Z"  # End time based on hours
+            # Less than 6 hours (shouldn't happen due to policy)
+            start_time = "11:00:00.000Z"
+            end_time = "17:00:00.000Z"  # 6 hours minimum
         
         return start_time, end_time
     
