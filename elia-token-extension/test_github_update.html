@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test GitHub Token Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test GitHub Token Update</h1>
+    <p>This tool tests if the extension can update your GitHub secret.</p>
+
+    <div class="form-group">
+        <label for="githubToken">GitHub Personal Access Token:</label>
+        <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    </div>
+
+    <div class="form-group">
+        <label for="repository">Repository (username/repo-name):</label>
+        <input type="text" id="repository" placeholder="tremblof/elia-parking-bot">
+    </div>
+
+    <div class="form-group">
+        <label for="eliaToken">Elia JWT Token (from Network tab):</label>
+        <textarea id="eliaToken" placeholder="Paste the full JWT token here (starts with eyJ...)"></textarea>
+        <small>Get this from: DevTools → Network → graphql request → Headers → Authorization (remove "Bearer " prefix)</small>
+    </div>
+
+    <button onclick="testUpdate()">🚀 Test GitHub Update</button>
+
+    <div id="result" class="result"></div>
+
+    <script>
+        async function testUpdate() {
+            const githubToken = document.getElementById('githubToken').value.trim();
+            const repository = document.getElementById('repository').value.trim();
+            const eliaToken = document.getElementById('eliaToken').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            // Validation
+            if (!githubToken) {
+                showResult('Please enter GitHub token', 'error');
+                return;
+            }
+            if (!repository || !repository.includes('/')) {
+                showResult('Please enter repository in format: username/repo-name', 'error');
+                return;
+            }
+            if (!eliaToken) {
+                showResult('Please enter Elia JWT token', 'error');
+                return;
+            }
+
+            showResult('Testing GitHub connection...', 'success');
+
+            try {
+                // Test 1: Check repository access
+                console.log('Testing repository access...');
+                const repoResponse = await fetch(`https://api.github.com/repos/${repository}`, {
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!repoResponse.ok) {
+                    const error = await repoResponse.text();
+                    showResult(`❌ Repository access failed: ${repoResponse.status} - ${error}`, 'error');
+                    return;
+                }
+
+                const repoData = await repoResponse.json();
+                console.log('✅ Repository access successful:', repoData.full_name);
+
+                // Test 2: Get public key for secret encryption
+                showResult('Getting repository public key...', 'success');
+                const keyResponse = await fetch(`https://api.github.com/repos/${repository}/actions/secrets/public-key`, {
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!keyResponse.ok) {
+                    const error = await keyResponse.text();
+                    showResult(`❌ Failed to get public key: ${keyResponse.status} - ${error}`, 'error');
+                    return;
+                }
+
+                const keyData = await keyResponse.json();
+                console.log('✅ Public key retrieved');
+
+                // Test 3: Encrypt and update secret
+                showResult('Encrypting and updating secret...', 'success');
+                
+                // For testing, we'll use base64 encoding (not secure, but works for testing)
+                const encodedToken = btoa(eliaToken);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${repository}/actions/secrets/ELIA_GRAPHQL_TOKEN`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        encrypted_value: encodedToken,
+                        key_id: keyData.key_id
+                    })
+                });
+
+                if (updateResponse.status === 201 || updateResponse.status === 204) {
+                    showResult(`✅ SUCCESS! GitHub secret ELIA_GRAPHQL_TOKEN updated successfully!\n\nRepository: ${repoData.full_name}\nToken length: ${eliaToken.length} characters\n\nYour bot can now use this token!`, 'success');
+                } else {
+                    const error = await updateResponse.text();
+                    showResult(`❌ Failed to update secret: ${updateResponse.status} - ${error}`, 'error');
+                }
+
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

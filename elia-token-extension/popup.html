@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Elia Token Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <img src="icons/icon48.png" alt="Elia Token Manager" class="header-icon">
+        <div class="header-text">
+          <h1>Elia Token Manager</h1>
+          <p class="header-subtitle">Automated JWT token management</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Section -->
+    <div class="status">
+      <h2>📊 Status</h2>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="label">Monitoring:</span>
+          <span id="monitoring-status" class="value">Active</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Last Token:</span>
+          <span id="last-token-time" class="value">Never</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Token Expires:</span>
+          <span id="token-expiry" class="value">Unknown</span>
+        </div>
+        <div class="status-item">
+          <span class="label">GitHub Sync:</span>
+          <span id="github-status" class="value">Not configured</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Extension:</span>
+          <span id="extension-status" class="value">Ready</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration Section -->
+    <div class="config">
+      <h2>⚙️ Configuration</h2>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label for="github-token">
+            🔑 GitHub Token
+            <span class="required">*</span>
+          </label>
+          <div class="input-group">
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="form-input">
+            <button type="button" id="toggle-token" class="toggle-btn" title="Show/hide token">👁️</button>
+          </div>
+          <small class="help-text">
+            Personal access token with repo permissions for updating secrets
+            <a href="https://github.com/settings/tokens/new" target="_blank">Create token →</a>
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label for="repository">
+            📁 Repository
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="repository" placeholder="username/repository-name" class="form-input">
+          <small class="help-text">Your parking bot repository (e.g., tremblof/elia-parking-bot)</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="monitoring-enabled" checked>
+            <span class="checkbox-text">
+              <span class="checkbox-icon">🔍</span>
+              Enable automatic token monitoring
+            </span>
+          </label>
+          <small class="help-text">Monitor Elia website for token changes and update GitHub automatically</small>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button id="save-config" class="btn btn-primary">
+          <span class="btn-icon">💾</span>
+          Save Configuration
+        </button>
+        <button id="test-connection" class="btn btn-secondary">
+          <span class="btn-icon">🧪</span>
+          Test Connection
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="actions">
+      <h2>🚀 Actions</h2>
+      
+      <div class="button-group">
+        <button id="force-token-check" class="btn btn-secondary">
+          <span class="btn-icon">🔍</span>
+          Check for Token Now
+        </button>
+        <button id="refresh-token-btn" class="btn btn-primary">
+          <span class="btn-icon">🔄</span>
+          Refresh Token
+        </button>
+        <button id="view-logs" class="btn btn-secondary">
+          <span class="btn-icon">📋</span>
+          View Logs
+        </button>
+        <button id="clear-logs" class="btn btn-outline">
+          <span class="btn-icon">🗑️</span>
+          Clear Logs
+        </button>
+      </div>
+      
+      <div class="help-text">
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>Keep Elia website open in a tab for automatic monitoring</li>
+          <li>Extension detects tokens when you login or refresh the page</li>
+          <li>GitHub secrets are updated automatically when new tokens are found</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Logs Section -->
+    <div class="logs" id="logs" style="display: none;">
+      <div class="logs-header">
+        <h2>📋 Activity Log</h2>
+        <button id="close-logs" class="btn-close">✕</button>
+      </div>
+      
+      <div class="log-controls">
+        <button id="refresh-logs" class="btn-small">Refresh</button>
+        <button id="export-logs" class="btn-small">Export</button>
+        <span class="log-count" id="log-count">0 entries</span>
+      </div>
+      
+      <div class="log-content" id="log-content">
+        <div class="log-placeholder">No logs available</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-content">
+        <span class="version">v1.0.0</span>
+        <span class="separator">•</span>
+        <a href="#" id="help-link" class="footer-link">Help</a>
+        <span class="separator">•</span>
+        <a href="https://github.com/tremblof/elia-parking-bot" target="_blank" class="footer-link">GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div id="notification-container" class="notification-container"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

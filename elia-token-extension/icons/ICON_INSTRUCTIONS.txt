@@ -1,0 +1,49 @@
+ICON INSTRUCTIONS
+=================
+
+You need to create 3 icon files for the extension:
+
+1. icon16.png (16x16 pixels)
+2. icon48.png (48x48 pixels)  
+3. icon128.png (128x128 pixels)
+
+QUICK SOLUTION:
+---------------
+
+Option 1: Use an online icon generator
+- Visit: https://www.favicon-generator.org/
+- Upload any image (parking logo, letter "E", etc.)
+- Download all sizes
+- Rename to icon16.png, icon48.png, icon128.png
+
+Option 2: Use a simple colored square
+- Create 3 PNG files with solid color background
+- Add text "E" or "🅿️" in center
+- Use Vidéotron brand color: #ffd200 (yellow)
+
+Option 3: Use emoji as icon
+- Take screenshot of 🅿️ or 🔐 emoji
+- Resize to 16px, 48px, 128px
+- Save as PNG files
+
+TEMPORARY WORKAROUND:
+--------------------
+
+If you want to test the extension immediately without icons:
+
+1. Create 3 blank PNG files (any size)
+2. Name them: icon16.png, icon48.png, icon128.png
+3. Place in this /icons/ folder
+4. Extension will load (icons just won't look good)
+
+The extension will work perfectly fine even with placeholder icons!
+
+RECOMMENDED DESIGN:
+------------------
+
+- Background: #ffd200 (Vidéotron yellow)
+- Icon: 🅿️ or 🔐 emoji
+- Or: Letter "E" in bold font
+- Keep it simple and recognizable
+
+Once you have the icons, place them in this folder and reload the extension.
