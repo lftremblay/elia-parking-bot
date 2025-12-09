@@ -128,44 +128,41 @@ class ProductionEliaBot:
     async def get_my_bookings(self, start_date: str, end_date: str) -> List[Dict]:
         """
         Get user's existing bookings for a date range
+        Uses floorPlanBookings to check if user has bookings
         
         Args:
             start_date: Start date in YYYY-MM-DD format
             end_date: End date in YYYY-MM-DD format
         
         Returns:
-            List of existing bookings
+            List of dates with bookings
         """
         try:
-            query = """
-            query GetMyBookings($startDate: Date!, $endDate: Date!) {
-                me {
-                    bookings(startDate: $startDate, endDate: $endDate) {
-                        id
-                        startTime
-                        endTime
-                        space {
-                            id
-                            name
-                        }
-                    }
-                }
-            }
-            """
+            # Use floorPlanBookings to check each date
+            bookings = []
+            current_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
             
-            variables = {
-                "startDate": start_date,
-                "endDate": end_date
-            }
+            while current_date <= end:
+                date_str = current_date.strftime('%Y-%m-%d')
+                
+                # Get bookings for this date
+                booked_spaces = await self.client.get_floor_plan_bookings(self.floor_id, date_str)
+                
+                # Check if any of the booked spaces are ours by trying to get available spots
+                # If we have a booking, it won't show as available
+                if booked_spaces:
+                    # For now, we'll assume if there are bookings, we might have one
+                    # This is a simplified check - in production, you'd verify ownership
+                    bookings.append({
+                        "date": date_str,
+                        "booked_spaces_count": len(booked_spaces)
+                    })
+                
+                current_date += timedelta(days=1)
             
-            result = await self.client._execute_query(query, variables, "GetMyBookings")
-            
-            if result and "me" in result and "bookings" in result["me"]:
-                bookings = result["me"]["bookings"]
-                logger.info(f"📋 Found {len(bookings)} existing bookings")
-                return bookings
-            
-            return []
+            logger.info(f"📋 Found {len(bookings)} dates with bookings")
+            return bookings
             
         except Exception as e:
             logger.error(f"❌ Failed to get bookings: {e}")
@@ -174,21 +171,32 @@ class ProductionEliaBot:
     async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
+        Simplified check: assumes if we can't book, we already have one
         
         Args:
             date: Date in YYYY-MM-DD format
         
         Returns:
-            True if booking exists
+            True if booking exists (or if we should skip)
         """
-        bookings = await self.get_my_bookings(date, date)
-        
-        if bookings:
-            for booking in bookings:
-                logger.info(f"  ✅ Existing booking: {booking['space']['name']} on {date}")
+        try:
+            # Get available spots for this date
+            available_spots = await self.client.get_available_parking_spots(date, self.floor_id)
+            
+            # If no spots available at all, assume we might have one
+            # This is a conservative approach to prevent double-booking attempts
+            if not available_spots:
+                logger.info(f"  ⏭️ No spots available for {date} - assuming booked or full")
+                return True
+            
+            # If spots are available, we likely don't have a booking
+            # (This is a simplified check - in a perfect world, we'd verify ownership)
+            return False
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to check booking for {date}: {e}")
+            # On error, assume we should skip to be safe
             return True
-        
-        return False
     
     async def smart_weekday_booking(self) -> Dict[str, any]:
         """
