@@ -211,7 +211,7 @@ class TokenManagerPopup {
     console.log('📋 Copying token to clipboard...');
     
     try {
-      const stored = await chrome.storage.local.get(['lastToken']);
+      const stored = await chrome.storage.local.get(['lastToken', 'config']);
       
       if (!stored.lastToken) {
         this.showNotification('No token available. Please check for token first.', 'warning');
@@ -221,13 +221,13 @@ class TokenManagerPopup {
       // Copy to clipboard
       await navigator.clipboard.writeText(stored.lastToken);
       
-      // Show success notification
-      this.showNotification('✅ Token copied to clipboard! Now paste it into GitHub secrets.', 'success');
+      // Open GitHub secrets page in new tab
+      const repository = stored.config?.repository || 'lftremblay/elia-parking-bot';
+      const githubUrl = `https://github.com/${repository}/settings/secrets/actions`;
+      chrome.tabs.create({ url: githubUrl });
       
-      // Also show instructions
-      setTimeout(() => {
-        this.showNotification('Go to: GitHub repo → Settings → Secrets → ELIA_GRAPHQL_TOKEN → Update', 'info');
-      }, 2000);
+      // Show success notification
+      this.showNotification('✅ Token copied! GitHub secrets page opened. Paste the token there.', 'success');
       
     } catch (error) {
       console.error('❌ Failed to copy token:', error);
