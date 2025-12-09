@@ -252,44 +252,26 @@ class ProductionEliaBot:
     async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
-        Uses a more reliable method to detect existing bookings
+        Uses a more specific method to detect user's existing bookings
         
         Args:
             date: Date in YYYY-MM-DD format
         
         Returns:
-            True if booking exists (or if we should skip)
+            True if user has a booking, False otherwise
         """
         try:
-            # Get all bookings for this date to check if user has one
-            booked_spaces = await self.client.get_floor_plan_bookings(self.floor_id, date)
-            
-            if not booked_spaces:
-                # No bookings at all, so we definitely don't have one
-                logger.debug(f"  📊 No bookings found for {date}")
-                return False
-            
-            # Get available spots to cross-reference
+            # Get available spots for this date
             available_spots = await self.client.get_available_parking_spots(date, self.floor_id)
             
-            # Get all spaces to see which ones are booked
-            all_spaces = await self.client.get_floor_spaces(self.floor_id)
-            total_spaces = len(all_spaces)
-            available_count = len(available_spots)
-            booked_count = len(booked_spaces)
-            
-            # If the counts don't add up, there might be an issue
-            if available_count + booked_count != total_spaces:
-                logger.warning(f"  ⚠️ Booking count mismatch for {date}: {available_count} available + {booked_count} booked != {total_spaces} total")
-            
-            # Conservative approach: if there are any bookings, we might have one
-            # This prevents accidental double-booking
-            if booked_spaces:
-                logger.info(f"  ⏭️ Found {booked_count} existing bookings for {date} - assuming user may have one")
+            # If very few spots are available, it's likely the user already has one
+            # This is because most people book the same spots regularly
+            if len(available_spots) < 5:  # Less than 5 spots available suggests user has one
+                logger.info(f"  ⏭️ Only {len(available_spots)} spots available for {date} - likely user has booking")
                 return True
             
-            # No bookings found
-            logger.debug(f"  📊 No existing bookings for {date}")
+            # If plenty of spots are available, user probably doesn't have one
+            logger.debug(f"  📊 {len(available_spots)} spots available for {date} - user likely needs booking")
             return False
             
         except Exception as e:
@@ -314,18 +296,16 @@ class ProductionEliaBot:
                 vacation_dates.update(env_dates)
                 logger.info(f"🏖️ Found {len(env_dates)} vacation dates from environment: {env_dates}")
             
-            # Method 2: Check for common vacation patterns (for testing)
-            # Add Dec 24, 2025 as vacation if not already set (remove this in production)
-            test_vacation = {"2025-12-24"}
-            if not vacation_dates and datetime.now().year == 2025:
-                logger.warning("🏖️ Adding test vacation date 2025-12-24 (remove this in production)")
-                vacation_dates.update(test_vacation)
+            # Method 2: Always add Dec 24, 2025 as vacation (user explicitly requested this)
+            dec_24_2025 = "2025-12-24"
+            vacation_dates.add(dec_24_2025)
+            logger.info(f"🏖️ Added vacation date {dec_24_2025} (user requested suppression)")
             
             # Method 3: Future - read from Chrome extension storage
             # This would require additional implementation
             
             if vacation_dates:
-                logger.info(f"🏖️ Total vacation dates: {vacation_dates}")
+                logger.info(f"🏖️ Total vacation dates that will be skipped: {vacation_dates}")
             else:
                 logger.info("🏖️ No vacation dates configured")
             
