@@ -21,6 +21,7 @@ class TokenManagerPopup {
       testConnection: document.getElementById('test-connection'),
       forceTokenCheck: document.getElementById('force-token-check'),
       refreshTokenBtn: document.getElementById('refresh-token-btn'),
+      copyTokenBtn: document.getElementById('copy-token-btn'),
       viewLogs: document.getElementById('view-logs'),
       clearLogs: document.getElementById('clear-logs'),
       closeLogs: document.getElementById('close-logs'),
@@ -74,6 +75,7 @@ class TokenManagerPopup {
     // Action buttons
     this.elements.forceTokenCheck.addEventListener('click', () => this.forceTokenCheck());
     this.elements.refreshTokenBtn.addEventListener('click', () => this.refreshToken());
+    this.elements.copyTokenBtn.addEventListener('click', () => this.copyToken());
     this.elements.viewLogs.addEventListener('click', () => this.toggleLogs());
     this.elements.clearLogs.addEventListener('click', () => this.clearLogs());
     this.elements.closeLogs.addEventListener('click', () => this.toggleLogs());
@@ -203,6 +205,34 @@ class TokenManagerPopup {
     
     // Open Elia website in new tab
     chrome.tabs.create({ url: 'https://app.elia.io' });
+  }
+
+  async copyToken() {
+    console.log('📋 Copying token to clipboard...');
+    
+    try {
+      const stored = await chrome.storage.local.get(['lastToken']);
+      
+      if (!stored.lastToken) {
+        this.showNotification('No token available. Please check for token first.', 'warning');
+        return;
+      }
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(stored.lastToken);
+      
+      // Show success notification
+      this.showNotification('✅ Token copied to clipboard! Now paste it into GitHub secrets.', 'success');
+      
+      // Also show instructions
+      setTimeout(() => {
+        this.showNotification('Go to: GitHub repo → Settings → Secrets → ELIA_GRAPHQL_TOKEN → Update', 'info');
+      }, 2000);
+      
+    } catch (error) {
+      console.error('❌ Failed to copy token:', error);
+      this.showNotification('Failed to copy token: ' + error.message, 'error');
+    }
   }
 
   toggleLogs() {
