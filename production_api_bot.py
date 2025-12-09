@@ -329,46 +329,128 @@ class ProductionEliaBot:
                 vacation_dates.update(env_dates)
                 logger.info(f"🏖️ Found {len(env_dates)} vacation dates from environment: {env_dates}")
             
-            # Method 2: Read from Chrome extension storage
-            # This is the primary method - extension should save vacation dates
-            try:
-                # Look for extension data file that might contain vacation dates
-                extension_file = Path("vacation_dates.txt")
-                if extension_file.exists():
-                    with open(extension_file, 'r') as f:
-                        file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
-                        vacation_dates.update(file_dates)
-                        logger.info(f"🏖️ Found {len(file_dates)} vacation dates from extension file: {file_dates}")
-                else:
-                    logger.debug("🏖️ No extension vacation file found")
-            except Exception as e:
-                logger.debug(f"🏖️ Could not read extension file: {e}")
+            # Method 2: Check multiple possible vacation file names
+            possible_files = [
+                "vacation_dates.txt",      # Our preferred format
+                "vacation.txt",            # Alternative name
+                "skip_dates.txt",          # Alternative name
+                "blocked_dates.txt",       # Alternative name
+                "elia_vacation.txt",       # Extension-specific
+                "parking_vacation.txt",    # Extension-specific
+                "sync_dates.txt",          # Extension-specific
+                "bot_dates.txt",           # Extension-specific
+                "vacation.json",           # JSON format
+                "skip_days.json"           # JSON format
+            ]
             
-            # Method 3: Check for common vacation file names
-            common_files = ["vacation.txt", "skip_dates.txt", "blocked_dates.txt"]
-            for filename in common_files:
+            for filename in possible_files:
                 try:
                     file_path = Path(filename)
                     if file_path.exists():
+                        logger.info(f"🏖️ Found vacation file: {filename}")
+                        
                         with open(file_path, 'r') as f:
-                            file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
-                            vacation_dates.update(file_dates)
-                            logger.info(f"🏖️ Found {len(file_dates)} vacation dates from {filename}: {file_dates}")
-                            break
+                            content = f.read().strip()
+                            
+                        if not content:
+                            logger.debug(f"🏖️ {filename} is empty")
+                            continue
+                            
+                        # Try different formats
+                        file_dates = set()
+                        
+                        # Try CSV format (comma-separated)
+                        if ',' in content or '\n' in content:
+                            dates = [date.strip() for date in content.replace('\n', ',').split(',') if date.strip()]
+                            file_dates.update(dates)
+                            logger.debug(f"🏖️ Parsed {filename} as CSV: {dates}")
+                        
+                        # Try JSON format
+                        elif content.startswith('[') or content.startswith('{'):
+                            try:
+                                import json
+                                data = json.loads(content)
+                                if isinstance(data, list):
+                                    file_dates.update(data)
+                                elif isinstance(data, dict) and 'dates' in data:
+                                    file_dates.update(data['dates'])
+                                elif isinstance(data, dict):
+                                    file_dates.update(data.keys())
+                                logger.debug(f"🏖️ Parsed {filename} as JSON: {file_dates}")
+                            except json.JSONDecodeError:
+                                logger.debug(f"🏖️ {filename} is not valid JSON")
+                        
+                        # Try single date format
+                        else:
+                            if self._is_valid_date(content):
+                                file_dates.add(content)
+                                logger.debug(f"🏖️ Parsed {filename} as single date: {content}")
+                        
+                        # Validate and add dates
+                        valid_dates = set()
+                        for date in file_dates:
+                            if self._is_valid_date(date):
+                                valid_dates.add(date)
+                            else:
+                                logger.warning(f"🏖️ Invalid date format in {filename}: {date}")
+                        
+                        if valid_dates:
+                            vacation_dates.update(valid_dates)
+                            logger.info(f"🏖️ Found {len(valid_dates)} valid vacation dates from {filename}: {valid_dates}")
+                            break  # Use first file found
+                            
                 except Exception as e:
                     logger.debug(f"🏖️ Could not read {filename}: {e}")
+            
+            # Method 3: Check for Chrome extension storage files
+            # Look for files in common Chrome extension directories
+            chrome_paths = [
+                Path("chrome_extension_data.txt"),
+                Path("extension_vacation.txt"),
+                Path("bot_sync.txt")
+            ]
+            
+            for chrome_file in chrome_paths:
+                try:
+                    if chrome_file.exists():
+                        with open(chrome_file, 'r') as f:
+                            content = f.read().strip()
+                            if content:
+                                dates = [date.strip() for date in content.split(',') if date.strip()]
+                                valid_dates = set()
+                                for date in dates:
+                                    if self._is_valid_date(date):
+                                        valid_dates.add(date)
+                                
+                                if valid_dates:
+                                    vacation_dates.update(valid_dates)
+                                    logger.info(f"🏖️ Found {len(valid_dates)} vacation dates from Chrome data: {valid_dates}")
+                                    break
+                except Exception as e:
+                    logger.debug(f"🏖️ Could not read Chrome data file {chrome_file}: {e}")
             
             if vacation_dates:
                 logger.info(f"🏖️ Total vacation dates that will be skipped: {vacation_dates}")
             else:
                 logger.warning("🏖️ No vacation dates found - bot will book all weekdays")
-                logger.info("💡 To set vacation dates, use VACATION_DATES environment variable or create vacation_dates.txt file")
+                logger.info("💡 To set vacation dates:")
+                logger.info("   - Use VACATION_DATES environment variable")
+                logger.info("   - Create vacation_dates.txt file")
+                logger.info("   - Use your extension's 'sync to bot' feature")
             
             return vacation_dates
             
         except Exception as e:
             logger.error(f"❌ Failed to get vacation dates: {e}")
             return set()
+    
+    def _is_valid_date(self, date_str: str) -> bool:
+        """Check if string is a valid date in YYYY-MM-DD format"""
+        try:
+            datetime.strptime(date_str, '%Y-%m-%d')
+            return True
+        except ValueError:
+            return False
     
     async def should_skip_date(self, date: str) -> bool:
         """
