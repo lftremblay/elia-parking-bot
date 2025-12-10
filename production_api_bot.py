@@ -456,7 +456,7 @@ class ProductionEliaBot:
             logger.error(f"❌ Failed to get bookings: {e}")
             return []
     
-    async def has_booking_for_date(self, date: str) -> bool:
+    async def has_booking_for_date(self, date: str, executive_spot: bool = False) -> bool:
         """
         Check if user already has a booking for a specific date
         Uses the GraphQL API to check user's actual bookings
@@ -548,8 +548,11 @@ class ProductionEliaBot:
             
             logger.debug(f"  📊 {date}: {available_count}/{total_spaces} spots available, {booked_count} booked ({occupancy_rate:.1%} occupancy)")
             
-            # Enhanced conservative logic
-            if occupancy_rate > 0.9:
+            # Enhanced conservative logic - skip for executive spots
+            if executive_spot:
+                logger.info(f"  🎯 Executive spot: Proceeding despite {occupancy_rate:.1%} occupancy")
+                return False
+            elif occupancy_rate > 0.9:
                 logger.info(f"  ⏭️ Very high occupancy ({occupancy_rate:.1%}) for {date} - skipping to avoid double-booking")
                 return True
             elif occupancy_rate > 0.7:
@@ -588,7 +591,12 @@ class ProductionEliaBot:
                 extension_file = Path("vacation_dates.txt")
                 if extension_file.exists():
                     with open(extension_file, 'r') as f:
-                        file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                        content = f.read().strip()
+                        # Handle both comma-separated and line-separated dates
+                        if ',' in content:
+                            file_dates = set(date.strip() for date in content.split(',') if date.strip())
+                        else:
+                            file_dates = set(date.strip() for date in content.split('\n') if date.strip())
                         vacation_dates.update(file_dates)
                         logger.info(f"🏖️ Found {len(file_dates)} vacation dates from extension file: {file_dates}")
                 else:
@@ -603,7 +611,12 @@ class ProductionEliaBot:
                     file_path = Path(filename)
                     if file_path.exists():
                         with open(file_path, 'r') as f:
-                            file_dates = set(date.strip() for date in f.read().split(',') if date.strip())
+                            content = f.read().strip()
+                            # Handle both comma-separated and line-separated dates
+                            if ',' in content:
+                                file_dates = set(date.strip() for date in content.split(',') if date.strip())
+                            else:
+                                file_dates = set(date.strip() for date in content.split('\n') if date.strip())
                             vacation_dates.update(file_dates)
                             logger.info(f"🏖️ Found {len(file_dates)} vacation dates from {filename}: {file_dates}")
                             break
@@ -672,7 +685,7 @@ class ProductionEliaBot:
             if await self.should_skip_date(tomorrow_str):
                 results["skipped"].append(f"{tomorrow_str} (vacation)")
             # Check if already booked
-            elif await self.has_booking_for_date(tomorrow_str):
+            elif await self.has_booking_for_date(tomorrow_str, executive_spot=True):
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
