@@ -1,0 +1,43 @@
+name: Parking Bot Midnight Run
+on:
+  schedule:
+    # Run at midnight Eastern Time (UTC-5 in winter, UTC-4 in summer)
+    # Using UTC to ensure consistent timing
+    - cron: '0 5 * * 1-5'  # 5:00 UTC = midnight EST (1-5 = Monday-Friday)
+  workflow_dispatch:  # Allow manual runs
+
+jobs:
+  run-parking-bot:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install python-dotenv httpx loguru asyncio
+        
+    - name: Run parking bot
+      env:
+        ELIA_GRAPHQL_TOKEN: ${{ secrets.ELIA_GRAPHQL_TOKEN }}
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        ELIA_EMAIL: ${{ secrets.ELIA_EMAIL }}
+        TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
+        MICROSOFT_USERNAME: ${{ secrets.MICROSOFT_USERNAME }}
+      run: |
+        python fresh_run.py
+        
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: bot-logs
+        path: logs/

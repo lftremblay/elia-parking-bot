@@ -676,11 +676,15 @@ class ProductionEliaBot:
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
+                # For executive spots, proceed if ANY spots are available
+                # Executive spots are premium and worth competing for
+                logger.info(f"🎯 Executive booking: Proceeding even with high occupancy")
+                
                 # Try to book executive spot
                 success = await self.reserve_parking_spot(
                     date=tomorrow_str,
                     spot_type="executive",
-                    booking_window_hours=6  # FIXED: Use 6 hours to meet policy minimum
+                    booking_window_hours=6  # Use 6 hours to meet policy minimum
                 )
                 results["executive_today"] = {
                     "date": tomorrow_str,
@@ -690,10 +694,10 @@ class ProductionEliaBot:
         else:
             logger.info(f"⏭️ Tomorrow is {tomorrow.strftime('%A')} - skipping")
         
-        # STEP 2: Book regular spots 14-15 days ahead
-        logger.info(f"\n📅 STEP 2: Regular spots 14-15 days ahead")
+        # STEP 2: Book regular spots 14 days ahead (not 15 to comply with policy)
+        logger.info(f"\n📅 STEP 2: Regular spots 14 days ahead")
         
-        for days_ahead in [14, 15]:
+        for days_ahead in [14]:  # Only 14 days to stay within 15-day policy
             future_date = today + timedelta(days=days_ahead)
             
             # Only book weekdays
@@ -761,9 +765,10 @@ class ProductionEliaBot:
         """Send email notification with booking results"""
         try:
             # Determine overall success
-            exec_success = results.get("executive_today", {}).get("success", False)
+            exec_result = results.get("executive_today")
+            exec_success = exec_result.get("success", False) if exec_result else False
             regular_successes = sum(1 for r in results.get("regular_ahead", {}).values() if r.get("success", False))
-            total_bookings = len(results.get("regular_ahead", {})) + (1 if results.get("executive_today") else 0)
+            total_bookings = len(results.get("regular_ahead", {})) + (1 if exec_result else 0)
             
             is_success = exec_success or regular_successes > 0
             
