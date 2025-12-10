@@ -456,7 +456,7 @@ class ProductionEliaBot:
             logger.error(f"❌ Failed to get bookings: {e}")
             return []
     
-    async def has_booking_for_date(self, date: str, executive_spot: bool = False) -> bool:
+    async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
         Uses the GraphQL API to check user's actual bookings
@@ -473,46 +473,63 @@ class ProductionEliaBot:
             # Method 1: Direct GraphQL API query for user's bookings
             # Use the correct Elia API schema
             query = """
-            query GetUserBookings($date: String!, $floorId: String!) {
-                floorPlanBookings(floorId: $floorId, date: $date) {
-                    id
-                    date
-                    status
-                    space {
+            query GetUserBookings($input: FloorPlanBookingsInput!) {
+                floorPlanBookings(input: $input) {
+                    users {
                         id
-                        name
-                        type
-                    }
-                    user {
-                        id
+                        firstName
+                        lastName
                         email
-                        displayName
+                        __typename
                     }
+                    bookingsBySpace {
+                        spaceId
+                        bookings {
+                            bookingId
+                            start
+                            end
+                            user
+                            isAssigned
+                            __typename
+                        }
+                        __typename
+                    }
+                    __typename
                 }
             }
             """
             
-            variables = {"date": date, "floorId": self.floor_id}
+            variables = {
+                "input": {
+                    "dates": [date],
+                    "floorId": self.floor_id,
+                    "start": "00:00:00",
+                    "end": "23:59:59"
+                }
+            }
             
             try:
                 result = await self.client.execute_query(query, variables)
                 
                 if result and "floorPlanBookings" in result:
-                    bookings = result["floorPlanBookings"]
+                    bookings_data = result["floorPlanBookings"]
+                    bookings_by_space = bookings_data.get("bookingsBySpace", [])
                     
-                    if bookings and len(bookings) > 0:
+                    if bookings_by_space and len(bookings_by_space) > 0:
                         # User has bookings for this date
                         user_email = os.getenv('ELIA_EMAIL', '').lower()
                         
                         # Check if any booking belongs to current user
-                        for booking in bookings:
-                            if (booking.get("user", {}).get("email", "").lower() == user_email or
-                                booking.get("status") in ["confirmed", "active", "booked"]):
-                                
-                                logger.info(f"  ✅ Found existing booking for {date}: {booking.get('space', {}).get('name', 'Unknown')}")
-                                return True
+                        for space_booking in bookings_by_space:
+                            bookings = space_booking.get("bookings", [])
+                            for booking in bookings:
+                                booking_user = booking.get("user", {})
+                                if (isinstance(booking_user, dict) and 
+                                    booking_user.get("email", "").lower() == user_email):
+                                    logger.info(f"  ✅ Found existing booking for {date}: Space {space_booking.get('spaceId', 'Unknown')}")
+                                    return True
                         
-                        logger.debug(f"  📊 Found {len(bookings)} bookings for {date}, but none belong to current user")
+                        logger.debug(f"  📊 Found bookings for {date}, but none belong to current user")
                     else:
                         logger.debug(f"  📊 No bookings found for {date}")
                         
@@ -547,19 +564,6 @@ class ProductionEliaBot:
             occupancy_rate = booked_count / total_spaces if total_spaces > 0 else 0
             
             logger.debug(f"  📊 {date}: {available_count}/{total_spaces} spots available, {booked_count} booked ({occupancy_rate:.1%} occupancy)")
-            
-            # Enhanced conservative logic - skip for executive spots
-            if executive_spot:
-                logger.info(f"  🎯 Executive spot: Proceeding despite {occupancy_rate:.1%} occupancy")
-                return False
-            elif occupancy_rate > 0.9:
-                logger.info(f"  ⏭️ Very high occupancy ({occupancy_rate:.1%}) for {date} - skipping to avoid double-booking")
-                return True
-            elif occupancy_rate > 0.7:
-                logger.warning(f"  ⚠️ High occupancy ({occupancy_rate:.1%}) for {date} - proceeding with caution")
-                return False
-            
-            logger.debug(f"  📊 {date}: Occupancy is reasonable ({occupancy_rate:.1%}) - proceeding with booking")
             return False
             
         except Exception as e:
@@ -685,7 +689,7 @@ class ProductionEliaBot:
             if await self.should_skip_date(tomorrow_str):
                 results["skipped"].append(f"{tomorrow_str} (vacation)")
             # Check if already booked
-            elif await self.has_booking_for_date(tomorrow_str, executive_spot=True):
+            elif await self.has_booking_for_date(tomorrow_str):
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
