@@ -3,122 +3,50 @@ name: Manual Parking Bot
 on:
   workflow_dispatch:
     inputs:
-      spot_type:
-        description: 'Type of parking spot to reserve'
-        required: true
-        default: 'regular'
-        type: choice
-        options:
-        - regular
-        - executive
       test_mode:
-        description: 'Run in test mode (no actual reservation)'
+        description: 'Run in test mode (check booking detection only, no actual reservation)'
         required: false
         default: true
         type: boolean
 
 jobs:
   reserve-parking:
-    runs-on: windows-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install python-dotenv httpx loguru asyncio
 
-    - name: Install Playwright browsers
-      run: |
-        # Fix for Ubuntu 24.04 - install correct libasound2 package
-        sudo apt-get update
-        sudo apt-get install -y libasound2t64
-        # Install Playwright browsers
-        playwright install chromium
-
-    - name: Create config directory
-      run: |
-        New-Item -ItemType Directory -Force -Path config
-        New-Item -ItemType Directory -Force -Path logs
-        New-Item -ItemType Directory -Force -Path screenshots
-        New-Item -ItemType Directory -Force -Path session_data
-
-    - name: Create config.json
-      run: |
-        $config = @{
-            'elia' = @{
-                'organization' = 'quebecor'
-                'url' = 'https://app.elia.io/'
-                'credentials' = @{
-                    'email' = $env:ELIA_EMAIL
-                    'use_sso' = $true
-                    'mfa_method' = 'authenticator'
-                }
-            }
-            'schedules' = @{
-                'executive_spots' = @{
-                    'enabled' = $true
-                    'time' = '00:00:00'
-                    'days_advance' = 14
-                    'spot_type' = 'executive'
-                    'weekdays_only' = $true
-                }
-                'regular_spots' = @{
-                    'enabled' = $true
-                    'time' = '06:00:00'
-                    'days_advance' = 14
-                    'spot_type' = 'regular'
-                    'weekdays_only' = $true
-                }
-            }
-            'retry' = @{
-                'max_attempts' = 5
-                'backoff_seconds' = @(5, 10, 30, 60, 120)
-                'aggressive_refresh' = $true
-            }
-            'notifications' = @{
-                'discord_webhook' = $env:DISCORD_WEBHOOK_URL
-                'telegram_bot_token' = $env:TELEGRAM_BOT_TOKEN
-                'telegram_chat_id' = $env:TELEGRAM_CHAT_ID
-                'email' = @{
-                    'enabled' = $false
-                }
-            }
-            'advanced' = @{
-                'headless' = $true
-                'browser_profile_path' = './browser_data'
-                'session_persistence' = $true
-                'screenshot_on_error' = $true
-                'ai_spot_detection' = $true
-                'use_api_when_possible' = $true
-            }
-        }
-
-        $config | ConvertTo-Json -Depth 10 | Out-File -FilePath 'config.json' -Encoding UTF8
-        Write-Host "Created config.json"
-
-    - name: Run Parking Reservation
+    - name: Run Parking Bot (API Mode)
       env:
+        ELIA_GRAPHQL_TOKEN: ${{ secrets.ELIA_GRAPHQL_TOKEN }}
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
         ELIA_EMAIL: ${{ secrets.ELIA_EMAIL }}
-        ELIA_PASSWORD: ${{ secrets.ELIA_PASSWORD }}
         TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
-        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        MICROSOFT_USERNAME: ${{ secrets.MICROSOFT_USERNAME }}
       run: |
-        # Get spot type from manual input
-        $spotType = '${{ inputs.spot_type }}'
-        Write-Host "Manual trigger for $spotType spot"
-
-        # Run the bot
-        python main.py --reserve $spotType
+        echo "Manual trigger - Test mode: ${{ inputs.test_mode }}"
+        
+        if [ "${{ inputs.test_mode }}" = "true" ]; then
+          echo "Running in TEST mode - checking booking detection"
+          python final_booking_test.py
+        else
+          echo "Running in PRODUCTION mode"
+          python fresh_run.py
+        fi
 
     - name: Upload logs and screenshots on failure
       if: failure()
