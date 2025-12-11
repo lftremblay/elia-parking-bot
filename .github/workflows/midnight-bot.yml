@@ -88,13 +88,13 @@ jobs:
       if: always()
       uses: dawidd6/action-send-mail@v3
       with:
-        server_address: smtp.videotron.ca
+        server_address: smtp.gmail.com
         server_port: 587
-        username: ${{ secrets.VIDEOTRON_EMAIL }}
-        password: ${{ secrets.VIDEOTRON_PASSWORD }}
+        username: ${{ secrets.GMAIL_USERNAME }}
+        password: ${{ secrets.GMAIL_APP_PASSWORD }}
         subject: "🤖 Parking Bot - ${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}"
-        to: ${{ secrets.VIDEOTRON_EMAIL }}
-        from: Parking Bot <${{ secrets.VIDEOTRON_EMAIL }}>
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: Elia Parking Bot
         html_body: |
           <!DOCTYPE html>
           <html>
