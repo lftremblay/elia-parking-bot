@@ -459,7 +459,7 @@ class ProductionEliaBot:
     async def has_booking_for_date(self, date: str) -> bool:
         """
         Check if user already has a booking for a specific date
-        Uses the GraphQL API to check user's actual bookings
+        Uses the robust booking detector with multiple fallback methods
         
         Args:
             date: Date in YYYY-MM-DD format
@@ -468,10 +468,34 @@ class ProductionEliaBot:
             True if user has a booking, False otherwise
         """
         try:
-            logger.debug(f"  🔍 Checking if user has booking for {date}")
+            from booking_detector import RobustBookingDetector
             
-            # Method 1: Direct GraphQL API query for user's bookings
-            # Use the correct Elia API schema
+            # Create robust detector
+            detector = RobustBookingDetector(
+                client=self.client,
+                user_email=os.getenv('ELIA_EMAIL', ''),
+                floor_id=self.floor_id
+            )
+            
+            # Use robust detection
+            return await detector.has_booking_for_date(date)
+            
+        except ImportError:
+            logger.warning("⚠️ Robust detector not available, falling back to legacy method")
+            return await self._legacy_booking_check(date)
+        except Exception as e:
+            logger.error(f"❌ Robust booking detection failed: {e}")
+            logger.info("🔄 Falling back to legacy method")
+            return await self._legacy_booking_check(date)
+    
+    async def _legacy_booking_check(self, date: str) -> bool:
+        """
+        Legacy booking check method as fallback
+        """
+        try:
+            logger.debug(f"  🔍 Using legacy booking check for {date}")
+            
+            # Use the floor plan method as fallback
             query = """
             query GetUserBookings($input: FloorPlanBookingsInput!) {
                 floorPlanBookings(input: $input) {
@@ -516,10 +540,8 @@ class ProductionEliaBot:
                     bookings_by_space = bookings_data.get("bookingsBySpace", [])
                     
                     if bookings_by_space and len(bookings_by_space) > 0:
-                        # User has bookings for this date
                         user_email = os.getenv('ELIA_EMAIL', '').lower()
                         
-                        # Check if any booking belongs to current user
                         for space_booking in bookings_by_space:
                             bookings = space_booking.get("bookings", [])
                             for booking in bookings:
@@ -538,9 +560,8 @@ class ProductionEliaBot:
                     
             except Exception as api_error:
                 logger.warning(f"  ⚠️ GraphQL booking check failed for {date}: {api_error}")
-                logger.info(f"  🔍 Falling back to alternative detection methods")
                 
-                # Fallback to Method 2: Check booking history file
+                # Fallback to booking history
                 history_file = Path("booking_history.json")
                 if history_file.exists():
                     with open(history_file, 'r') as f:
@@ -548,15 +569,13 @@ class ProductionEliaBot:
                         
                     if date in history.get("successful_bookings", []):
                         logger.info(f"  📋 Found {date} in booking history - assuming user has booking")
-                        logger.debug(f"  📋 History contents: {history.get('successful_bookings', [])}")
                         return True
                         
                     logger.debug(f"  📋 {date} not found in booking history")
                 else:
                     logger.debug(f"  📋 No booking history file found")
             
-            # Method 3: Conservative check with enhanced logic
-            # Only if both API and history checks fail
+            # Final fallback: check occupancy
             available_spots = await self.client.get_available_parking_spots(date, self.floor_id)
             all_spaces = await self.client.get_floor_spaces(self.floor_id)
             total_spaces = len(all_spaces)

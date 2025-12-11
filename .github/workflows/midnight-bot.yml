@@ -1,9 +1,11 @@
 name: Parking Bot Midnight Run
 on:
   schedule:
-    # Run at midnight Eastern Time (UTC-5 in winter, UTC-4 in summer)
-    # Using UTC to ensure consistent timing
-    - cron: '0 5 * * 1-5'  # 5:00 UTC = midnight EST (1-5 = Monday-Friday)
+    # Run exactly at midnight Eastern Time
+    # EST: UTC-5 (Nov-Mar), EDT: UTC-4 (Mar-Nov)
+    # Use 5:00 UTC for EST (winter), 4:00 UTC for EDT (summer)
+    # Schedule both to ensure midnight execution year-round
+    - cron: '0 4,5 * * 1-5'  # 4:00 & 5:00 UTC = midnight EST/EDT (1-5 = Monday-Friday)
   workflow_dispatch:  # Allow manual runs
 
 jobs:
@@ -20,9 +22,9 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install python-dotenv httpx loguru asyncio
+        pip install python-dotenv httpx loguru asyncio pytz
         
-    - name: Run parking bot
+    - name: Check exact time and run if at midnight
       env:
         ELIA_GRAPHQL_TOKEN: ${{ secrets.ELIA_GRAPHQL_TOKEN }}
         EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
@@ -33,7 +35,31 @@ jobs:
         TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
         MICROSOFT_USERNAME: ${{ secrets.MICROSOFT_USERNAME }}
       run: |
-        python fresh_run.py
+        # Get current time and check if we're within 5 minutes of midnight EST
+        python -c "
+        import datetime
+        import pytz
+        import subprocess
+        import sys
+        
+        # Get current time in Eastern timezone
+        eastern = pytz.timezone('US/Eastern')
+        now = datetime.datetime.now(eastern)
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Calculate minutes since midnight
+        minutes_since_midnight = (now - midnight).total_seconds() / 60
+        
+        print(f'Current Eastern time: {now.strftime(\"%Y-%m-%d %H:%M:%S %Z\")}')
+        print(f'Minutes since midnight: {minutes_since_midnight:.1f}')
+        
+        # Only run if within 5 minutes of midnight
+        if minutes_since_midnight <= 5:
+            print('✅ Within 5 minutes of midnight - running bot')
+            subprocess.run([sys.executable, 'fresh_run.py'])
+        else:
+            print('⏭️ Not within 5 minutes of midnight - skipping execution')
+        "
         
     - name: Upload logs
       if: always()
