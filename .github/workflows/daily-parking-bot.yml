@@ -1,10 +1,11 @@
-name: Smart Weekday Parking Bot
+name: Smart Weekday Parking Bot (DISABLED - Use midnight-bot.yml instead)
 
 on:
-  schedule:
-    # Run Monday-Friday at midnight Montreal Winter Time (5:00 AM UTC)
-    # 6 hours before 6 AM reservation (executive spots)
-    - cron: '0 5 * * 1-5'
+  # DISABLED: This workflow is replaced by midnight-bot.yml
+  # schedule:
+  #   # Run Monday-Friday at midnight Montreal Winter Time (5:00 AM UTC)
+  #   # 6 hours before 6 AM reservation (executive spots)
+  #   - cron: '0 5 * * 1-5'
   workflow_dispatch:  # Allow manual triggering
     inputs:
       booking_mode:

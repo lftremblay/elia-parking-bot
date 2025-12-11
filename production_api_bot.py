@@ -456,37 +456,34 @@ class ProductionEliaBot:
             logger.error(f"❌ Failed to get bookings: {e}")
             return []
     
-    async def has_booking_for_date(self, date: str) -> bool:
+    async def has_booking_for_date(self, date_str: str) -> bool:
         """
-        Check if user already has a booking for a specific date
-        Uses the robust booking detector with multiple fallback methods
+        Check if user already has a booking for the given date using the correct API
         
         Args:
-            date: Date in YYYY-MM-DD format
-        
+            date_str: Date in YYYY-MM-DD format
+            
         Returns:
-            True if user has a booking, False otherwise
+            True if booking exists, False otherwise
         """
         try:
-            from booking_detector import RobustBookingDetector
+            from correct_booking_detector import CorrectBookingDetector
             
-            # Create robust detector
-            detector = RobustBookingDetector(
-                client=self.client,
-                user_email=os.getenv('ELIA_EMAIL', ''),
-                floor_id=self.floor_id
-            )
+            detector = CorrectBookingDetector(client=self.client)
             
-            # Use robust detection
-            return await detector.has_booking_for_date(date)
+            has_booking = await detector.has_booking_for_date(date_str)
             
-        except ImportError:
-            logger.warning("⚠️ Robust detector not available, falling back to legacy method")
-            return await self._legacy_booking_check(date)
+            if has_booking:
+                logger.info(f"📅 Existing booking detected for {date_str} - will skip")
+            else:
+                logger.info(f"✅ No booking found for {date_str} - can proceed")
+            
+            return has_booking
+            
         except Exception as e:
-            logger.error(f"❌ Robust booking detection failed: {e}")
-            logger.info("🔄 Falling back to legacy method")
-            return await self._legacy_booking_check(date)
+            logger.error(f"❌ Error checking for existing booking: {e}")
+            # On error, assume no booking to avoid blocking legitimate bookings
+            return False
     
     async def _legacy_booking_check(self, date: str) -> bool:
         """
