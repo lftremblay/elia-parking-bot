@@ -40,57 +40,62 @@ if __name__ == "__main__":
     
     # Create human-readable summary
     print("\n" + "=" * 60)
-    print("📊 PARKING BOT SUMMARY")
+    print("📊 COMPREHENSIVE PARKING BOT SUMMARY")
     print("=" * 60)
     
     # Save summary to file for email
     summary_lines = []
     summary_lines.append("=" * 60)
-    summary_lines.append("🚗 ELIA PARKING BOT - RUN SUMMARY")
+    summary_lines.append("🚗 ELIA PARKING BOT - COMPREHENSIVE RUN SUMMARY")
     summary_lines.append("=" * 60)
     summary_lines.append("")
     
-    # Tomorrow's booking (executive or regular)
-    tomorrow_booked = False
+    # Today's booking (executive or regular)
+    today_date = datetime.now().strftime('%Y-%m-%d')
+    today_booked = False
+    
     if results.get('executive_today'):
         exec_result = results['executive_today']
-        summary_lines.append("✅ EXECUTIVE SPOT (Tomorrow)")
+        summary_lines.append("✅ EXECUTIVE SPOT (Today)")
         summary_lines.append(f"   Date: {exec_result.get('date', 'N/A')}")
         summary_lines.append(f"   Status: Booked")
-        print("✅ Executive spot booked for tomorrow")
-        tomorrow_booked = True
+        print("✅ Executive spot booked for today")
+        today_booked = True
     
-    # Check if regular spot was booked for tomorrow (fallback)
-    tomorrow_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-    if tomorrow_date in results.get('regular_ahead', {}):
-        if not tomorrow_booked:
-            summary_lines.append("✅ REGULAR SPOT (Tomorrow - fallback)")
-            summary_lines.append(f"   Date: {tomorrow_date}")
+    # Check if regular spot was booked for today (fallback)
+    if today_date in results.get('regular_ahead', {}):
+        if not today_booked:
+            summary_lines.append("✅ REGULAR SPOT (Today - fallback)")
+            summary_lines.append(f"   Date: {today_date}")
             summary_lines.append(f"   Status: Booked (executive unavailable)")
-            print("✅ Regular spot booked for tomorrow (fallback)")
-            tomorrow_booked = True
+            print("✅ Regular spot booked for today (fallback)")
+            today_booked = True
     
-    if not tomorrow_booked and not results.get('executive_today'):
-        summary_lines.append("⏭️  TOMORROW'S SPOT")
+    if not today_booked and not results.get('executive_today'):
+        summary_lines.append("⏭️  TODAY'S SPOT")
         summary_lines.append("   Status: Skipped or already booked")
-        print("⏭️  Tomorrow's spot skipped")
+        print("⏭️  Today's spot skipped")
     
     summary_lines.append("")
     
-    # Regular bookings (14 days ahead, excluding tomorrow which was already shown)
+    # All regular bookings (days 1-15, excluding today which was already shown)
     regular = results.get('regular_ahead', {})
-    regular_14_days = {k: v for k, v in regular.items() if k != tomorrow_date}
+    regular_future = {k: v for k, v in regular.items() if k != today_date}
     
-    if regular_14_days:
-        summary_lines.append(f"✅ REGULAR SPOTS (14 days ahead): {len(regular_14_days)} booked")
-        print(f"✅ Regular spots booked (14 days): {len(regular_14_days)}")
-        for date, booking in regular_14_days.items():
-            summary_lines.append(f"   • {date}")
-            print(f"   • {date}")
+    if regular_future:
+        successful = sum(1 for v in regular_future.values() if v.get('success', False))
+        summary_lines.append(f"✅ REGULAR SPOTS (Days 1-15): {successful}/{len(regular_future)} booked")
+        print(f"✅ Regular spots: {successful}/{len(regular_future)} successful")
+        for date in sorted(regular_future.keys()):
+            booking = regular_future[date]
+            status = "✅" if booking.get('success', False) else "❌"
+            days = booking.get('days_ahead', '?')
+            summary_lines.append(f"   {status} {date} (day {days})")
+            print(f"   {status} {date} (day {days})")
     else:
-        summary_lines.append("⏭️  REGULAR SPOTS (14 days ahead)")
-        summary_lines.append("   Status: None booked (already have bookings or vacation)")
-        print("⏭️  No regular spots booked (14 days)")
+        summary_lines.append("⏭️  REGULAR SPOTS (Days 1-15)")
+        summary_lines.append("   Status: None attempted (all already booked or vacation)")
+        print("⏭️  No regular spots attempted")
     
     summary_lines.append("")
     

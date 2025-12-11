@@ -451,15 +451,16 @@ class ProductionEliaBot:
     async def smart_weekday_booking(self) -> Dict[str, any]:
         """
         Smart booking strategy:
-        1. Book executive spot for tomorrow (6h policy)
-        2. Book regular spots 14-15 days ahead
-        3. Skip weekends
-        4. Prevent double-booking
+        - Check every weekday from today through 15 days ahead
+        - Day 1 (today): Try executive first, fallback to regular
+        - Days 2-15: Book regular spots
+        - Skip weekends, vacation days, and already booked dates
         
         Returns:
             Dictionary with booking results and summary
         """
-        logger.info("🎯 Starting smart weekday booking strategy")
+        logger.info("🎯 Starting comprehensive weekday booking strategy")
+        logger.info("📅 Checking all weekdays from today through 15 days ahead")
         
         results = {
             "executive_today": None,
@@ -469,120 +470,125 @@ class ProductionEliaBot:
         }
         
         today = datetime.now()
-        tomorrow = today + timedelta(days=1)
         
-        # STEP 1: Book spots for tomorrow (both executive and regular if available)
-        if tomorrow.weekday() < 5:  # Weekday check
-            tomorrow_str = tomorrow.strftime('%Y-%m-%d')
-            logger.info(f"\n📅 STEP 1: Spots for tomorrow ({tomorrow_str})")
+        # Loop through days 0-15 (today through 15 days ahead)
+        for days_ahead in range(0, 16):
+            target_date = today + timedelta(days=days_ahead)
+            
+            # Skip weekends
+            if target_date.weekday() >= 5:
+                logger.info(f"⏭️ {target_date.strftime('%Y-%m-%d')} is {target_date.strftime('%A')} - skipping weekend")
+                continue
+            
+            target_date_str = target_date.strftime('%Y-%m-%d')
+            day_name = target_date.strftime('%A')
+            
+            logger.info(f"\n📅 Day {days_ahead}: {target_date_str} ({day_name})")
             
             # Check if vacation day
-            if await self.should_skip_date(tomorrow_str):
-                results["skipped"].append(f"{tomorrow_str} (vacation)")
-            # Check if already booked
-            has_booking = await self.has_booking_for_date(tomorrow_str)
-            logger.info(f"  🔍 Booking check result for {tomorrow_str}: {has_booking}")
+            if await self.should_skip_date(target_date_str):
+                logger.info(f"🏖️ Vacation day - skipping")
+                results["skipped"].append(f"{target_date_str} (vacation)")
+                continue
             
+            # Check if already booked
+            has_booking = await self.has_booking_for_date(target_date_str)
             if has_booking:
-                logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
-                results["skipped"].append(tomorrow_str)
-            else:
-                # Try to book executive spot first
-                logger.info(f"🎯 Attempting executive spot for tomorrow")
+                logger.info(f"✅ Already booked - skipping")
+                results["skipped"].append(target_date_str)
+                continue
+            
+            # Day 0 (today): Try executive first, fallback to regular
+            if days_ahead == 0:
+                logger.info(f"🎯 Today - attempting executive spot first")
                 exec_success = await self.reserve_parking_spot(
-                    date=tomorrow_str,
+                    date=target_date_str,
                     spot_type="executive",
-                    booking_window_hours=12  # Use 12 hours for full day booking
+                    booking_window_hours=12
                 )
                 
                 if exec_success:
                     results["executive_today"] = {
-                        "date": tomorrow_str,
+                        "date": target_date_str,
                         "success": True,
                         "type": "executive"
                     }
-                    logger.info(f"✅ Executive spot booked for tomorrow")
+                    logger.info(f"✅ Executive spot booked for today")
                 else:
-                    # If executive fails, try regular spot as fallback
-                    logger.info(f"⚠️ Executive spot failed, trying regular spot for tomorrow")
+                    # Fallback to regular spot
+                    logger.info(f"⚠️ Executive unavailable, trying regular spot")
                     regular_success = await self.reserve_parking_spot(
-                        date=tomorrow_str,
+                        date=target_date_str,
                         spot_type="regular",
                         booking_window_hours=6
                     )
                     
                     if regular_success:
-                        results["regular_ahead"][tomorrow_str] = {
+                        results["regular_ahead"][target_date_str] = {
                             "success": True,
                             "type": "regular",
-                            "days_ahead": 1
+                            "days_ahead": days_ahead
                         }
-                        logger.info(f"✅ Regular spot booked for tomorrow (fallback)")
+                        logger.info(f"✅ Regular spot booked for today (fallback)")
                     else:
-                        logger.warning(f"❌ Both executive and regular spots failed for tomorrow")
-                        results["errors"].append(f"Failed to book any spot for {tomorrow_str}")
-        else:
-            logger.info(f"⏭️ Tomorrow is {tomorrow.strftime('%A')} - skipping")
-        
-        # STEP 2: Book regular spots 14 days ahead (not 15 to comply with policy)
-        logger.info(f"\n📅 STEP 2: Regular spots 14 days ahead")
-        
-        for days_ahead in [14]:  # Only 14 days to stay within 15-day policy
-            future_date = today + timedelta(days=days_ahead)
+                        logger.warning(f"❌ No spots available for today")
+                        results["errors"].append(f"Failed to book any spot for {target_date_str}")
             
-            # Only book weekdays
-            if future_date.weekday() < 5:
-                future_date_str = future_date.strftime('%Y-%m-%d')
-                logger.info(f"\n📅 Checking {future_date_str} ({future_date.strftime('%A')})")
-                
-                # Check if vacation day
-                if await self.should_skip_date(future_date_str):
-                    results["skipped"].append(f"{future_date_str} (vacation)")
-                # Check if already booked
-                elif await self.has_booking_for_date(future_date_str):
-                    logger.info(f"⏭️ Skipping {future_date_str} - already booked")
-                    results["skipped"].append(future_date_str)
-                else:
-                    # Try to book regular spot
-                    success = await self.reserve_parking_spot(
-                        date=future_date_str,
-                        spot_type="regular",
-                        booking_window_hours=6  # FIXED: Use 6 hours to meet policy minimum
-                    )
-                    results["regular_ahead"][future_date_str] = {
-                        "success": success,
-                        "type": "regular",
-                        "days_ahead": days_ahead
-                    }
-                    
-                    # Small delay between bookings
-                    await asyncio.sleep(2)
+            # Days 1-15: Book regular spots only
             else:
-                logger.info(f"⏭️ {future_date.strftime('%Y-%m-%d')} is {future_date.strftime('%A')} - skipping")
+                logger.info(f"📅 Attempting regular spot ({days_ahead} days ahead)")
+                success = await self.reserve_parking_spot(
+                    date=target_date_str,
+                    spot_type="regular",
+                    booking_window_hours=6
+                )
+                
+                results["regular_ahead"][target_date_str] = {
+                    "success": success,
+                    "type": "regular",
+                    "days_ahead": days_ahead
+                }
+                
+                if success:
+                    logger.info(f"✅ Regular spot booked")
+                else:
+                    logger.warning(f"❌ Booking failed")
+                    results["errors"].append(f"Failed to book spot for {target_date_str}")
+            
+            # Small delay between bookings to avoid rate limiting
+            await asyncio.sleep(2)
         
-        # STEP 3: Summary
+        # Summary
         logger.info("\n" + "="*50)
-        logger.success("📊 SMART BOOKING SUMMARY")
+        logger.success("📊 COMPREHENSIVE BOOKING SUMMARY")
         logger.info("="*50)
         
         # Executive booking
         if results["executive_today"]:
             exec_result = results["executive_today"]
             status = "✅ SUCCESS" if exec_result["success"] else "❌ FAILED"
-            logger.info(f"Executive (tomorrow): {status} - {exec_result['date']}")
+            logger.info(f"Executive (today): {status} - {exec_result['date']}")
         
         # Regular bookings
         if results["regular_ahead"]:
-            logger.info(f"\nRegular spots (14-15 days ahead):")
-            for date_str, result in results["regular_ahead"].items():
-                status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
-                logger.info(f"  {status} - {date_str} ({result['days_ahead']} days ahead)")
+            successful = sum(1 for r in results["regular_ahead"].values() if r["success"])
+            total = len(results["regular_ahead"])
+            logger.info(f"\nRegular spots: {successful}/{total} successful")
+            for date_str, result in sorted(results["regular_ahead"].items()):
+                status = "✅" if result["success"] else "❌"
+                logger.info(f"  {status} {date_str} ({result['days_ahead']} days ahead)")
         
         # Skipped dates
         if results["skipped"]:
-            logger.info(f"\nSkipped (already booked): {len(results['skipped'])} dates")
+            logger.info(f"\nSkipped: {len(results['skipped'])} dates")
             for date_str in results["skipped"]:
                 logger.info(f"  ⏭️ {date_str}")
+        
+        # Errors
+        if results["errors"]:
+            logger.info(f"\nErrors: {len(results['errors'])}")
+            for error in results["errors"]:
+                logger.info(f"  ❌ {error}")
         
         logger.info("="*50)
         
