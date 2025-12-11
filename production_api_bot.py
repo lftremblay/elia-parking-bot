@@ -548,6 +548,7 @@ class ProductionEliaBot:
                         
                     if date in history.get("successful_bookings", []):
                         logger.info(f"  📋 Found {date} in booking history - assuming user has booking")
+                        logger.debug(f"  📋 History contents: {history.get('successful_bookings', [])}")
                         return True
                         
                     logger.debug(f"  📋 {date} not found in booking history")
@@ -564,6 +565,7 @@ class ProductionEliaBot:
             occupancy_rate = booked_count / total_spaces if total_spaces > 0 else 0
             
             logger.debug(f"  📊 {date}: {available_count}/{total_spaces} spots available, {booked_count} booked ({occupancy_rate:.1%} occupancy)")
+            logger.debug(f"  📊 {date}: Proceeding with booking (no occupancy restrictions)")
             return False
             
         except Exception as e:
@@ -689,7 +691,10 @@ class ProductionEliaBot:
             if await self.should_skip_date(tomorrow_str):
                 results["skipped"].append(f"{tomorrow_str} (vacation)")
             # Check if already booked
-            elif await self.has_booking_for_date(tomorrow_str):
+            has_booking = await self.has_booking_for_date(tomorrow_str)
+            logger.info(f"  🔍 Booking check result for {tomorrow_str}: {has_booking}")
+            
+            if has_booking:
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
