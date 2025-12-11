@@ -3,6 +3,7 @@
 .venv310/
 venv/
 ENV/
+env/
 
 # Playwright/Chromium downloads
 browser_data/
@@ -10,11 +11,13 @@ chromium-win64.zip
 
 # Python cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
 
 # Logs and temp
+logs/
 *.log
 *.tmp
 *.cache/
@@ -23,6 +26,17 @@ __pycache__/
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Test artifacts
 screenshots/
@@ -32,3 +46,12 @@ screenshots/
 # Task-specific directories
 report/
 test_browser_data/
+session_data/
+
+# Temporary files
+*.bak
+*.old
+run_summary.txt
+
+# Old/unused directories
+enhanced_sync/
