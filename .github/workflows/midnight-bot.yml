@@ -27,10 +27,11 @@ jobs:
     - name: Check exact time and run if at midnight
       env:
         ELIA_GRAPHQL_TOKEN: ${{ secrets.ELIA_GRAPHQL_TOKEN }}
-        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
-        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        SMTP_HOST: ${{ secrets.SMTP_HOST }}
-        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        # Email disabled - internal SMTP not accessible from GitHub Actions
+        # EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        # SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        # SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        # SMTP_PORT: ${{ secrets.SMTP_PORT }}
         ELIA_EMAIL: ${{ secrets.ELIA_EMAIL }}
         TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
         MICROSOFT_USERNAME: ${{ secrets.MICROSOFT_USERNAME }}
