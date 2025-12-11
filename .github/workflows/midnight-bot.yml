@@ -1,11 +1,14 @@
-name: Parking Bot Midnight Run
+name: Parking Bot Midnight & 6AM Runs
 on:
   schedule:
-    # Run exactly at midnight Eastern Time
+    # Run 10 minutes before midnight Eastern Time (to account for GitHub delays)
     # EST: UTC-5 (Nov-Mar), EDT: UTC-4 (Mar-Nov)
-    # Use 5:00 UTC for EST (winter), 4:00 UTC for EDT (summer)
-    # Schedule both to ensure midnight execution year-round
-    - cron: '0 4,5 * * 1-5'  # 4:00 & 5:00 UTC = midnight EST/EDT (1-5 = Monday-Friday)
+    # 11:50 PM EST = 4:50 UTC, 11:50 PM EDT = 3:50 UTC
+    - cron: '50 3,4 * * 1-5'  # 11:50 PM EST/EDT (Monday-Friday)
+    
+    # Run 10 minutes before 6 AM Eastern Time (second attempt)
+    # 5:50 AM EST = 10:50 UTC, 5:50 AM EDT = 9:50 UTC
+    - cron: '50 9,10 * * 1-5'  # 5:50 AM EST/EDT (Monday-Friday)
   workflow_dispatch:  # Allow manual runs
 
 jobs:
@@ -24,42 +27,60 @@ jobs:
       run: |
         pip install python-dotenv httpx loguru asyncio pytz
         
-    - name: Check exact time and run if at midnight
+    - name: Wait and run bot at exact midnight or 6 AM
       env:
         ELIA_GRAPHQL_TOKEN: ${{ secrets.ELIA_GRAPHQL_TOKEN }}
-        # Email disabled - internal SMTP not accessible from GitHub Actions
-        # EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
-        # SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        # SMTP_HOST: ${{ secrets.SMTP_HOST }}
-        # SMTP_PORT: ${{ secrets.SMTP_PORT }}
         ELIA_EMAIL: ${{ secrets.ELIA_EMAIL }}
         TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
         MICROSOFT_USERNAME: ${{ secrets.MICROSOFT_USERNAME }}
       run: |
-        # Get current time and check if we're within 5 minutes of midnight EST
         python -c "
         import datetime
         import pytz
         import subprocess
         import sys
+        import time
         
         # Get current time in Eastern timezone
         eastern = pytz.timezone('US/Eastern')
         now = datetime.datetime.now(eastern)
-        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        current_hour = now.hour
+        current_minute = now.minute
         
-        # Calculate minutes since midnight
-        minutes_since_midnight = (now - midnight).total_seconds() / 60
+        print(f'🕐 Current Eastern time: {now.strftime(\"%Y-%m-%d %H:%M:%S %Z\")}')
         
-        print(f'Current Eastern time: {now.strftime(\"%Y-%m-%d %H:%M:%S %Z\")}')
-        print(f'Minutes since midnight: {minutes_since_midnight:.1f}')
-        
-        # Only run if within 5 minutes of midnight
-        if minutes_since_midnight <= 5:
-            print('✅ Within 5 minutes of midnight - running bot')
-            subprocess.run([sys.executable, 'fresh_run.py'])
+        # Determine target time (midnight or 6 AM)
+        if current_hour == 23 or (current_hour == 0 and current_minute < 15):
+            target_hour = 0
+            target_name = 'midnight'
+        elif current_hour == 5 or (current_hour == 6 and current_minute < 15):
+            target_hour = 6
+            target_name = '6 AM'
         else:
-            print('⏭️ Not within 5 minutes of midnight - skipping execution')
+            print(f'⏭️ Not near midnight or 6 AM (current hour: {current_hour}) - skipping')
+            sys.exit(0)
+        
+        # Calculate target time
+        target = now.replace(hour=target_hour, minute=0, second=0, microsecond=0)
+        if target < now:
+            target += datetime.timedelta(days=1)
+        
+        # Calculate sleep duration
+        sleep_seconds = (target - now).total_seconds()
+        
+        print(f'🎯 Target time: {target_name} ({target.strftime(\"%H:%M:%S\")})')
+        print(f'⏰ Sleeping for {sleep_seconds:.1f} seconds ({sleep_seconds/60:.1f} minutes)...')
+        
+        # Sleep until target time
+        time.sleep(sleep_seconds)
+        
+        # Verify we're at the right time
+        now_after_sleep = datetime.datetime.now(eastern)
+        print(f'✅ Woke up at: {now_after_sleep.strftime(\"%Y-%m-%d %H:%M:%S %Z\")}')
+        print(f'🚀 Running parking bot...')
+        
+        # Run the bot
+        subprocess.run([sys.executable, 'fresh_run.py'])
         "
         
     - name: Upload logs
