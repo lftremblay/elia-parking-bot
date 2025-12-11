@@ -28,7 +28,7 @@ async def main():
     bot = ProductionEliaBot()
     
     # Test time calculation
-    start_time, end_time = bot._calculate_booking_times(6)
+    start_time, end_time = bot._calculate_booking_times(12)
     print(f"Time calculation test: {start_time} to {end_time}")
     
     # Run smart booking
