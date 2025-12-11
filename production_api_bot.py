@@ -520,7 +520,7 @@ class ProductionEliaBot:
                     regular_success = await self.reserve_parking_spot(
                         date=target_date_str,
                         spot_type="regular",
-                        booking_window_hours=6
+                        booking_window_hours=12
                     )
                     
                     if regular_success:
@@ -540,7 +540,7 @@ class ProductionEliaBot:
                 success = await self.reserve_parking_spot(
                     date=target_date_str,
                     spot_type="regular",
-                    booking_window_hours=6
+                    booking_window_hours=12
                 )
                 
                 results["regular_ahead"][target_date_str] = {
