@@ -247,6 +247,13 @@ class FixedEliaGraphQLClient:
                 }
             }
             
+            # Debug: Show exact booking times being sent
+            logger.info(f"🕐 BOOKING DEBUG:")
+            logger.info(f"   - Date: {date}")
+            logger.info(f"   - Start: {date}T{start_time}")
+            logger.info(f"   - End: {date}T{end_time}")
+            logger.info(f"   - Duration: {start_time} to {end_time}")
+            
             response = await self._execute_query(mutation, variables, "MultiDateBook")
             
             if response and 'data' in response:

@@ -706,7 +706,7 @@ class ProductionEliaBot:
                 success = await self.reserve_parking_spot(
                     date=tomorrow_str,
                     spot_type="executive",
-                    booking_window_hours=8  # Use 8 hours to meet policy minimum
+                    booking_window_hours=12  # Use 12 hours for full day booking
                 )
                 results["executive_today"] = {
                     "date": tomorrow_str,
