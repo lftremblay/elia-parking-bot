@@ -17,6 +17,7 @@ load_dotenv(override=True)
 
 # Now import fresh
 import asyncio
+from datetime import datetime, timedelta
 from production_api_bot import ProductionEliaBot
 
 async def main():
@@ -49,33 +50,47 @@ if __name__ == "__main__":
     summary_lines.append("=" * 60)
     summary_lines.append("")
     
-    # Executive booking
+    # Tomorrow's booking (executive or regular)
+    tomorrow_booked = False
     if results.get('executive_today'):
         exec_result = results['executive_today']
         summary_lines.append("✅ EXECUTIVE SPOT (Tomorrow)")
         summary_lines.append(f"   Date: {exec_result.get('date', 'N/A')}")
-        summary_lines.append(f"   Spot: {exec_result.get('spot_name', 'N/A')}")
-        summary_lines.append(f"   Time: {exec_result.get('time', 'N/A')}")
+        summary_lines.append(f"   Status: Booked")
         print("✅ Executive spot booked for tomorrow")
-    else:
-        summary_lines.append("⏭️  EXECUTIVE SPOT (Tomorrow)")
+        tomorrow_booked = True
+    
+    # Check if regular spot was booked for tomorrow (fallback)
+    tomorrow_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+    if tomorrow_date in results.get('regular_ahead', {}):
+        if not tomorrow_booked:
+            summary_lines.append("✅ REGULAR SPOT (Tomorrow - fallback)")
+            summary_lines.append(f"   Date: {tomorrow_date}")
+            summary_lines.append(f"   Status: Booked (executive unavailable)")
+            print("✅ Regular spot booked for tomorrow (fallback)")
+            tomorrow_booked = True
+    
+    if not tomorrow_booked and not results.get('executive_today'):
+        summary_lines.append("⏭️  TOMORROW'S SPOT")
         summary_lines.append("   Status: Skipped or already booked")
-        print("⏭️  Executive spot skipped")
+        print("⏭️  Tomorrow's spot skipped")
     
     summary_lines.append("")
     
-    # Regular bookings
+    # Regular bookings (14 days ahead, excluding tomorrow which was already shown)
     regular = results.get('regular_ahead', {})
-    if regular:
-        summary_lines.append(f"✅ REGULAR SPOTS (14 days ahead): {len(regular)} booked")
-        print(f"✅ Regular spots booked: {len(regular)}")
-        for date, booking in regular.items():
-            summary_lines.append(f"   • {date}: {booking.get('spot_name', 'N/A')}")
-            print(f"   • {date}: {booking.get('spot_name', 'N/A')}")
+    regular_14_days = {k: v for k, v in regular.items() if k != tomorrow_date}
+    
+    if regular_14_days:
+        summary_lines.append(f"✅ REGULAR SPOTS (14 days ahead): {len(regular_14_days)} booked")
+        print(f"✅ Regular spots booked (14 days): {len(regular_14_days)}")
+        for date, booking in regular_14_days.items():
+            summary_lines.append(f"   • {date}")
+            print(f"   • {date}")
     else:
         summary_lines.append("⏭️  REGULAR SPOTS (14 days ahead)")
         summary_lines.append("   Status: None booked (already have bookings or vacation)")
-        print("⏭️  No regular spots booked")
+        print("⏭️  No regular spots booked (14 days)")
     
     summary_lines.append("")
     

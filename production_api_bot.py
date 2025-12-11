@@ -698,10 +698,10 @@ class ProductionEliaBot:
         today = datetime.now()
         tomorrow = today + timedelta(days=1)
         
-        # STEP 1: Book executive spot for tomorrow (6h policy)
+        # STEP 1: Book spots for tomorrow (both executive and regular if available)
         if tomorrow.weekday() < 5:  # Weekday check
             tomorrow_str = tomorrow.strftime('%Y-%m-%d')
-            logger.info(f"\n📅 STEP 1: Executive spot for tomorrow ({tomorrow_str})")
+            logger.info(f"\n📅 STEP 1: Spots for tomorrow ({tomorrow_str})")
             
             # Check if vacation day
             if await self.should_skip_date(tomorrow_str):
@@ -714,21 +714,40 @@ class ProductionEliaBot:
                 logger.info(f"⏭️ Skipping {tomorrow_str} - already booked")
                 results["skipped"].append(tomorrow_str)
             else:
-                # For executive spots, proceed if ANY spots are available
-                # Executive spots are premium and worth competing for
-                logger.info(f"🎯 Executive booking: Proceeding even with high occupancy")
-                
-                # Try to book executive spot
-                success = await self.reserve_parking_spot(
+                # Try to book executive spot first
+                logger.info(f"🎯 Attempting executive spot for tomorrow")
+                exec_success = await self.reserve_parking_spot(
                     date=tomorrow_str,
                     spot_type="executive",
                     booking_window_hours=12  # Use 12 hours for full day booking
                 )
-                results["executive_today"] = {
-                    "date": tomorrow_str,
-                    "success": success,
-                    "type": "executive"
-                }
+                
+                if exec_success:
+                    results["executive_today"] = {
+                        "date": tomorrow_str,
+                        "success": True,
+                        "type": "executive"
+                    }
+                    logger.info(f"✅ Executive spot booked for tomorrow")
+                else:
+                    # If executive fails, try regular spot as fallback
+                    logger.info(f"⚠️ Executive spot failed, trying regular spot for tomorrow")
+                    regular_success = await self.reserve_parking_spot(
+                        date=tomorrow_str,
+                        spot_type="regular",
+                        booking_window_hours=6
+                    )
+                    
+                    if regular_success:
+                        results["regular_ahead"][tomorrow_str] = {
+                            "success": True,
+                            "type": "regular",
+                            "days_ahead": 1
+                        }
+                        logger.info(f"✅ Regular spot booked for tomorrow (fallback)")
+                    else:
+                        logger.warning(f"❌ Both executive and regular spots failed for tomorrow")
+                        results["errors"].append(f"Failed to book any spot for {tomorrow_str}")
         else:
             logger.info(f"⏭️ Tomorrow is {tomorrow.strftime('%A')} - skipping")
         
