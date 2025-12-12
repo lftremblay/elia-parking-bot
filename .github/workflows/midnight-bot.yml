@@ -63,16 +63,26 @@ jobs:
         # Calculate target time
         target = now.replace(hour=target_hour, minute=0, second=0, microsecond=0)
         if target < now:
+            # If target already passed, add 1 day
             target += datetime.timedelta(days=1)
         
         # Calculate sleep duration
         sleep_seconds = (target - now).total_seconds()
         
+        # Safety check: if sleep is more than 20 minutes, something is wrong
+        if sleep_seconds > 1200:  # 20 minutes
+            print(f'❌ ERROR: Sleep duration too long ({sleep_seconds/60:.1f} minutes)')
+            print(f'   Current time: {now.strftime(\"%H:%M:%S\")}')
+            print(f'   Target time: {target.strftime(\"%H:%M:%S\")}')
+            print(f'   Running immediately instead of sleeping')
+            sleep_seconds = 0
+        
         print(f'🎯 Target time: {target_name} ({target.strftime(\"%H:%M:%S\")})')
         print(f'⏰ Sleeping for {sleep_seconds:.1f} seconds ({sleep_seconds/60:.1f} minutes)...')
         
-        # Sleep until target time
-        time.sleep(sleep_seconds)
+        # Sleep until target time (or skip if 0)
+        if sleep_seconds > 0:
+            time.sleep(sleep_seconds)
         
         # Verify we're at the right time
         now_after_sleep = datetime.datetime.now(eastern)
