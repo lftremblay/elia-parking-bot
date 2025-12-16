@@ -55,3 +55,8 @@ run_summary.txt
 
 # Old/unused directories
 enhanced_sync/
+
+# Droplet management scripts (contain hardcoded paths)
+setup_ssh_key.sh
+update_token.sh
+sync_code.sh
